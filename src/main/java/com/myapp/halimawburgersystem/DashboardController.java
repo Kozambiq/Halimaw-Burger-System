@@ -29,7 +29,6 @@ public class DashboardController {
     private void onNavigate(ActionEvent event) {
         Button clicked = (Button) event.getSource();
         String text = clicked.getText().trim();
-        System.out.println("DEBUG: Button clicked: [" + text + "]");
 
         clearAllHighlights();
         clicked.getStyleClass().add("nav-item-active");
@@ -38,14 +37,42 @@ public class DashboardController {
             pageTitle.setText(text);
         }
 
-        System.out.println("DEBUG: Checking if Inventory matches... text length: " + text.length());
         if (text.contains("Inventory")) {
-            System.out.println("DEBUG: Contains Inventory! Loading inventory...");
             try {
                 Main.showInventory();
             } catch (Exception e) {
                 e.printStackTrace();
             }
+        }
+    }
+
+    public void setActiveNav(String navName) {
+        clearAllHighlights();
+        switch(navName) {
+            case "Dashboard":
+                if (btnDashboard != null) btnDashboard.getStyleClass().add("nav-item-active");
+                break;
+            case "Orders":
+                if (btnOrders != null) btnOrders.getStyleClass().add("nav-item-active");
+                break;
+            case "Kitchen Queue":
+                if (btnKitchen != null) btnKitchen.getStyleClass().add("nav-item-active");
+                break;
+            case "Menu Items":
+                if (btnMenuItems != null) btnMenuItems.getStyleClass().add("nav-item-active");
+                break;
+            case "Combos & Promos":
+                if (btnCombos != null) btnCombos.getStyleClass().add("nav-item-active");
+                break;
+            case "Inventory":
+                if (btnInventory != null) btnInventory.getStyleClass().add("nav-item-active");
+                break;
+            case "Sales Reports":
+                if (btnSales != null) btnSales.getStyleClass().add("nav-item-active");
+                break;
+            case "Staff":
+                if (btnStaff != null) btnStaff.getStyleClass().add("nav-item-active");
+                break;
         }
     }
 

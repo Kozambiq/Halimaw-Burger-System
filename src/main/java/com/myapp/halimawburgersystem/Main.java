@@ -14,6 +14,7 @@ public class Main extends Application {
     private static Parent loginRoot;
     private static Parent dashboardRoot;
     private static Parent inventoryRoot;
+    private static DashboardController dashboardController;
 
     @Override
     public void start(Stage stage) throws Exception {
@@ -36,7 +37,6 @@ public class Main extends Application {
         }
         
         mainStage.setTitle("Halimaw Burger - Staff Portal");
-        mainStage.setFullScreen(true);
         mainStage.show();
     }
 
@@ -46,6 +46,7 @@ public class Main extends Application {
         if (dashboardRoot == null) {
             FXMLLoader fxmlLoader = new FXMLLoader(Main.class.getResource("/fxml/dashboard.fxml"));
             dashboardRoot = fxmlLoader.load();
+            dashboardController = fxmlLoader.getController();
         }
         
         if (cachedScene == null) {
@@ -56,8 +57,11 @@ public class Main extends Application {
         }
         
         mainStage.setTitle("BurgerHQ - Staff Portal");
-        mainStage.setFullScreen(true);
         mainStage.show();
+        
+        if (dashboardController != null) {
+            dashboardController.setActiveNav("Dashboard");
+        }
     }
 
     public static void showInventory() throws Exception {
@@ -74,8 +78,11 @@ public class Main extends Application {
         }
         
         mainStage.setTitle("BurgerHQ - Inventory");
-        mainStage.setFullScreen(true);
         mainStage.show();
+        
+        if (dashboardController != null) {
+            dashboardController.setActiveNav("Inventory");
+        }
     }
     
     public static void clearInventoryCache() {

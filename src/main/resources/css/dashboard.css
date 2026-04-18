@@ -350,13 +350,35 @@
     -fx-background-radius: 12;
 }
 
+.table-wrap {
+    -fx-background-color: #332615;
+    -fx-border-color: #4a3820;
+    -fx-border-width: 1;
+    -fx-border-radius: 12;
+    -fx-background-radius: 12;
+}
+
 .inventory-table {
     -fx-background-color: transparent;
     -fx-border-width: 0;
+    -fx-background: transparent;
+}
+
+.inventory-table .table-view {
+    -fx-background-color: transparent;
+}
+
+.inventory-table .column-header-background {
+    -fx-background-color: #221a0e;
+}
+
+.inventory-table .filler {
+    -fx-background-color: #221a0e;
 }
 
 .inventory-table .column-header {
     -fx-background-color: #221a0e;
+    -fx-background: #221a0e;
     -fx-text-fill: #8a7055;
     -fx-font-size: 11px;
     -fx-font-weight: bold;
@@ -364,17 +386,23 @@
 }
 
 .inventory-table .table-cell {
+    -fx-background-color: transparent;
     -fx-text-fill: #c4a882;
     -fx-font-size: 13px;
+    -fx-border-width: 0;
+}
+
+.inventory-table .table-row-cell {
+    -fx-background-color: transparent;
     -fx-border-color: #4a3820;
     -fx-border-width: 0 0 1 0;
 }
 
-.inventory-table .row-cell {
+.inventory-table .table-row-cell:odd {
     -fx-background-color: transparent;
 }
 
-.inventory-table .row-cell:hover {
+.inventory-table .table-row-cell:hover {
     -fx-background-color: #3d2e1a;
 }
 
@@ -383,4 +411,13 @@
     -fx-background-radius: 20;
     -fx-font-size: 11px;
     -fx-font-weight: 600;
+}
+
+/* ── Main Content ───────────────────────────────────────────── */
+.main-content {
+    -fx-background-color: #1a1208;
+}
+
+.content-area {
+    -fx-background-color: #1a1208;
 }
