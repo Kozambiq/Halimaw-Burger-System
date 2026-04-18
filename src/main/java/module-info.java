@@ -6,4 +6,6 @@ module com.myapp.halimawburgersystem {
     opens com.myapp.halimawburgersystem to javafx.fxml;
     exports com.myapp.halimawburgersystem;
     exports com.myapp.util;
+    exports com.myapp.model;
+    exports com.myapp.dao;
 }
