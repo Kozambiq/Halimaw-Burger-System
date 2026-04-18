@@ -1,0 +1,166 @@
+/* ============================================================
+    Halimaw Burger – Login Page Styles
+    ============================================================ */
+
+/* ── Left panel ─────────────────────────────────────────────── */
+.left-panel {
+    -fx-background-color: #221a0e;
+    -fx-background-radius: 20 0 0 20;
+    -fx-min-width: 360;
+}
+
+/* Badge */
+.badge {
+    -fx-background-color: #c8500a;
+    -fx-text-fill: white;
+    -fx-font-size: 10px;
+    -fx-font-weight: bold;
+    -fx-font-family: "DM Sans", sans-serif;
+    -fx-letter-spacing: 0.14em;
+    -fx-padding: 4 10 4 10;
+    -fx-background-radius: 4;
+}
+
+/* Brand name */
+.brand-name-top {
+    -fx-text-fill: #c8500a;
+    -fx-font-size: 32px;
+    -fx-font-weight: bold;
+    -fx-font-family: "Playfair Display", serif;
+    -fx-padding: 22 0 0 0;
+}
+
+.brand-name-bottom {
+    -fx-text-fill: #f5ede0;
+    -fx-font-size: 38px;
+    -fx-font-weight: bold;
+    -fx-font-family: "Playfair Display", serif;
+}
+
+.brand-sub {
+    -fx-text-fill: #8a7055;
+    -fx-font-size: 13px;
+    -fx-font-family: "DM Sans", sans-serif;
+    -fx-padding: 8 0 0 0;
+    -fx-letter-spacing: 0.04em;
+}
+
+/* ── Text inputs ────────────────────────────────────────────── */
+.text-input {
+    -fx-background-color: #332615;
+    -fx-border-color: #5c4828;
+    -fx-border-width: 1;
+    -fx-border-radius: 8;
+    -fx-background-radius: 8;
+    -fx-text-fill: #f5ede0;
+    -fx-font-size: 14px;
+    -fx-font-family: "DM Sans", sans-serif;
+    -fx-padding: 12 14 12 14;
+    -fx-prompt-text-fill: #6d5a40;
+}
+
+.text-input:focused {
+    -fx-border-color: #c8500a;
+    -fx-background-color: #332615;
+}
+
+/* Password toggle */
+.password-toggle {
+    -fx-background-color: transparent;
+    -fx-border-color: transparent;
+    -fx-cursor: hand;
+}
+
+.eye-svg {
+    -fx-fill: #8a7055;
+    -fx-min-width: 18px;
+    -fx-min-height: 18px;
+    -fx-max-width: 18px;
+    -fx-max-height: 18px;
+}
+
+.password-toggle:hover .eye-svg {
+    -fx-fill: #c8500a;
+}
+
+/* ── Links ───────────────────────────────────────────────────── */
+.link-muted {
+    -fx-text-fill: #8a7055;
+    -fx-font-size: 12px;
+    -fx-font-family: "DM Sans", sans-serif;
+    -fx-border-color: transparent;
+    -fx-underline: false;
+}
+
+.link-muted:hover {
+    -fx-text-fill: #c8500a;
+}
+
+/* ── Primary button ─────────────────────────────────────────── */
+.btn-primary {
+    -fx-background-color: #c8500a;
+    -fx-text-fill: white;
+    -fx-font-size: 13px;
+    -fx-font-weight: bold;
+    -fx-font-family: "DM Sans", sans-serif;
+    -fx-letter-spacing: 0.08em;
+    -fx-padding: 13 0 13 0;
+    -fx-background-radius: 8;
+    -fx-cursor: hand;
+}
+
+.btn-primary:hover {
+    -fx-background-color: #e05c0a;
+}
+
+/* ── Divider ─────────────────────────────────────────────── */
+.divider {
+    -fx-background-color: #4a3820;
+    -fx-max-height: 1;
+    -fx-pref-height: 1;
+}
+
+.divider-text {
+    -fx-text-fill: #5c4828;
+    -fx-font-size: 11px;
+    -fx-font-family: "DM Sans", sans-serif;
+}
+
+.link-accent {
+    -fx-text-fill: #c8500a;
+    -fx-font-size: 13px;
+    -fx-font-family: "DM Sans", sans-serif;
+    -fx-border-color: transparent;
+    -fx-underline: false;
+}
+
+.link-accent:hover {
+    -fx-text-fill: #e05c0a;
+}
+
+/* ── Right panel ────────────────────────────────────────────── */
+.right-panel {
+    -fx-background-color: #1a1208;
+    -fx-background-radius: 0 20 20 0;
+}
+
+.glow-overlay {
+    -fx-background-color: radial-gradient(center 70% 80%, radius 65%, rgba(200,80,10,0.18) 0%, transparent 100%);
+    -fx-pref-width: 400;
+    -fx-pref-height: 350;
+}
+
+/* ── Headlines ─────────────────────────────────────────────── */
+.headline {
+    -fx-text-fill: #f5ede0;
+    -fx-font-size: 40px;
+    -fx-font-weight: bold;
+    -fx-font-family: "Playfair Display", serif;
+    -fx-padding: 10 0 0 0;
+    -fx-wrap-text: true;
+}
+
+/* Burger emoji */
+.burger-emoji {
+    -fx-font-size: 120px;
+}
