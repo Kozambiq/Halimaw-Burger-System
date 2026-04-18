@@ -40,3 +40,10 @@ build/
 
 ### Sensitive files ###
 db.properties
+*.log
+credentials.json
+.env
+.env.*
+*.key
+secret/
+keys/
