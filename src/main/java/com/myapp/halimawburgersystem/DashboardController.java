@@ -29,12 +29,23 @@ public class DashboardController {
     private void onNavigate(ActionEvent event) {
         Button clicked = (Button) event.getSource();
         String text = clicked.getText().trim();
+        System.out.println("DEBUG: Button clicked: [" + text + "]");
 
         clearAllHighlights();
         clicked.getStyleClass().add("nav-item-active");
 
         if (pageTitle != null) {
             pageTitle.setText(text);
+        }
+
+        System.out.println("DEBUG: Checking if Inventory matches... text length: " + text.length());
+        if (text.contains("Inventory")) {
+            System.out.println("DEBUG: Contains Inventory! Loading inventory...");
+            try {
+                Main.showInventory();
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
         }
     }
 

@@ -224,3 +224,163 @@
     -fx-letter-spacing: 0.1em;
     -fx-text-fill: #8a7055;
 }
+
+/* ── Inventory Table ─────────────────────────────────────── */
+.table-wrap {
+    -fx-background-color: #332615;
+    -fx-border-color: #4a3820;
+    -fx-border-width: 1;
+    -fx-border-radius: 12;
+    -fx-background-radius: 12;
+}
+
+.table-wrap .table-view {
+    -fx-background-color: transparent;
+}
+
+.table-column {
+    -fx-background-color: #221a0e;
+    -fx-text-fill: #8a7055;
+    -fx-font-size: 11px;
+    -fx-font-weight: bold;
+    -fx-letter-spacing: 0.08em;
+    -fx-border-color: #4a3820;
+    -fx-border-width: 0 0 1 0;
+    -fx-padding: 10 14 10 14;
+}
+
+.table-cell {
+    -fx-text-fill: #c4a882;
+    -fx-font-size: 13px;
+    -fx-border-color: #4a3820;
+    -fx-border-width: 0 0 1 0;
+    -fx-padding: 11 14 11 14;
+}
+
+.table-row {
+    -fx-background-color: transparent;
+}
+
+.table-row:hover {
+    -fx-background-color: #3d2e1a;
+}
+
+/* ── Inventory Badges ────────────────────────────────────── */
+.badge-ok {
+    -fx-background-color: rgba(74, 140, 63, 0.15);
+    -fx-text-fill: #7ec470;
+    -fx-font-size: 11px;
+    -fx-font-weight: 600;
+    -fx-padding: 3 10 3 10;
+    -fx-background-radius: 20;
+}
+
+.badge-low {
+    -fx-background-color: rgba(176, 122, 24, 0.15);
+    -fx-text-fill: #e8b84b;
+    -fx-font-size: 11px;
+    -fx-font-weight: 600;
+    -fx-padding: 3 10 3 10;
+    -fx-background-radius: 20;
+}
+
+.badge-out {
+    -fx-background-color: rgba(140, 48, 48, 0.15);
+    -fx-text-fill: #e07070;
+    -fx-font-size: 11px;
+    -fx-font-weight: 600;
+    -fx-padding: 3 10 3 10;
+    -fx-background-radius: 20;
+}
+
+/* ── Stock Progress Bar ───────────────────────────────── */
+.stock-progress {
+    -fx-background-color: #2d2010;
+    -fx-background-radius: 3;
+    -fx-min-width: 100;
+    -fx-min-height: 6;
+}
+
+.stock-progress-bar {
+    -fx-background-radius: 3;
+    -fx-min-height: 6;
+}
+
+.stock-progress-bar.ok {
+    -fx-background-color: #7ec470;
+}
+
+.stock-progress-bar.low {
+    -fx-background-color: #e8b84b;
+}
+
+.stock-progress-bar.out {
+    -fx-background-color: #e07070;
+}
+
+/* ── Inventory Actions ─────────────────────────────────── */
+.action-btn {
+    -fx-background-color: transparent;
+    -fx-border-color: #5c4828;
+    -fx-border-width: 1;
+    -fx-text-fill: #8a7055;
+    -fx-font-size: 11px;
+    -fx-font-family: "DM Sans", sans-serif;
+    -fx-padding: 4 10 4 10;
+    -fx-background-radius: 5;
+    -fx-cursor: hand;
+}
+
+.action-btn:hover {
+    -fx-border-color: #c8500a;
+    -fx-text-fill: #c8500a;
+}
+
+.action-btn.danger:hover {
+    -fx-border-color: #e07070;
+    -fx-text-fill: #e07070;
+}
+
+/* ── Table Styles ─────────────────────────────────────────── */
+.table-container {
+    -fx-background-color: #332615;
+    -fx-border-color: #4a3820;
+    -fx-border-width: 1;
+    -fx-border-radius: 12;
+    -fx-background-radius: 12;
+}
+
+.inventory-table {
+    -fx-background-color: transparent;
+    -fx-border-width: 0;
+}
+
+.inventory-table .column-header {
+    -fx-background-color: #221a0e;
+    -fx-text-fill: #8a7055;
+    -fx-font-size: 11px;
+    -fx-font-weight: bold;
+    -fx-letter-spacing: 0.08em;
+}
+
+.inventory-table .table-cell {
+    -fx-text-fill: #c4a882;
+    -fx-font-size: 13px;
+    -fx-border-color: #4a3820;
+    -fx-border-width: 0 0 1 0;
+}
+
+.inventory-table .row-cell {
+    -fx-background-color: transparent;
+}
+
+.inventory-table .row-cell:hover {
+    -fx-background-color: #3d2e1a;
+}
+
+.badge-cell {
+    -fx-padding: 3 10 3 10;
+    -fx-background-radius: 20;
+    -fx-font-size: 11px;
+    -fx-font-weight: 600;
+}

@@ -78,15 +78,7 @@ public class UserDAO {
             return false;
         }
         
-        if (storedHash.startsWith("$2a$") || storedHash.startsWith("$2b$") || storedHash.startsWith("$2y$")) {
-            try {
-                Class<?> bcryptClass = Class.forName("org.mindrot.jbcrypt.BCrypt");
-                Method checkPw = bcryptClass.getMethod("checkpw", String.class, String.class);
-                return (boolean) checkPw.invoke(null, password, storedHash);
-            } catch (Exception e) {
-            }
-        }
-        
+        // Plain text comparison (e.g., "admin123")
         return password.equals(storedHash);
     }
 
