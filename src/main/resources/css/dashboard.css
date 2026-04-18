@@ -413,6 +413,29 @@
     -fx-font-weight: 600;
 }
 
+/* ── Status Pills ───────────────────────────────────────── */
+.status-pill {
+    -fx-padding: 3 12 3 12;
+    -fx-background-radius: 20;
+    -fx-font-size: 11px;
+    -fx-font-weight: bold;
+}
+
+.pill-ok {
+    -fx-background-color: rgba(74, 140, 63, 0.15);
+    -fx-text-fill: #7ec470;
+}
+
+.pill-low {
+    -fx-background-color: rgba(176, 122, 24, 0.15);
+    -fx-text-fill: #e8b84b;
+}
+
+.pill-out {
+    -fx-background-color: rgba(140, 48, 48, 0.15);
+    -fx-text-fill: #e07070;
+}
+
 /* ── Main Content ───────────────────────────────────────────── */
 .main-content {
     -fx-background-color: #1a1208;

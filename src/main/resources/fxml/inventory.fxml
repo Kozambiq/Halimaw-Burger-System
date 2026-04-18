@@ -150,10 +150,10 @@
                     <padding><Insets top="24" bottom="0"/></padding>
                     <TableView fx:id="inventoryTable" styleClass="inventory-table" maxHeight="Infinity" VBox.vgrow="ALWAYS">
                         <columns>
-                            <TableColumn text="INGREDIENT" fx:id="colName" prefWidth="200"/>
-                            <TableColumn text="REMAINING" fx:id="colQuantity" prefWidth="100"/>
-                            <TableColumn text="UNIT" fx:id="colUnit" prefWidth="80"/>
-                            <TableColumn text="STATUS" fx:id="colStatus" prefWidth="100"/>
+                            <TableColumn text="INGREDIENT" fx:id="colName" prefWidth="1" minWidth="150"/>
+                            <TableColumn text="REMAINING" fx:id="colQuantity" prefWidth="1" minWidth="100"/>
+                            <TableColumn text="UNIT" fx:id="colUnit" prefWidth="1" minWidth="80"/>
+                            <TableColumn text="STATUS" fx:id="colStatus" prefWidth="1" minWidth="100"/>
                         </columns>
                     </TableView>
                 </StackPane>

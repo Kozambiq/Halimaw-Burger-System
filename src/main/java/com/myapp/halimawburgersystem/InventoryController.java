@@ -7,10 +7,13 @@ import javafx.collections.FXCollections;
 import javafx.fxml.FXML;
 import javafx.scene.control.Alert;
 import javafx.scene.control.Button;
+import javafx.scene.control.Label;
+import javafx.scene.control.TableCell;
 import javafx.scene.control.TableColumn;
 import javafx.scene.control.TableView;
-import javafx.scene.control.Label;
 import javafx.scene.control.cell.PropertyValueFactory;
+import javafx.geometry.Pos;
+import javafx.util.Callback;
 
 import java.util.List;
 
@@ -95,7 +98,36 @@ public class InventoryController {
             )
         );
         colUnit.setCellValueFactory(new PropertyValueFactory<>("unit"));
+        
+        inventoryTable.setColumnResizePolicy(TableView.CONSTRAINED_RESIZE_POLICY);
+        
         colStatus.setCellValueFactory(new PropertyValueFactory<>("status"));
+        
+        colStatus.setCellFactory(col -> new TableCell<Ingredient, String>() {
+            @Override
+            protected void updateItem(String status, boolean empty) {
+                super.updateItem(status, empty);
+                if (empty || status == null) {
+                    setGraphic(null);
+                    setText(null);
+                    return;
+                }
+
+                Label pill = new Label(status);
+                pill.getStyleClass().add("status-pill");
+
+                if ("OK".equals(status)) {
+                    pill.getStyleClass().add("pill-ok");
+                } else if ("Low".equals(status)) {
+                    pill.getStyleClass().add("pill-low");
+                } else if ("Out".equals(status)) {
+                    pill.getStyleClass().add("pill-out");
+                }
+
+                setGraphic(pill);
+                setText(null);
+            }
+        });
     }
 
     private void loadInventory() {

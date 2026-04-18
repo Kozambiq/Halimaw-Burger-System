@@ -39,7 +39,9 @@ public class DashboardController {
 
         if (text.contains("Inventory")) {
             try {
+                System.out.println("DEBUG: Loading inventory...");
                 Main.showInventory();
+                System.out.println("DEBUG: Inventory loaded successfully");
             } catch (Exception e) {
                 e.printStackTrace();
             }
