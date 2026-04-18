@@ -1,0 +1,52 @@
+/* ============================================================
+    Halimaw Burger – Common Styles
+    Shared tokens, fonts, colors, and base components
+    ============================================================ */
+
+@import url('https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&family=DM+Mono:wght@400;500&family=Playfair+Display:wght@700;900&display=swap');
+
+/* ── Root colors ─────────────────────────────────────────────── */
+.root-pane, .dashboard-root, .main-content {
+    -fx-background-color: #1a1208;
+}
+
+.window-bg {
+    -fx-background-color: #1a1208;
+}
+
+/* ── Card base ─────────────────────────────────────────────── */
+.card {
+    -fx-background-color: #221a0e;
+    -fx-border-color: #4a3820;
+    -fx-border-width: 1;
+    -fx-border-radius: 20;
+    -fx-background-radius: 20;
+    -fx-effect: dropshadow(gaussian, rgba(0,0,0,0.6), 40, 0.2, 0, 8);
+}
+
+/* ── Typography ────────────────────────────────────────────── */
+.field-label {
+    -fx-text-fill: #8a7055;
+    -fx-font-size: 11px;
+    -fx-font-weight: bold;
+    -fx-font-family: "DM Sans", sans-serif;
+    -fx-letter-spacing: 0.1em;
+}
+
+.eyebrow {
+    -fx-text-fill: #c8500a;
+    -fx-font-size: 11px;
+    -fx-font-weight: bold;
+    -fx-font-family: "DM Sans", sans-serif;
+    -fx-letter-spacing: 0.16em;
+}
+
+.text-muted {
+    -fx-text-fill: #5c4828;
+    -fx-font-size: 13px;
+    -fx-font-family: "DM Sans", sans-serif;
+}
+
+.text-light {
+    -fx-text-fill: #f5ede0;
+}

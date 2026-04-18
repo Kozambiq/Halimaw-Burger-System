@@ -13,13 +13,14 @@
 <?import javafx.scene.layout.Region?>
 <?import javafx.scene.layout.StackPane?>
 <?import javafx.scene.layout.VBox?>
+<?import javafx.scene.shape.SVGPath?>
 
 <AnchorPane xmlns="http://javafx.com/javafx/17"
             xmlns:fx="http://javafx.com/fxml/1"
             fx:controller="com.myapp.halimawburgersystem.LoginController"
             prefWidth="940" prefHeight="600"
             styleClass="root-pane"
-            stylesheets="@../css/login.css">
+            stylesheets="@../css/common.css, @../css/login.css">
 
     <HBox AnchorPane.topAnchor="0" AnchorPane.bottomAnchor="0"
           AnchorPane.leftAnchor="0" AnchorPane.rightAnchor="0"
@@ -33,10 +34,8 @@
 
                 <Label text="STAFF PORTAL" styleClass="badge"/>
 
-                <Label text="halimaw" styleClass="brand-name-top"/>
-                <Label text="BURGER" styleClass="brand-name-bottom"/>
-
-                <Label text="Welcome back. Sign in to continue." styleClass="brand-sub"/>
+                <Label text="Halimaw" styleClass="brand-name-top"/>
+                <Label text="Burger" styleClass="brand-name-bottom"/>
 
                 <Region prefHeight="42"/>
 
@@ -49,29 +48,20 @@
 
                 <VBox spacing="6">
                     <Label text="PASSWORD" styleClass="field-label"/>
-                    <PasswordField fx:id="passwordField" promptText="••••••••" styleClass="text-input"/>
+                    <StackPane>
+                        <PasswordField fx:id="passwordField" promptText="••••••••" styleClass="text-input"/>
+                        <TextField fx:id="passwordVisibleField" promptText="••••••••" styleClass="text-input" visible="false"/>
+                        <Button fx:id="togglePassword" styleClass="password-toggle" onAction="#onTogglePassword" StackPane.alignment="CENTER_RIGHT">
+                            <graphic>
+                                <SVGPath fx:id="eyeIcon" content="M12 4.5C7 4.5 2.73 7.61 1 12c1.73 4.39 6 7.5 11 7.5s9.27-3.11 11-7.5c-1.73-4.39-6-7.5-11-7.5zM12 17c-2.76 0-5-2.24-5-5s2.24-5 5-5 5 2.24 5 5-2.24 5-5 5zm0-8c-1.66 0-3 1.34-3 3s1.34 3 3 3 3-1.34 3-3-1.34-3-3-3z" styleClass="eye-svg"/>
+                            </graphic>
+                        </Button>
+                    </StackPane>
                 </VBox>
 
-                <HBox alignment="CENTER_RIGHT">
-                    <Hyperlink text="Forgot password?" styleClass="link-muted"/>
-                </HBox>
-
-                <Region prefHeight="8"/>
+                <Region prefHeight="55"/>
 
                 <Button text="ENTER" styleClass="btn-primary" maxWidth="Infinity" onAction="#onEnter"/>
-
-                <HBox alignment="CENTER" spacing="10">
-                    <padding><Insets top="20"/></padding>
-                    <Region styleClass="divider" HBox.hgrow="ALWAYS"/>
-                    <Label text="or" styleClass="divider-text"/>
-                    <Region styleClass="divider" HBox.hgrow="ALWAYS"/>
-                </HBox>
-
-                <HBox alignment="CENTER">
-                    <padding><Insets top="12"/></padding>
-                    <Label text="No account? " styleClass="text-muted"/>
-                    <Hyperlink text="Request access" styleClass="link-accent"/>
-                </HBox>
 
                 <Region VBox.vgrow="ALWAYS"/>
             </VBox>
@@ -81,8 +71,8 @@
 
                 <VBox StackPane.alignment="TOP_LEFT">
                     <padding><Insets top="44" left="40"/></padding>
-                    <Label text="TASTE THE DIFFERENCE" styleClass="eyebrow"/>
-                    <Label wrapText="true" styleClass="headline" maxWidth="280" text="Burgers that hit different."/>
+                    <Label text="You Can't Buy Happiness" styleClass="eyebrow"/>
+                    <Label wrapText="true" styleClass="headline" maxWidth="280" text="But You Can Buy A Burger"/>
                 </VBox>
 
                 <ImageView StackPane.alignment="BOTTOM_RIGHT" fitWidth="360" preserveRatio="true">
