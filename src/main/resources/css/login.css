@@ -2,26 +2,29 @@
    Halimaw Burger – Login Page
    ============================================================ */
 
+@import url('https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&family=DM+Mono:wght@400;500&family=Playfair+Display:wght@700;900&display=swap');
+
 .root-pane, .dashboard-root, .main-content {
-    -fx-background-color: #0f0a05;
+    -fx-background-color: #1a1208;
 }
 
 .window-bg {
-    -fx-background-color: #0f0a05;
+    -fx-background-color: #1a1208;
 }
 
 /* ── Card ───────────────────────────────────────────────────── */
 .card {
-    -fx-background-color: #141008, #141008;
-    -fx-border-color: #2a1a0a;
+    -fx-background-color: #221a0e;
+    -fx-border-color: #4a3820;
     -fx-border-width: 1;
     -fx-border-radius: 20;
     -fx-background-radius: 20;
+    -fx-effect: dropshadow(gaussian, rgba(0,0,0,0.6), 40, 0.2, 0, 8);
 }
 
 /* ── Left panel ─────────────────────────────────────────────── */
 .left-panel {
-    -fx-background-color: #141008;
+    -fx-background-color: #221a0e;
     -fx-background-radius: 20 0 0 20;
     -fx-min-width: 360;
 }
@@ -32,10 +35,34 @@
     -fx-text-fill: white;
     -fx-font-size: 10px;
     -fx-font-weight: bold;
-    -fx-font-family: "Arial", sans-serif;
+    -fx-font-family: "DM Sans", sans-serif;
     -fx-letter-spacing: 0.14em;
     -fx-padding: 4 10 4 10;
     -fx-background-radius: 4;
+}
+
+/* Brand name */
+.brand-name-top {
+    -fx-text-fill: #c8500a;
+    -fx-font-size: 32px;
+    -fx-font-weight: bold;
+    -fx-font-family: "Playfair Display", serif;
+    -fx-padding: 22 0 0 0;
+}
+
+.brand-name-bottom {
+    -fx-text-fill: #f5ede0;
+    -fx-font-size: 38px;
+    -fx-font-weight: bold;
+    -fx-font-family: "Playfair Display", serif;
+}
+
+.brand-sub {
+    -fx-text-fill: #8a7055;
+    -fx-font-size: 13px;
+    -fx-font-family: "DM Sans", sans-serif;
+    -fx-padding: 8 0 0 0;
+    -fx-letter-spacing: 0.04em;
 }
 
 /* Brand name */
@@ -64,37 +91,37 @@
 
 /* ── Form labels ────────────────────────────────────────────── */
 .field-label {
-    -fx-text-fill: #7a5e3a;
+    -fx-text-fill: #8a7055;
     -fx-font-size: 11px;
     -fx-font-weight: bold;
-    -fx-font-family: "Arial", sans-serif;
+    -fx-font-family: "DM Sans", sans-serif;
     -fx-letter-spacing: 0.1em;
 }
 
 /* ── Text inputs ────────────────────────────────────────────── */
 .text-input {
-    -fx-background-color: #201408;
-    -fx-border-color: #3a2510;
+    -fx-background-color: #332615;
+    -fx-border-color: #5c4828;
     -fx-border-width: 1;
     -fx-border-radius: 8;
     -fx-background-radius: 8;
-    -fx-text-fill: #f5e6c8;
+    -fx-text-fill: #f5ede0;
     -fx-font-size: 14px;
-    -fx-font-family: "Arial", sans-serif;
+    -fx-font-family: "DM Sans", sans-serif;
     -fx-padding: 12 14 12 14;
-    -fx-prompt-text-fill: #4a3020;
+    -fx-prompt-text-fill: #6d5a40;
 }
 
 .text-input:focused {
     -fx-border-color: #c8500a;
-    -fx-background-color: #201408;
+    -fx-background-color: #332615;
 }
 
 /* ── Forgot-password link ────────────────────────────────────── */
 .link-muted {
-    -fx-text-fill: #7a5e3a;
+    -fx-text-fill: #8a7055;
     -fx-font-size: 12px;
-    -fx-font-family: "Arial", sans-serif;
+    -fx-font-family: "DM Sans", sans-serif;
     -fx-border-color: transparent;
     -fx-underline: false;
 }
@@ -109,7 +136,7 @@
     -fx-text-fill: white;
     -fx-font-size: 13px;
     -fx-font-weight: bold;
-    -fx-font-family: "Arial", sans-serif;
+    -fx-font-family: "DM Sans", sans-serif;
     -fx-letter-spacing: 0.08em;
     -fx-padding: 13 0 13 0;
     -fx-background-radius: 8;
@@ -122,21 +149,63 @@
 
 /* ── Divider ──────────────────────────────────────���─────── */
 .divider {
-    -fx-background-color: #2a1a0a;
+    -fx-background-color: #4a3820;
     -fx-pref-height: 1;
 }
 
 .divider-text {
-    -fx-text-fill: #3a2510;
+    -fx-text-fill: #5c4828;
     -fx-font-size: 11px;
     -fx-font-family: "Arial", sans-serif;
 }
 
 /* ── Text links ─────────────────────────────────────────── */
 .text-muted {
-    -fx-text-fill: #3a2510;
+    -fx-text-fill: #5c4828;
     -fx-font-size: 13px;
-    -fx-font-family: "Arial", sans-serif;
+    -fx-font-family: "DM Sans", sans-serif;
+}
+
+.link-accent {
+    -fx-text-fill: #c8500a;
+    -fx-font-size: 13px;
+    -fx-font-family: "DM Sans", sans-serif;
+    -fx-border-color: transparent;
+    -fx-underline: false;
+}
+
+.link-accent:hover {
+    -fx-text-fill: #e05c0a;
+}
+
+/* ── Right panel ────────────────────────────────────────────── */
+.right-panel {
+    -fx-background-color: #1a1208;
+    -fx-background-radius: 0 20 20 0;
+}
+
+.glow-overlay {
+    -fx-background-color: radial-gradient(center 70% 80%, radius 65%, rgba(200,80,10,0.18) 0%, transparent 100%);
+    -fx-pref-width: 400;
+    -fx-pref-height: 350;
+}
+
+/* ── Headlines ─────────────────────────────────────────────── */
+.eyebrow {
+    -fx-text-fill: #c8500a;
+    -fx-font-size: 11px;
+    -fx-font-weight: bold;
+    -fx-font-family: "DM Sans", sans-serif;
+    -fx-letter-spacing: 0.16em;
+}
+
+.headline {
+    -fx-text-fill: #f5ede0;
+    -fx-font-size: 40px;
+    -fx-font-weight: bold;
+    -fx-font-family: "Playfair Display", serif;
+    -fx-padding: 10 0 0 0;
+    -fx-wrap-text: true;
 }
 
 .link-accent {
@@ -153,7 +222,7 @@
 
 /* ── Right panel ────────────────────────────────────────────── */
 .right-panel {
-    -fx-background-color: #0f0804;
+    -fx-background-color: #1a1208;
     -fx-background-radius: 0 20 20 0;
 }
 
@@ -207,7 +276,7 @@
 }
 
 .sidebar-logo-text {
-    -fx-font-family: "Arial", sans-serif;
+    -fx-font-family: "Playfair Display", serif;
     -fx-font-size: 18px;
     -fx-font-weight: bold;
     -fx-text-fill: #f5ede0;
@@ -230,13 +299,13 @@
     -fx-background-radius: 8;
     -fx-text-fill: #c4a882;
     -fx-font-size: 14px;
-    -fx-font-family: "Arial", sans-serif;
-    -fx-padding: 8 12 8 16;
+    -fx-font-family: "DM Sans", sans-serif;
+    -fx-padding: 10 14 10 18;
     -fx-cursor: hand;
     -fx-alignment: CENTER_LEFT;
     -fx-max-width: INFINITY;
     -fx-background-insets: 0;
-    -fx-margin: 2 0 2 0;
+    -fx-margin: 3 0 3 0;
 }
 
 .nav-item:hover {
@@ -260,15 +329,15 @@
 /* SVG Icon */
 .nav-svg {
     -fx-fill: #c4a882;
-    -fx-min-width: 16px;
-    -fx-min-height: 16px;
-    -fx-max-width: 16px;
-    -fx-max-height: 16px;
+    -fx-min-width: 12px;
+    -fx-min-height: 12px;
+    -fx-max-width: 12px;
+    -fx-max-height: 12px;
     -fx-stroke-width: 0;
 }
 
 .nav-item .graphic {
-    -fx-spacing: 12;
+    -fx-spacing: 14;
     -fx-alignment: CENTER_LEFT;
 }
 
@@ -305,6 +374,56 @@
     -fx-font-size: 13px;
     -fx-font-weight: 500;
     -fx-text-fill: #f5ede0;
+}
+
+.sidebar-user-role {
+    -fx-font-size: 12px;
+    -fx-text-fill: #8a7055;
+}
+
+/* ── Main Content Area ──────────────────────────────── */
+.topbar {
+    -fx-background-color: #221a0e;
+    -fx-border-color: #4a3820;
+    -fx-border-width: 0 0 1 0;
+    -fx-padding: 16 24 16 24;
+}
+
+.topbar-title {
+    -fx-font-family: "Playfair Display", serif;
+    -fx-font-size: 22px;
+    -fx-font-weight: bold;
+    -fx-text-fill: #f5ede0;
+}
+
+.topbar-date {
+    -fx-font-size: 12px;
+    -fx-text-fill: #8a7055;
+}
+
+/* Stat Cards */
+.stat-card {
+    -fx-background-color: #332615;
+    -fx-border-color: #4a3820;
+    -fx-border-width: 1;
+    -fx-border-radius: 12;
+    -fx-background-radius: 12;
+    -fx-padding: 16 20 16 20;
+}
+
+.stat-card .stat-label {
+    -fx-font-size: 11px;
+    -fx-font-weight: bold;
+    -fx-letter-spacing: 0.08em;
+    -fx-text-fill: #8a7055;
+}
+
+.stat-card .stat-value {
+    -fx-font-size: 28px;
+    -fx-font-weight: 500;
+    -fx-font-family: "DM Mono", monospace;
+    -fx-text-fill: #f5ede0;
+    -fx-padding: 4 0 4 0;
 }
 
 .sidebar-user-role {

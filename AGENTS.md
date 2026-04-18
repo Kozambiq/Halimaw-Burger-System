@@ -108,11 +108,18 @@ mvn javafx:run
 ## Git Commands
 
 ```bash
-# Commit all changes
+# Commit only for important changes:
+# - New features
+# - Bug fixes
+# - Major file changes
+# - Breaking changes
+
 git add -A
 git commit -m "Your message"
 git push origin master
 ```
+
+**Tip**: Don't commit every small edit. Bundle related changes into meaningful commits.
 
 **Important**: If GitHub blocks push for secrets in `db.properties`, the secret must have been committed before. Fix by:
 1. Change the password in `db.properties` to placeholder values

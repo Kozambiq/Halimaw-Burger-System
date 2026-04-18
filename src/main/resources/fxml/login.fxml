@@ -18,11 +18,13 @@
             xmlns:fx="http://javafx.com/fxml/1"
             fx:controller="com.myapp.halimawburgersystem.LoginController"
             prefWidth="940" prefHeight="600"
+            styleClass="root-pane"
             stylesheets="@../css/login.css">
 
     <HBox AnchorPane.topAnchor="0" AnchorPane.bottomAnchor="0"
           AnchorPane.leftAnchor="0" AnchorPane.rightAnchor="0"
-          alignment="CENTER">
+          alignment="CENTER"
+          styleClass="window-bg">
 
         <HBox styleClass="card" maxWidth="940" maxHeight="600">
 
@@ -83,10 +85,11 @@
                     <Label wrapText="true" styleClass="headline" maxWidth="280" text="Burgers that hit different."/>
                 </VBox>
 
-                <StackPane StackPane.alignment="BOTTOM_RIGHT">
-                    <padding><Insets bottom="20" right="20"/></padding>
-                    <Label text="🍔" styleClass="burger-emoji"/>
-                </StackPane>
+                <ImageView StackPane.alignment="BOTTOM_RIGHT" fitWidth="360" preserveRatio="true">
+                    <image>
+                        <Image url="@../burger-profile.png" preserveRatio="true"/>
+                    </image>
+                </ImageView>
             </StackPane>
 
         </HBox>
