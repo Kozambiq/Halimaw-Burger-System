@@ -436,6 +436,47 @@
     -fx-text-fill: #e07070;
 }
 
+/* ── Action Buttons ────────────────────────────────────────── */
+.btn-action-add, .btn-action-minus, .btn-action-delete {
+    -fx-min-width: 28;
+    -fx-min-height: 28;
+    -fx-max-width: 28;
+    -fx-max-height: 28;
+    -fx-background-radius: 6;
+    -fx-padding: 0;
+    -fx-cursor: hand;
+}
+
+.btn-action-add {
+    -fx-background-color: #4CAF50;
+}
+
+.btn-action-add:hover {
+    -fx-background-color: #5CBF60;
+}
+
+.btn-action-minus {
+    -fx-background-color: #FFA726;
+}
+
+.btn-action-minus:hover {
+    -fx-background-color: #FFB740;
+}
+
+.btn-action-delete {
+    -fx-background-color: #F44336;
+}
+
+.btn-action-delete:hover {
+    -fx-background-color: #F55A50;
+}
+
+.action-svg {
+    -fx-fill: white;
+    -fx-min-width: 14;
+    -fx-min-height: 14;
+}
+
 /* ── Main Content ───────────────────────────────────────────── */
 .main-content {
     -fx-background-color: #1a1208;

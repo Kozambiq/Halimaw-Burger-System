@@ -141,19 +141,18 @@
                         <Label styleClass="stat-label" text="OUT OF STOCK"/>
                         <Label fx:id="lblOutOfStock" styleClass="stat-value" text="0" style="-fx-text-fill: #e07070;"/>
                     </VBox>
-                    <Region HBox.hgrow="ALWAYS"/>
-                    <Button styleClass="btn-primary" text="RESTOCK" onAction="#onRestock"/>
-                    <Button styleClass="btn-primary" text="ADD INGREDIENT" onAction="#onAddIngredient"/>
                 </HBox>
 
 <StackPane VBox.vgrow="ALWAYS" maxHeight="Infinity" styleClass="table-wrap">
                     <padding><Insets top="24" bottom="0"/></padding>
                     <TableView fx:id="inventoryTable" styleClass="inventory-table" maxHeight="Infinity" VBox.vgrow="ALWAYS">
                         <columns>
-                            <TableColumn text="INGREDIENT" fx:id="colName" prefWidth="1" minWidth="150"/>
-                            <TableColumn text="REMAINING" fx:id="colQuantity" prefWidth="1" minWidth="100"/>
-                            <TableColumn text="UNIT" fx:id="colUnit" prefWidth="1" minWidth="80"/>
-                            <TableColumn text="STATUS" fx:id="colStatus" prefWidth="1" minWidth="100"/>
+                            <TableColumn text="INGREDIENT" fx:id="colName" prefWidth="1" minWidth="140"/>
+                            <TableColumn text="STOCK LEVEL" fx:id="colStockLevel" prefWidth="1" minWidth="110"/>
+                            <TableColumn text="REMAINING" fx:id="colQuantity" prefWidth="1" minWidth="80"/>
+                            <TableColumn text="UNIT" fx:id="colUnit" prefWidth="1" minWidth="60"/>
+                            <TableColumn text="STATUS" fx:id="colStatus" prefWidth="1" minWidth="80"/>
+                            <TableColumn text="" fx:id="colActions" prefWidth="1" minWidth="100"/>
                         </columns>
                     </TableView>
                 </StackPane>

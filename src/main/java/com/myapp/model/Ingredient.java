@@ -43,4 +43,11 @@ public class Ingredient {
         if (minThreshold <= 0) return 100;
         return Math.min(100, (quantity / minThreshold) * 50);
     }
+
+    public int getStockPercentage() {
+        if (quantity <= 0) return 0;
+        if (minThreshold <= 0) return 100;
+        int pct = (int) ((quantity / minThreshold) * 100);
+        return Math.min(100, pct);
+    }
 }
