@@ -14,7 +14,7 @@ public class IngredientDAO {
 
     public List<Ingredient> findAll() {
         List<Ingredient> ingredients = new ArrayList<>();
-        String sql = "SELECT id, name, unit, quantity, min_threshold FROM ingredients ORDER BY name";
+        String sql = "SELECT id, name, unit, quantity, min_threshold, max_stock FROM ingredients ORDER BY id";
 
         try (Connection conn = DatabaseConnection.getConnection();
              PreparedStatement stmt = conn.prepareStatement(sql);
@@ -26,7 +26,8 @@ public class IngredientDAO {
                     rs.getString("name"),
                     rs.getString("unit"),
                     rs.getDouble("quantity"),
-                    rs.getDouble("min_threshold")
+                    rs.getDouble("min_threshold"),
+                    rs.getDouble("max_stock")
                 ));
             }
         } catch (SQLException e) {
@@ -118,6 +119,60 @@ public class IngredientDAO {
             }
         } catch (SQLException e) {
             System.err.println("Error with connection: " + e.getMessage());
+        }
+        return false;
+    }
+
+    public boolean delete(int id) {
+        String sql = "DELETE FROM ingredients WHERE id = ?";
+        try (Connection conn = DatabaseConnection.getConnection();
+             PreparedStatement stmt = conn.prepareStatement(sql)) {
+            stmt.setInt(1, id);
+            return stmt.executeUpdate() > 0;
+        } catch (SQLException e) {
+            System.err.println("Error deleting ingredient: " + e.getMessage());
+        }
+        return false;
+    }
+
+    public boolean updateThreshold(int id, double minThreshold) {
+        String sql = "UPDATE ingredients SET min_threshold = ? WHERE id = ?";
+        try (Connection conn = DatabaseConnection.getConnection();
+             PreparedStatement stmt = conn.prepareStatement(sql)) {
+            stmt.setDouble(1, minThreshold);
+            stmt.setInt(2, id);
+            return stmt.executeUpdate() > 0;
+        } catch (SQLException e) {
+            System.err.println("Error updating threshold: " + e.getMessage());
+        }
+        return false;
+    }
+
+    public boolean updateMaxStock(int id, double maxStock) {
+        String sql = "UPDATE ingredients SET max_stock = ? WHERE id = ?";
+        try (Connection conn = DatabaseConnection.getConnection();
+             PreparedStatement stmt = conn.prepareStatement(sql)) {
+            stmt.setDouble(1, maxStock);
+            stmt.setInt(2, id);
+            return stmt.executeUpdate() > 0;
+        } catch (SQLException e) {
+            System.err.println("Error updating max_stock: " + e.getMessage());
+        }
+        return false;
+    }
+
+    public boolean insert(String name, String unit, double quantity, double minThreshold, double maxStock) {
+        String sql = "INSERT INTO ingredients (name, unit, quantity, min_threshold, max_stock) VALUES (?, ?, ?, ?, ?)";
+        try (Connection conn = DatabaseConnection.getConnection();
+             PreparedStatement stmt = conn.prepareStatement(sql)) {
+            stmt.setString(1, name);
+            stmt.setString(2, unit);
+            stmt.setDouble(3, quantity);
+            stmt.setDouble(4, minThreshold);
+            stmt.setDouble(5, maxStock);
+            return stmt.executeUpdate() > 0;
+        } catch (SQLException e) {
+            System.err.println("Error inserting ingredient: " + e.getMessage());
         }
         return false;
     }

@@ -477,6 +477,77 @@
     -fx-min-height: 14;
 }
 
+/* ── MenuButton Dots ─────────────────────────────────────── */
+.menu-btn-dots {
+    -fx-background-color: #2e2410;
+    -fx-text-fill: #f5ede0;
+    -fx-font-size: 13px;
+    -fx-font-weight: bold;
+    -fx-padding: 4 10 4 10;
+    -fx-cursor: hand;
+    -fx-border-color: #4a3820;
+    -fx-border-width: 1;
+    -fx-border-radius: 4;
+    -fx-background-radius: 4;
+}
+
+.menu-btn-dots:hover {
+    -fx-background-color: #3a2e18;
+    -fx-text-fill: #f5ede0;
+    -fx-border-color: #5c4828;
+}
+
+.menu-btn-dots:focused {
+    -fx-border-color: #c8500a;
+}
+
+.menu-btn-dots .arrow {
+    -fx-background-color: #f5ede0;
+}
+
+/* ── Scrollbar ───────────────────────────────────────────── */
+.scroll-bar {
+    -fx-background-color: #221a0e;
+}
+
+.scroll-bar:vertical {
+    -fx-pref-width: 8;
+}
+
+.scroll-bar:horizontal {
+    -fx-pref-height: 8;
+}
+
+.scroll-bar .track {
+    -fx-background-color: #221a0e;
+    -fx-background-radius: 4;
+}
+
+.scroll-bar .track-background {
+    -fx-background-color: #221a0e;
+}
+
+.scroll-bar .thumb {
+    -fx-background-color: #4a3820;
+    -fx-background-radius: 4;
+}
+
+.scroll-bar .thumb:hover {
+    -fx-background-color: #5c4828;
+}
+
+.scroll-bar .thumb:pressed {
+    -fx-background-color: #c8500a;
+}
+
+.scroll-bar .increment-button,
+.scroll-bar .decrement-button {
+    -fx-background-color: transparent;
+    -fx-pref-width: 0;
+    -fx-pref-height: 0;
+    -fx-opacity: 0;
+}
+
 /* ── Main Content ───────────────────────────────────────────── */
 .main-content {
     -fx-background-color: #1a1208;

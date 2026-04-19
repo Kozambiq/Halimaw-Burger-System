@@ -19,11 +19,11 @@ public class UserDAO {
              PreparedStatement stmt = conn.prepareStatement(sql)) {
             
             stmt.setString(1, email);
-            
+
             try (ResultSet rs = stmt.executeQuery()) {
                 if (rs.next()) {
                     String storedHash = rs.getString("password_hash");
-                    
+
                     if (verifyPassword(password, storedHash)) {
                         User user = new User(
                             rs.getInt("id"),

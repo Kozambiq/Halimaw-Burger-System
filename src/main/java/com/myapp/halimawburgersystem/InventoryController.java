@@ -8,8 +8,12 @@ import javafx.fxml.FXML;
 import javafx.geometry.Insets;
 import javafx.scene.control.Alert;
 import javafx.scene.control.Button;
+import javafx.scene.control.Dialog;
 import javafx.scene.control.Label;
+import javafx.scene.control.MenuButton;
+import javafx.scene.control.MenuItem;
 import javafx.scene.control.TableCell;
+import javafx.scene.control.TextField;
 import javafx.scene.control.TableColumn;
 import javafx.scene.control.TableView;
 import javafx.scene.control.cell.PropertyValueFactory;
@@ -122,12 +126,17 @@ private void setupTableColumns() {
                 Ingredient ing = getTableView().getItems().get(getIndex());
                 String status = ing.getStatus();
 
-                Pane barContainer = new Pane();
-                barContainer.setPrefHeight(6);
-                barContainer.setPrefWidth(180);
-                barContainer.setMaxWidth(180);
-                barContainer.setBackground(new Background(
-                    new BackgroundFill(Color.web("#3a2a15"), new CornerRadii(3.0), Insets.EMPTY)
+                StackPane stack = new StackPane();
+                stack.setPrefHeight(8);
+                stack.setPrefWidth(180);
+                stack.setMaxWidth(180);
+                stack.setAlignment(Pos.CENTER_LEFT);
+
+                Pane barTrack = new Pane();
+                barTrack.setPrefHeight(6);
+                barTrack.setPrefWidth(180);
+                barTrack.setBackground(new Background(
+                    new BackgroundFill(Color.web("#332615"), new CornerRadii(3.0), Insets.EMPTY)
                 ));
 
                 Pane barFill = new Pane();
@@ -148,9 +157,9 @@ private void setupTableColumns() {
                     new BackgroundFill(barColor, new CornerRadii(3.0), Insets.EMPTY)
                 ));
 
-                barContainer.getChildren().add(barFill);
+                stack.getChildren().addAll(barTrack, barFill);
 
-                setGraphic(barContainer);
+                setGraphic(stack);
                 setText(null);
             }
         });
@@ -204,32 +213,37 @@ private void setupTableColumns() {
                     return;
                 }
 
-                HBox box = new HBox(4);
-                box.setAlignment(Pos.CENTER);
+                int rowIndex = getIndex();
+                if (rowIndex < 0 || rowIndex >= getTableView().getItems().size()) {
+                    setGraphic(null);
+                    return;
+                }
 
-                Button btnAdd = new Button();
-                btnAdd.getStyleClass().add("btn-action-add");
-                SVGPath plusIcon = new SVGPath();
-                plusIcon.setContent("M19 13h-6v6h-2v-6H5v-2h6V5h2v6h6v2z");
-                plusIcon.getStyleClass().add("action-svg");
-                btnAdd.setGraphic(plusIcon);
+                final Ingredient ingredient = getTableView().getItems().get(rowIndex);
+                if (ingredient == null) {
+                    setGraphic(null);
+                    return;
+                }
 
-                Button btnMinus = new Button();
-                btnMinus.getStyleClass().add("btn-action-minus");
-                SVGPath minusIcon = new SVGPath();
-                minusIcon.setContent("M19 13H5v-2h14v2z");
-                minusIcon.getStyleClass().add("action-svg");
-                btnMinus.setGraphic(minusIcon);
+                MenuButton menuBtn = new MenuButton("...");
+                menuBtn.getStyleClass().add("menu-btn-dots");
 
-                Button btnDelete = new Button();
-                btnDelete.getStyleClass().add("btn-action-delete");
-                SVGPath trashIcon = new SVGPath();
-                trashIcon.setContent("M6 19c0 1.1.9 2 2 2h8c1.1 0 2-.9 2-2V7H6v12zM19 4h-3.5l-1-1h-5l-1 1H5v2h14V4z");
-                trashIcon.getStyleClass().add("action-svg");
-                btnDelete.setGraphic(trashIcon);
+                MenuItem addStock = new MenuItem("Add Stock");
+                addStock.setOnAction(e -> showAddStockDialog(ingredient));
 
-                box.getChildren().addAll(btnAdd, btnMinus, btnDelete);
-                setGraphic(box);
+                MenuItem reduceStock = new MenuItem("Reduce Stock");
+                reduceStock.setOnAction(e -> showReduceStockDialog(ingredient));
+
+                MenuItem editThreshold = new MenuItem("Edit Threshold");
+                editThreshold.setOnAction(e -> showEditThresholdDialog(ingredient));
+
+                MenuItem delete = new MenuItem("Delete");
+                delete.setStyle("-fx-text-fill: #e07070;");
+                delete.setOnAction(e -> showDeleteConfirmation(ingredient));
+
+                menuBtn.getItems().addAll(addStock, reduceStock, editThreshold, delete);
+
+                setGraphic(menuBtn);
                 setText(null);
             }
         });
@@ -253,21 +267,210 @@ private void setupTableColumns() {
         }
     }
 
+    private void showAddStockDialog(Ingredient ingredient) {
+        Dialog<Double> dialog = new Dialog<>();
+        dialog.setTitle("Add Stock");
+        dialog.setHeaderText("Add stock to: " + ingredient.getName());
+
+        TextField quantityField = new TextField();
+        quantityField.setPromptText("Enter quantity");
+
+        dialog.getDialogPane().setContent(quantityField);
+        dialog.getDialogPane().getButtonTypes().addAll(
+            javafx.scene.control.ButtonType.CANCEL,
+            javafx.scene.control.ButtonType.OK
+        );
+
+        dialog.setResultConverter(btn -> {
+            if (btn == javafx.scene.control.ButtonType.OK) {
+                try {
+                    return Double.parseDouble(quantityField.getText());
+                } catch (NumberFormatException ex) {
+                    return null;
+                }
+            }
+            return null;
+        });
+
+        dialog.showAndWait().ifPresent(qty -> {
+            if (qty != null && qty > 0) {
+                double newQty = ingredient.getQuantity() + qty;
+                ingredientDAO.updateQuantity(ingredient.getId(), newQty);
+                loadInventory();
+            }
+        });
+    }
+
+    private void showReduceStockDialog(Ingredient ingredient) {
+        Dialog<Double> dialog = new Dialog<>();
+        dialog.setTitle("Reduce Stock");
+        dialog.setHeaderText("Reduce stock from: " + ingredient.getName());
+
+        TextField quantityField = new TextField();
+        quantityField.setPromptText("Enter quantity to reduce");
+
+        dialog.getDialogPane().setContent(quantityField);
+        dialog.getDialogPane().getButtonTypes().addAll(
+            javafx.scene.control.ButtonType.CANCEL,
+            javafx.scene.control.ButtonType.OK
+        );
+
+        dialog.setResultConverter(btn -> {
+            if (btn == javafx.scene.control.ButtonType.OK) {
+                try {
+                    return Double.parseDouble(quantityField.getText());
+                } catch (NumberFormatException ex) {
+                    return null;
+                }
+            }
+            return null;
+        });
+
+        dialog.showAndWait().ifPresent(qty -> {
+            if (qty != null && qty > 0 && qty <= ingredient.getQuantity()) {
+                double newQty = ingredient.getQuantity() - qty;
+                ingredientDAO.updateQuantity(ingredient.getId(), newQty);
+                loadInventory();
+            }
+        });
+    }
+
+    private void showEditThresholdDialog(Ingredient ingredient) {
+        Dialog<Double> dialog = new Dialog<>();
+        dialog.setTitle("Edit Threshold");
+        dialog.setHeaderText("Edit thresholds for: " + ingredient.getName());
+
+        javafx.scene.layout.VBox vbox = new javafx.scene.layout.VBox(8);
+        javafx.scene.control.Label minLabel = new javafx.scene.control.Label("Min Threshold:");
+        TextField minField = new TextField(String.valueOf(ingredient.getMinThreshold()));
+        javafx.scene.control.Label maxLabel = new javafx.scene.control.Label("Max Stock:");
+        TextField maxField = new TextField(String.valueOf(ingredient.getMaxStock()));
+
+        vbox.getChildren().addAll(minLabel, minField, maxLabel, maxField);
+        dialog.getDialogPane().setContent(vbox);
+        dialog.getDialogPane().getButtonTypes().addAll(
+            javafx.scene.control.ButtonType.CANCEL,
+            javafx.scene.control.ButtonType.OK
+        );
+
+        dialog.setResultConverter(btn -> {
+            if (btn == javafx.scene.control.ButtonType.OK) {
+                try {
+                    return Double.parseDouble(minField.getText());
+                } catch (NumberFormatException ex) {
+                    return null;
+                }
+            }
+            return null;
+        });
+
+        dialog.showAndWait().ifPresent(result -> {
+            try {
+                double newMin = Double.parseDouble(minField.getText());
+                double newMax = Double.parseDouble(maxField.getText());
+                if (newMin > 0 && newMax > 0) {
+                    ingredientDAO.updateThreshold(ingredient.getId(), newMin);
+                    ingredientDAO.updateMaxStock(ingredient.getId(), newMax);
+                    loadInventory();
+                }
+            } catch (NumberFormatException ex) {
+                System.err.println("Invalid input: " + ex.getMessage());
+            }
+        });
+    }
+
+    private void showDeleteConfirmation(Ingredient ingredient) {
+        Alert alert = new Alert(Alert.AlertType.CONFIRMATION);
+        alert.setTitle("Delete Ingredient");
+        alert.setHeaderText("Delete " + ingredient.getName() + "?");
+        alert.setContentText("This action cannot be undone.");
+
+        alert.showAndWait().ifPresent(result -> {
+            if (result == javafx.scene.control.ButtonType.OK) {
+                ingredientDAO.delete(ingredient.getId());
+                loadInventory();
+            }
+        });
+    }
+
+    @FXML
+    private void onAddIngredient() {
+        Dialog<Boolean> dialog = new Dialog<>();
+        dialog.setTitle("Add New Ingredient");
+        dialog.setHeaderText("Enter ingredient details");
+
+        javafx.scene.layout.GridPane grid = new javafx.scene.layout.GridPane();
+        grid.setHgap(10);
+        grid.setVgap(10);
+        grid.setPadding(new Insets(20));
+
+        TextField nameField = new TextField();
+        nameField.setPromptText("Ingredient name");
+
+        TextField unitField = new TextField();
+        unitField.setPromptText("e.g., pcs, g, L");
+
+        TextField quantityField = new TextField();
+        quantityField.setPromptText("Initial quantity");
+
+        TextField minThresholdField = new TextField();
+        minThresholdField.setPromptText("Low stock alert threshold");
+
+        TextField maxStockField = new TextField();
+        maxStockField.setPromptText("Maximum stock capacity");
+
+        grid.add(new Label("Name:"), 0, 0);
+        grid.add(nameField, 1, 0);
+        grid.add(new Label("Unit:"), 0, 1);
+        grid.add(unitField, 1, 1);
+        grid.add(new Label("Quantity:"), 0, 2);
+        grid.add(quantityField, 1, 2);
+        grid.add(new Label("Min Threshold:"), 0, 3);
+        grid.add(minThresholdField, 1, 3);
+        grid.add(new Label("Max Stock:"), 0, 4);
+        grid.add(maxStockField, 1, 4);
+
+        dialog.getDialogPane().setContent(grid);
+        dialog.getDialogPane().getButtonTypes().addAll(
+            javafx.scene.control.ButtonType.CANCEL,
+            javafx.scene.control.ButtonType.OK
+        );
+
+        dialog.setResultConverter(btn -> {
+            if (btn == javafx.scene.control.ButtonType.OK) {
+                return true;
+            }
+            return false;
+        });
+
+        dialog.showAndWait().filter(result -> result).ifPresent(result -> {
+            try {
+                String name = nameField.getText().trim();
+                String unit = unitField.getText().trim();
+                double quantity = Double.parseDouble(quantityField.getText().trim());
+                double minThreshold = Double.parseDouble(minThresholdField.getText().trim());
+                double maxStock = Double.parseDouble(maxStockField.getText().trim());
+
+                if (!name.isEmpty() && !unit.isEmpty()) {
+                    ingredientDAO.insert(name, unit, quantity, minThreshold, maxStock);
+                    loadInventory();
+                }
+            } catch (NumberFormatException ex) {
+                Alert err = new Alert(Alert.AlertType.ERROR);
+                err.setTitle("Error");
+                err.setHeaderText("Invalid input");
+                err.setContentText("Please enter valid numbers for quantity, threshold, and max stock.");
+                err.showAndWait();
+            }
+        });
+    }
+
     @FXML
     private void onRestock() {
         Alert alert = new Alert(Alert.AlertType.INFORMATION);
         alert.setTitle("Restock");
         alert.setHeaderText(null);
         alert.setContentText("Select an ingredient first, then restock.");
-        alert.showAndWait();
-    }
-
-    @FXML
-    private void onAddIngredient() {
-        Alert alert = new Alert(Alert.AlertType.INFORMATION);
-        alert.setTitle("Add Ingredient");
-        alert.setHeaderText(null);
-        alert.setContentText("Feature coming soon!");
         alert.showAndWait();
     }
 

@@ -6,9 +6,10 @@ public class Ingredient {
     private String unit;
     private double quantity;
     private double minThreshold;
+    private double maxStock;
     private String status;
 
-    public Ingredient(int id, String name, String unit, double quantity, double minThreshold) {
+    public Ingredient(int id, String name, String unit, double quantity, double minThreshold, double maxStock) {
         this.id = id;
         this.name = name;
         this.unit = unit;
@@ -32,6 +33,12 @@ public class Ingredient {
     public String getUnit() { return unit; }
     public double getQuantity() { return quantity; }
     public double getMinThreshold() { return minThreshold; }
+    public double getMaxStock() { return maxStock; }
+
+    public double getCriticalThreshold() {
+        return maxStock * 0.25;
+    }
+
     public String getStatus() { return status; }
 
     public void setQuantity(double quantity) {

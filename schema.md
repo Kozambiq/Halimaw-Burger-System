@@ -2,17 +2,18 @@
 
 ## Database Setup
 
-Run this SQL to create the database and tables:
-
 ```sql
 CREATE DATABASE IF NOT EXISTS burgerhq;
 USE burgerhq;
 ```
 
+### Migration (for existing databases)
+```sql
+ALTER TABLE ingredients ADD COLUMN max_stock DECIMAL(10,2) NOT NULL DEFAULT 0 AFTER min_threshold;
+```
+
 ## Tables
 
-### staff
-Employees table with roles (Manager, Cashier, Cook)
 ```sql
 CREATE TABLE IF NOT EXISTS staff (
     id          INT AUTO_INCREMENT PRIMARY KEY,
@@ -23,11 +24,7 @@ CREATE TABLE IF NOT EXISTS staff (
     status      ENUM('Active','Break','Off Shift') NOT NULL DEFAULT 'Off Shift',
     created_at  DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP
 );
-```
 
-### users
-Login credentials linked to staff
-```sql
 CREATE TABLE IF NOT EXISTS users (
     id              INT AUTO_INCREMENT PRIMARY KEY,
     staff_id        INT           NOT NULL UNIQUE,
@@ -40,10 +37,7 @@ CREATE TABLE IF NOT EXISTS users (
     updated_at      DATETIME     NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
     FOREIGN KEY (staff_id) REFERENCES staff(id) ON DELETE CASCADE
 );
-```
 
-### menu_items
-```sql
 CREATE TABLE IF NOT EXISTS menu_items (
     id           INT AUTO_INCREMENT PRIMARY KEY,
     name         VARCHAR(100)   NOT NULL,
@@ -53,23 +47,18 @@ CREATE TABLE IF NOT EXISTS menu_items (
     created_at   DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
     updated_at   DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
 );
-```
 
-### ingredients
-```sql
 CREATE TABLE IF NOT EXISTS ingredients (
     id            INT AUTO_INCREMENT PRIMARY KEY,
     name          VARCHAR(100)  NOT NULL,
     unit          VARCHAR(20)   NOT NULL,
     quantity      DECIMAL(10,2) NOT NULL DEFAULT 0,
     min_threshold DECIMAL(10,2) NOT NULL DEFAULT 0,
+    max_stock     DECIMAL(10,2) NOT NULL DEFAULT 0,
     created_at    DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
     updated_at    DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
 );
-```
 
-### menu_item_ingredients
-```sql
 CREATE TABLE IF NOT EXISTS menu_item_ingredients (
     id             INT AUTO_INCREMENT PRIMARY KEY,
     menu_item_id   INT           NOT NULL,
@@ -78,10 +67,7 @@ CREATE TABLE IF NOT EXISTS menu_item_ingredients (
     FOREIGN KEY (menu_item_id)  REFERENCES menu_items(id)  ON DELETE CASCADE,
     FOREIGN KEY (ingredient_id) REFERENCES ingredients(id) ON DELETE CASCADE
 );
-```
 
-### restock_logs
-```sql
 CREATE TABLE IF NOT EXISTS restock_logs (
     id             INT AUTO_INCREMENT PRIMARY KEY,
     ingredient_id  INT           NOT NULL,
@@ -95,7 +81,6 @@ CREATE TABLE IF NOT EXISTS restock_logs (
 
 ## Seed Data
 
-### Staff
 ```sql
 INSERT INTO staff (name, role, shift_start, shift_end, status) VALUES
 ('Maria G.',  'Manager', '08:00:00', '18:00:00', 'Active'),
@@ -103,49 +88,56 @@ INSERT INTO staff (name, role, shift_start, shift_end, status) VALUES
 ('Ana L.',    'Cook',    '10:00:00', '20:00:00', 'Break'),
 ('Ben P.',    'Cashier', '08:00:00', '16:00:00', 'Active'),
 ('Carlo S.',  'Cook',    '10:00:00', '20:00:00', 'Active');
+
+INSERT INTO menu_items (name, category, price, availability) VALUES
+('Halimaw Burger',   'Burgers', 185.00, 'Available'),
+('Double Smash',     'Burgers', 195.00, 'Available'),
+('Classic Burger',   'Burgers', 145.00, 'Low Stock'),
+('BBQ Bacon Burger', 'Burgers', 210.00, 'Hidden'),
+('Crispy Chicken',   'Chicken', 160.00, 'Available'),
+('Classic Fries',    'Sides',    65.00, 'Available'),
+('Onion Rings',      'Sides',    75.00, 'Available'),
+('Iced Tea',         'Drinks',   55.00, 'Available'),
+('Coleslaw',         'Sides',    45.00, 'Available');
+
+INSERT INTO ingredients (name, unit, quantity, min_threshold, max_stock) VALUES
+('Beef Patty',     'pcs',  50,    20,   100),
+('Bun',            'pcs',  60,    20,   100),
+('Cheddar',        'pcs',  40,    15,    80),
+('Lettuce',        'g',   500,   200,  1000),
+('Tomato',         'pcs',  30,    10,    50),
+('Chicken Fillet', 'pcs',  25,    10,    50),
+('Potato',         'g',  2000,  500,  5000),
+('Cooking Oil',    'L',     5,    2,    10),
+('Onion',          'pcs',  20,     8,    40),
+('Ketchup',        'g',   300,  100,   500),
+('Mayo',           'g',   200,    80,   400),
+('BBQ Sauce',      'g',   150,    50,   300);
+
+INSERT INTO menu_item_ingredients (menu_item_id, ingredient_id, quantity_used) VALUES
+(1, 1,  1),    -- Halimaw Burger  → 1 Beef Patty
+(1, 2,  1),    -- Halimaw Burger  → 1 Bun
+(1, 3,  2),    -- Halimaw Burger  → 2 Cheddar
+(1, 4, 30),    -- Halimaw Burger  → 30g Lettuce
+(1, 5,  1),    -- Halimaw Burger  → 1 Tomato
+(2, 1,  2),    -- Double Smash    → 2 Beef Patties
+(2, 2,  1),    -- Double Smash    → 1 Bun
+(2, 3,  2),    -- Double Smash    → 2 Cheddar
+(3, 1,  1),    -- Classic Burger  → 1 Beef Patty
+(3, 2,  1),    -- Classic Burger  → 1 Bun
+(3, 4, 20),    -- Classic Burger  → 20g Lettuce
+(5, 6,  1),    -- Crispy Chicken  → 1 Chicken Fillet
+(6, 7, 150),   -- Classic Fries   → 150g Potato
+(6, 8, 0.05);  -- Classic Fries   → 0.05L Cooking Oil
+
+INSERT INTO users (staff_id, email, password_hash, role, is_active) VALUES
+(1, 'maria@halimaw.ph', 'admin123', 'Manager', 1);
 ```
 
-### Users (Default Login)
-```sql
--- Default manager account (password: admin123)
-INSERT INTO users (staff_id, email, password_hash, role) VALUES
-(1, 'maria@halimaw.ph', '$2a$10$xGJ9Q7K5P3X8Y2Z0N5V9B.O9Y1U5O3J0W1X9Y5Z0N2V8U1O3J', 'Manager');
-```
+## Default Credentials
 
-**Default Credentials:**
 - Email: `maria@halimaw.ph`
 - Password: `admin123`
-
-### Menu Items
-```sql
-INSERT INTO menu_items (name, category, price, availability) VALUES
-('Halimaw Burger',  'Burgers', 185.00, 'Available'),
-('Double Smash',    'Burgers', 195.00, 'Available'),
-('Classic Burger',  'Burgers', 145.00, 'Low Stock'),
-('BBQ Bacon Burger','Burgers', 210.00, 'Hidden'),
-('Crispy Chicken',  'Chicken', 160.00, 'Available'),
-('Classic Fries',   'Sides',   65.00,  'Available'),
-('Onion Rings',     'Sides',   75.00,  'Available'),
-('Iced Tea',        'Drinks',  55.00,  'Available'),
-('Coleslaw',        'Sides',   45.00,  'Available');
-```
-
-### Ingredients
-```sql
-INSERT INTO ingredients (name, unit, quantity, min_threshold) VALUES
-('Burger Patty (Beef)', 'pcs',   0,    20),
-('Burger Buns',         'pcs',   8,    30),
-('Cheddar Cheese',      'slices',12,   40),
-('Lettuce',             'g',     200,  500),
-('Tomatoes',            'pcs',   0,    15),
-('Chicken Fillet',      'pcs',   42,   20),
-('Potato (Fries)',      'kg',    5.1,  2),
-('Cooking Oil',         'L',     4.5,  2),
-('Ketchup',             'btl',   3,    5),
-('Onion',               'pcs',   24,  10),
-('Burger Sauce',        'g',     800,  300),
-('Salt',                'g',     1200, 200);
-```
 
 ## Role Permissions
 
