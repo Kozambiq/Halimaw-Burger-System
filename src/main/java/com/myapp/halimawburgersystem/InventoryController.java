@@ -17,6 +17,7 @@ import javafx.scene.control.TextField;
 import javafx.scene.control.TableColumn;
 import javafx.scene.control.TableView;
 import javafx.scene.control.cell.PropertyValueFactory;
+import javafx.scene.shape.Rectangle;
 import javafx.scene.shape.SVGPath;
 import javafx.scene.layout.Background;
 import javafx.scene.layout.BackgroundFill;
@@ -125,25 +126,27 @@ private void setupTableColumns() {
 
                 Ingredient ing = getTableView().getItems().get(getIndex());
                 String status = ing.getStatus();
+                final double BAR_WIDTH = 180.0;
+                double maxStock = ing.getMaxStock();
+                double minThreshold = ing.getMinThreshold();
 
-                StackPane stack = new StackPane();
-                stack.setPrefHeight(8);
-                stack.setPrefWidth(180);
-                stack.setMaxWidth(180);
-                stack.setAlignment(Pos.CENTER_LEFT);
+                Pane container = new Pane();
+                container.setPrefHeight(10);
+                container.setPrefWidth(BAR_WIDTH);
 
                 Pane barTrack = new Pane();
                 barTrack.setPrefHeight(6);
-                barTrack.setPrefWidth(180);
+                barTrack.setPrefWidth(BAR_WIDTH);
+                barTrack.setLayoutY(2);
                 barTrack.setBackground(new Background(
                     new BackgroundFill(Color.web("#332615"), new CornerRadii(3.0), Insets.EMPTY)
                 ));
 
                 Pane barFill = new Pane();
                 barFill.setPrefHeight(6);
-                barFill.setPrefWidth(percentage * 1.8);
-                barFill.setMaxWidth(180);
-                barFill.setLayoutY(0);
+                barFill.setLayoutY(2);
+                double fillWidth = Math.min(percentage * (BAR_WIDTH / 100.0), BAR_WIDTH);
+                barFill.setPrefWidth(fillWidth);
 
                 Color barColor;
                 if ("OK".equals(status)) {
@@ -157,9 +160,24 @@ private void setupTableColumns() {
                     new BackgroundFill(barColor, new CornerRadii(3.0), Insets.EMPTY)
                 ));
 
-                stack.getChildren().addAll(barTrack, barFill);
+                javafx.scene.shape.Rectangle lowMarker = new javafx.scene.shape.Rectangle(2, 10);
+                lowMarker.setFill(Color.web("#EF9F27"));
 
-                setGraphic(stack);
+                javafx.scene.shape.Rectangle criticalMarker = new javafx.scene.shape.Rectangle(2, 10);
+                criticalMarker.setFill(Color.web("#E24B4A"));
+
+                if (maxStock > 0) {
+                    lowMarker.setLayoutX((minThreshold / maxStock) * BAR_WIDTH);
+                    criticalMarker.setLayoutX((minThreshold * 0.5 / maxStock) * BAR_WIDTH);
+                } else {
+                    lowMarker.setLayoutX(0);
+                    criticalMarker.setLayoutX(0);
+                }
+                lowMarker.setLayoutY(0);
+                criticalMarker.setLayoutY(0);
+
+                container.getChildren().addAll(barTrack, barFill, criticalMarker, lowMarker);
+                setGraphic(container);
                 setText(null);
             }
         });

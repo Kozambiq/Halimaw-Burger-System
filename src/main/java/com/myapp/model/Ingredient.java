@@ -15,6 +15,7 @@ public class Ingredient {
         this.unit = unit;
         this.quantity = quantity;
         this.minThreshold = minThreshold;
+        this.maxStock = maxStock;
         this.status = calculateStatus();
     }
 
@@ -52,9 +53,8 @@ public class Ingredient {
     }
 
     public int getStockPercentage() {
+        if (maxStock <= 0) return 0;
         if (quantity <= 0) return 0;
-        if (minThreshold <= 0) return 100;
-        int pct = (int) ((quantity / minThreshold) * 100);
-        return Math.min(100, pct);
+        return (int) Math.min((quantity / maxStock) * 100, 100);
     }
 }
