@@ -46,6 +46,33 @@ public class UserDAO {
         return Optional.empty();
     }
 
+    public Optional<User> findByEmail(String email) {
+        String sql = "SELECT id, staff_id, email, role, is_active FROM users WHERE email = ?";
+
+        try (Connection conn = DatabaseConnection.getConnection();
+             PreparedStatement stmt = conn.prepareStatement(sql)) {
+
+            stmt.setString(1, email);
+
+            try (ResultSet rs = stmt.executeQuery()) {
+                if (rs.next()) {
+                    User user = new User(
+                        rs.getInt("id"),
+                        rs.getInt("staff_id"),
+                        rs.getString("email"),
+                        rs.getString("role")
+                    );
+                    user.setActive(rs.getInt("is_active") == 1);
+                    return Optional.of(user);
+                }
+            }
+        } catch (SQLException e) {
+            System.err.println("Error finding user by email: " + e.getMessage());
+        }
+
+        return Optional.empty();
+    }
+
     public Optional<User> findById(int id) {
         String sql = "SELECT id, staff_id, email, role, is_active FROM users WHERE id = ?";
         

@@ -6,6 +6,7 @@ import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
 import javafx.scene.control.Alert;
 import javafx.scene.control.Alert.AlertType;
+import javafx.scene.control.Label;
 import javafx.scene.control.PasswordField;
 import javafx.scene.control.TextField;
 import javafx.scene.shape.SVGPath;
@@ -16,9 +17,74 @@ public class LoginController {
     @FXML private PasswordField passwordField;
     @FXML private TextField passwordVisibleField;
     @FXML private SVGPath eyeIcon;
+    @FXML private Label emailError;
+    @FXML private Label passwordError;
 
     private UserDAO userDAO = new UserDAO();
     private boolean passwordVisible = false;
+
+    @FXML
+    private void initialize() {
+        String fieldStyle = "-fx-background-color: #221a0e; -fx-text-fill: #f5ede0; -fx-prompt-text-fill: #6d5a40; -fx-border-color: #4a3820; -fx-border-width: 1; -fx-border-radius: 6; -fx-background-radius: 6; -fx-padding: 12 14 12 14; -fx-font-size: 14px;";
+        String errorBorderStyle = "-fx-background-color: #221a0e; -fx-text-fill: #f5ede0; -fx-prompt-text-fill: #6d5a40; -fx-border-color: #e07070; -fx-border-width: 1; -fx-border-radius: 6; -fx-background-radius: 6; -fx-padding: 12 14 12 14; -fx-font-size: 14px;";
+
+        emailField.textProperty().addListener((obs, oldVal, newVal) -> {
+            String email = emailField.getText().trim();
+            if (email.isEmpty()) {
+                emailError.setVisible(false);
+                emailError.setManaged(false);
+                emailField.setStyle(fieldStyle);
+            } else if (!isValidEmail(email)) {
+                emailError.setText("Email format is invalid");
+                emailError.setVisible(true);
+                emailError.setManaged(true);
+                emailField.setStyle(errorBorderStyle);
+            } else {
+                emailError.setVisible(false);
+                emailError.setManaged(false);
+                emailField.setStyle(fieldStyle);
+            }
+        });
+
+        passwordField.textProperty().addListener((obs, oldVal, newVal) -> {
+            String password = passwordField.getText();
+            if (password.isEmpty()) {
+                passwordError.setVisible(false);
+                passwordError.setManaged(false);
+                passwordField.setStyle(fieldStyle);
+                passwordVisibleField.setStyle(fieldStyle);
+            } else {
+                passwordError.setVisible(false);
+                passwordError.setManaged(false);
+                passwordField.setStyle(fieldStyle);
+                passwordVisibleField.setStyle(fieldStyle);
+            }
+        });
+
+        passwordVisibleField.textProperty().addListener((obs, oldVal, newVal) -> {
+            String password = passwordVisibleField.getText();
+            if (password.isEmpty()) {
+                passwordError.setVisible(false);
+                passwordError.setManaged(false);
+                passwordField.setStyle(fieldStyle);
+                passwordVisibleField.setStyle(fieldStyle);
+            } else {
+                passwordError.setVisible(false);
+                passwordError.setManaged(false);
+                passwordField.setStyle(fieldStyle);
+                passwordVisibleField.setStyle(fieldStyle);
+            }
+        });
+    }
+
+    private boolean isValidEmail(String email) {
+        return email.contains("@") && email.indexOf('@') < email.lastIndexOf('.') && email.lastIndexOf('.') > email.indexOf('@');
+    }
+
+    private String sanitizeInput(String input) {
+        if (input == null) return "";
+        return input.replaceAll("[;'\"\\\\]", "");
+    }
 
     @FXML
     private void onTogglePassword(ActionEvent event) {
@@ -38,13 +104,38 @@ public class LoginController {
 
     @FXML
     private void onEnter(ActionEvent event) {
-        String email = emailField.getText().trim();
-        String password = passwordVisible ? passwordVisibleField.getText() : passwordField.getText();
+        String email = sanitizeInput(emailField.getText().trim());
+        String password = sanitizeInput(passwordVisible ? passwordVisibleField.getText() : passwordField.getText());
 
-        if (email.isEmpty() || password.isEmpty()) {
-            showAlert(AlertType.WARNING,
-                    "Missing Credentials",
-                    "Please enter both your email address and password.");
+        String fieldStyle = "-fx-background-color: #221a0e; -fx-text-fill: #f5ede0; -fx-prompt-text-fill: #6d5a40; -fx-border-color: #4a3820; -fx-border-width: 1; -fx-border-radius: 6; -fx-background-radius: 6; -fx-padding: 12 14 12 14; -fx-font-size: 14px;";
+        String errorBorderStyle = "-fx-background-color: #221a0e; -fx-text-fill: #f5ede0; -fx-prompt-text-fill: #6d5a40; -fx-border-color: #e07070; -fx-border-width: 1; -fx-border-radius: 6; -fx-background-radius: 6; -fx-padding: 12 14 12 14; -fx-font-size: 14px;";
+
+        boolean valid = true;
+
+        if (email.isEmpty()) {
+            emailError.setText("Email format is invalid");
+            emailError.setVisible(true);
+            emailError.setManaged(true);
+            emailField.setStyle(errorBorderStyle);
+            valid = false;
+        } else if (!isValidEmail(email)) {
+            emailError.setText("Email format is invalid");
+            emailError.setVisible(true);
+            emailError.setManaged(true);
+            emailField.setStyle(errorBorderStyle);
+            valid = false;
+        }
+
+        if (password.isEmpty()) {
+            passwordError.setText("Required");
+            passwordError.setVisible(true);
+            passwordError.setManaged(true);
+            passwordField.setStyle(errorBorderStyle);
+            passwordVisibleField.setStyle(errorBorderStyle);
+            valid = false;
+        }
+
+        if (!valid) {
             return;
         }
 
@@ -53,29 +144,60 @@ public class LoginController {
                 try {
                     Main.showDashboard();
                 } catch (Exception e) {
-                    showAlert(AlertType.ERROR,
+                    showStyledAlert(AlertType.ERROR,
                             "Navigation Error",
                             "Failed to load dashboard: " + e.getMessage());
                 }
             },
-            () -> showAlert(AlertType.ERROR,
-                    "Invalid Credentials",
-                    "Invalid email or password. Please try again.")
+            () -> {
+                userDAO.findByEmail(email).ifPresentOrElse(
+                    user -> showStyledAlert(AlertType.ERROR, "Wrong email or password.", ""),
+                    () -> showStyledAlert(AlertType.ERROR, "Account not found.", "")
+                );
+            }
         );
+    }
+
+    private void showStyledAlert(AlertType type, String header, String content) {
+        Alert alert = new Alert(type);
+        alert.setTitle(type == AlertType.ERROR ? "Error" : "Warning");
+        alert.setHeaderText(header);
+        alert.setContentText(content);
+        alert.getDialogPane().getStyleClass().add("dialog-pane");
+        alert.getDialogPane().setStyle("-fx-background-color: #2e2410; -fx-border-color: #4a3820; -fx-border-width: 1; -fx-border-radius: 12; -fx-background-radius: 12;");
+
+        javafx.scene.Node headerNode = alert.getDialogPane().lookup(".header-panel");
+        if (headerNode != null) {
+            headerNode.setStyle("-fx-background-color: transparent;");
+        }
+
+        javafx.scene.control.Label headerText = (javafx.scene.control.Label) alert.getDialogPane().lookup(".header");
+        if (headerText != null) {
+            headerText.setStyle("-fx-text-fill: #e07070; -fx-font-size: 14px;");
+        }
+
+        javafx.scene.Node contentNode = alert.getDialogPane().lookup(".content");
+        if (contentNode != null) {
+            contentNode.setStyle("-fx-text-fill: #f5ede0; -fx-font-size: 13px;");
+        }
+
+        alert.getDialogPane().getButtonTypes().clear();
+        alert.getDialogPane().getButtonTypes().add(javafx.scene.control.ButtonType.OK);
+
+        javafx.scene.control.Button okButton = (javafx.scene.control.Button) alert.getDialogPane().lookupButton(javafx.scene.control.ButtonType.OK);
+        okButton.setStyle("-fx-background-color: #c8500a; -fx-text-fill: #f5ede0; -fx-border-radius: 6; -fx-padding: 8 16 8 16; -fx-font-size: 12px; -fx-font-weight: bold;");
+
+        alert.showAndWait();
     }
 
     @FXML
     private void onForgotPassword(ActionEvent event) {
-        showAlert(AlertType.INFORMATION,
-                "Forgot Password",
-                "Please contact the system administrator to reset your password.");
+        showStyledAlert(AlertType.INFORMATION, "Forgot Password", "Please contact the system administrator to reset your password.");
     }
 
     @FXML
     private void onRequestAccess(ActionEvent event) {
-        showAlert(AlertType.INFORMATION,
-                "Request Access",
-                "Please contact the system administrator to request access.");
+        showStyledAlert(AlertType.INFORMATION, "Request Access", "Please contact the system administrator to request access.");
     }
 
     private void showAlert(AlertType type, String title, String message) {

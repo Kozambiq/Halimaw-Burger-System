@@ -247,16 +247,19 @@ private void setupTableColumns() {
                 menuBtn.getStyleClass().add("menu-btn-dots");
 
                 MenuItem addStock = new MenuItem("Add Stock");
+                addStock.setStyle("-fx-text-fill: #f5ede0; -fx-font-size: 13px; -fx-padding: 8 16 8 16;");
                 addStock.setOnAction(e -> showAddStockDialog(ingredient));
 
                 MenuItem reduceStock = new MenuItem("Reduce Stock");
+                reduceStock.setStyle("-fx-text-fill: #f5ede0; -fx-font-size: 13px; -fx-padding: 8 16 8 16;");
                 reduceStock.setOnAction(e -> showReduceStockDialog(ingredient));
 
                 MenuItem editThreshold = new MenuItem("Edit Threshold");
+                editThreshold.setStyle("-fx-text-fill: #f5ede0; -fx-font-size: 13px; -fx-padding: 8 16 8 16;");
                 editThreshold.setOnAction(e -> showEditThresholdDialog(ingredient));
 
                 MenuItem delete = new MenuItem("Delete");
-                delete.setStyle("-fx-text-fill: #e07070;");
+                delete.setStyle("-fx-text-fill: #e07070; -fx-font-size: 13px; -fx-padding: 8 16 8 16;");
                 delete.setOnAction(e -> showDeleteConfirmation(ingredient));
 
                 menuBtn.getItems().addAll(addStock, reduceStock, editThreshold, delete);
@@ -374,6 +377,8 @@ private void setupTableColumns() {
         boolean isPcs = "pcs".equalsIgnoreCase(ingredient.getUnit());
         double maxStock = ingredient.getMaxStock();
 
+        String numberPattern = isPcs ? "^\\d+$" : "^\\d*\\.?\\d+$";
+
         javafx.beans.InvalidationListener qtyValidator = obs -> {
             String qtyText = quantityField.getText().trim();
             boolean valid = true;
@@ -381,11 +386,12 @@ private void setupTableColumns() {
 
             if (qtyText.isEmpty()) {
                 valid = false;
-            } else if (!qtyText.matches("^\\d+$")) {
-                errorMsg = "Whole numbers only";
-                valid = false;
-            } else if (isPcs && qtyText.contains(".")) {
-                errorMsg = "Decimals not allowed";
+            } else if (!qtyText.matches(numberPattern)) {
+                if (isPcs) {
+                    errorMsg = "Whole numbers only";
+                } else {
+                    errorMsg = "Enter valid number";
+                }
                 valid = false;
             } else {
                 try {
@@ -479,6 +485,8 @@ private void setupTableColumns() {
         boolean isPcs = "pcs".equalsIgnoreCase(ingredient.getUnit());
         double currentQty = ingredient.getQuantity();
 
+        String numberPattern = isPcs ? "^\\d+$" : "^\\d*\\.?\\d+$";
+
         javafx.beans.InvalidationListener qtyValidator = obs -> {
             String qtyText = quantityField.getText().trim();
             boolean valid = true;
@@ -486,11 +494,12 @@ private void setupTableColumns() {
 
             if (qtyText.isEmpty()) {
                 valid = false;
-            } else if (!qtyText.matches("^\\d+$")) {
-                errorMsg = "Whole numbers only";
-                valid = false;
-            } else if (isPcs && qtyText.contains(".")) {
-                errorMsg = "Decimals not allowed";
+            } else if (!qtyText.matches(numberPattern)) {
+                if (isPcs) {
+                    errorMsg = "Whole numbers only";
+                } else {
+                    errorMsg = "Enter valid number";
+                }
                 valid = false;
             } else {
                 try {

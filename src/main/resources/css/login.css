@@ -64,6 +64,12 @@
     -fx-background-color: #332615;
 }
 
+.field-error {
+    -fx-text-fill: #e07070;
+    -fx-font-size: 11px;
+    -fx-padding: 0 0 0 0;
+}
+
 /* Password toggle */
 .password-toggle {
     -fx-background-color: transparent;
