@@ -14,7 +14,7 @@
 <HBox xmlns="http://javafx.com/javafx/17"
       xmlns:fx="http://javafx.com/fxml/1"
       fx:controller="com.myapp.halimawburgersystem.InventoryController"
-      stylesheets="@../css/common.css, @../css/login.css, @../css/dashboard.css">
+      stylesheets="@../css/common.css, @../css/login.css, @../css/dashboard.css, @../css/inventory.css">
 
     <VBox styleClass="sidebar" prefWidth="240" spacing="4">
         <padding><Insets top="16" right="8" bottom="16" left="8"/></padding>
