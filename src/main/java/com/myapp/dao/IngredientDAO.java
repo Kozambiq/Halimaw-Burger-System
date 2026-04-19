@@ -161,6 +161,22 @@ public class IngredientDAO {
         return false;
     }
 
+    public boolean existsByName(String name) {
+        String sql = "SELECT COUNT(*) FROM ingredients WHERE LOWER(name) = LOWER(?)";
+        try (Connection conn = DatabaseConnection.getConnection();
+             PreparedStatement stmt = conn.prepareStatement(sql)) {
+            stmt.setString(1, name);
+            try (ResultSet rs = stmt.executeQuery()) {
+                if (rs.next()) {
+                    return rs.getInt(1) > 0;
+                }
+            }
+        } catch (SQLException e) {
+            System.err.println("Error checking ingredient: " + e.getMessage());
+        }
+        return false;
+    }
+
     public boolean insert(String name, String unit, double quantity, double minThreshold, double maxStock) {
         String sql = "INSERT INTO ingredients (name, unit, quantity, min_threshold, max_stock) VALUES (?, ?, ?, ?, ?)";
         try (Connection conn = DatabaseConnection.getConnection();

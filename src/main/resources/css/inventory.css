@@ -151,3 +151,81 @@
     -fx-pref-height: 0;
     -fx-opacity: 0;
 }
+
+/* ── Dialog Styles ─────────────────────────────────────── */
+
+/* Apply to all dialog panes */
+.dialog-pane {
+    -fx-background-color: #2e2410;
+    -fx-text-fill: #f5ede0;
+}
+
+.dialog-pane {
+    background-color: #2e2410;
+}
+
+/* Dialog header */
+.dialog-pane .header-panel {
+    -fx-background-color: #221a0e;
+}
+
+.dialog-pane .header-panel .label {
+    -fx-text-fill: #f5ede0;
+    -fx-font-size: 15px;
+    -fx-font-weight: bold;
+}
+
+/* Dialog content */
+.dialog-pane .content-area {
+    -fx-background-color: #2e2410;
+}
+
+/* Button bar */
+.dialog-pane .button-bar {
+    -fx-background-color: #2e2410;
+}
+
+/* Dialog buttons */
+.dialog-pane .button-bar .button {
+    -fx-background-color: #4a3820;
+    -fx-text-fill: #f5ede0;
+    -fx-font-size: 12px;
+    -fx-padding: 8px 16px;
+}
+
+.dialog-pane .button-bar .button:hover {
+    -fx-background-color: #5c4828;
+}
+
+/* TextField in dialog */
+.dialog-pane .text-field {
+    -fx-background-color: #221a0e;
+    -fx-text-fill: #f5ede0;
+    -fx-prompt-text-fill: #8a7055;
+    -fx-border-color: #4a3820;
+    -fx-border-width: 1px;
+    -fx-padding: 8px;
+}
+
+.dialog-pane .text-field:focused {
+    -fx-border-color: #c8500a;
+}
+
+/* Label in dialog */
+.dialog-pane Label {
+    -fx-text-fill: #a09070;
+}
+
+/* Dialog header - white background fix */
+.dialog-pane *.headerPanel {
+    -fx-background-color: #2e2410;
+}
+
+.dialog-pane *.headerPanel > *.label {
+    -fx-text-fill: #f5ede0;
+    -fx-font-size: 14px;
+}
+
+.dialog-pane *.title {
+    -fx-background-color: #2e2410;
+}
