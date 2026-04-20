@@ -233,6 +233,22 @@ public class MenuItemDAO {
         return false;
     }
 
+    public String getIngredientUnit(String name) {
+        String sql = "SELECT unit FROM ingredients WHERE LOWER(name) = LOWER(?)";
+        try (Connection conn = DatabaseConnection.getConnection();
+             PreparedStatement stmt = conn.prepareStatement(sql)) {
+            stmt.setString(1, name);
+            try (ResultSet rs = stmt.executeQuery()) {
+                if (rs.next()) {
+                    return rs.getString("unit");
+                }
+            }
+        } catch (SQLException e) {
+            System.err.println("Error getting ingredient unit: " + e.getMessage());
+        }
+        return null;
+    }
+
     public boolean updateMenuItem(int id, String name, String category, double price) {
         String sql = "UPDATE menu_items SET name = ?, category = ?, price = ? WHERE id = ?";
         try (Connection conn = DatabaseConnection.getConnection();

@@ -138,15 +138,27 @@
 /* ── ComboBox (Category Dropdown) ───────────────────────── */
 .dialog-pane .combo-box {
     -fx-background-color: #221a0e;
-    -fx-text-fill: white;
     -fx-border-color: #4a3820;
     -fx-border-width: 1;
     -fx-border-radius: 6;
     -fx-background-radius: 6;
 }
 
+.dialog-pane .combo-box .text-field {
+    -fx-background-color: #221a0e;
+    -fx-text-fill: white;
+}
+
 .dialog-pane .combo-box .text {
     -fx-fill: white;
+}
+
+.dialog-pane .combo-box .button {
+    -fx-background-color: #221a0e;
+}
+
+.dialog-pane .combo-box .arrow {
+    -fx-background-color: #f5ede0;
 }
 
 .dialog-pane .combo-box .list-cell {
@@ -175,6 +187,11 @@
 
 .dialog-pane .combo-box-popup .list-view .list-cell:hover {
     -fx-background-color: #4a3820;
+}
+
+.dialog-pane .combo-box-popup .list-view .list-cell:selected {
+    -fx-background-color: #5c4828;
+    -fx-text-fill: white;
 }
 
 .dialog-pane .combo-box-popup .list-view .list-cell:selected {

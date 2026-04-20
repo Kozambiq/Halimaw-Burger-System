@@ -24,10 +24,12 @@ import javafx.scene.layout.GridPane;
 import javafx.scene.layout.HBox;
 import javafx.scene.layout.VBox;
 import javafx.scene.paint.Color;
+import javafx.scene.layout.StackPane;
 import javafx.util.Callback;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.stream.Collectors;
 
 public class MenuItemsController {
 
@@ -209,10 +211,13 @@ public class MenuItemsController {
         Label categoryLabel = new Label("Category:");
         categoryLabel.setStyle(labelStyle);
         ComboBox<String> categoryCombo = new ComboBox<>();
-        categoryCombo.setStyle(fieldStyle);
+        categoryCombo.setStyle("-fx-background-color: #221a0e; -fx-text-fill: white; -fx-prompt-text-fill: #8a7055; -fx-border-color: #4a3820; -fx-border-width: 1; -fx-border-radius: 6; -fx-background-radius: 6; -fx-padding: 8 12 8 12; -fx-font-size: 13px;");
         categoryCombo.setPrefWidth(300);
         categoryCombo.getItems().addAll(categories);
         categoryCombo.getSelectionModel().select(fullItem.getCategory());
+        categoryCombo.setOnShown(e -> {
+            categoryCombo.getStyleClass().add("category-combo-visible");
+        });
 
         Label priceLabel = new Label("Price:");
         priceLabel.setStyle(labelStyle);
@@ -238,10 +243,21 @@ public class MenuItemsController {
 
         HBox searchBox = new HBox(10);
 
-        TextField searchField = new TextField();
-        searchField.setStyle(fieldStyle);
-        searchField.setPrefWidth(200);
-        searchField.setPromptText("Search ingredient...");
+        ComboBox<String> searchCombo = new ComboBox<>();
+        searchCombo.setEditable(true);
+        searchCombo.setStyle(fieldStyle);
+        searchCombo.setPrefWidth(200);
+        searchCombo.setPromptText("Search ingredient...");
+        TextField searchField = searchCombo.getEditor();
+
+        javafx.scene.control.ListView<String> suggestionList = new javafx.scene.control.ListView<>();
+        suggestionList.setStyle("-fx-background-color: #2e2410; -fx-border-color: #4a3820; -fx-border-width: 1; -fx-border-radius: 6; -fx-background-radius: 6;");
+        suggestionList.setPrefHeight(100);
+        suggestionList.setVisible(false);
+
+        StackPane searchContainer = new StackPane();
+        searchContainer.getChildren().addAll(searchCombo, suggestionList);
+        searchContainer.setPrefWidth(200);
 
         TextField qtyField = new TextField();
         qtyField.setStyle(fieldStyle);
@@ -257,7 +273,7 @@ public class MenuItemsController {
         qtyError.setStyle(errorStyle);
         qtyError.setVisible(false);
 
-        searchBox.getChildren().addAll(searchField, qtyField, addBtn, qtyError);
+        searchBox.getChildren().addAll(searchContainer, qtyField, addBtn, qtyError);
 
         VBox ingredientList = new VBox(5);
         final List<MenuItemIngredient> ingredientDataList = new ArrayList<>(currentIngredients);
@@ -265,12 +281,29 @@ public class MenuItemsController {
             addIngredientRow(ingredientList, ing, ingredientDataList, fieldStyle);
         }
 
+        List<String> allIngredientNames = menuItemDAO.searchIngredients("").stream()
+                .map(Ingredient::getName)
+                .collect(Collectors.toList());
+
         searchField.textProperty().addListener(obs -> {
-            String query = searchField.getText().trim();
+            String query = searchField.getText().trim().toLowerCase();
             if (query.isEmpty()) {
                 searchField.setStyle(fieldStyle);
                 qtyError.setVisible(false);
+                suggestionList.setVisible(false);
                 return;
+            }
+
+            List<String> matches = allIngredientNames.stream()
+                    .filter(name -> name.toLowerCase().contains(query))
+                    .limit(10)
+                    .collect(Collectors.toList());
+
+            if (!matches.isEmpty()) {
+                suggestionList.setItems(FXCollections.observableArrayList(matches));
+                suggestionList.setVisible(true);
+            } else {
+                suggestionList.setVisible(false);
             }
 
             boolean exists = menuItemDAO.ingredientExistsByName(query);
@@ -278,6 +311,14 @@ public class MenuItemsController {
                 searchField.setStyle(fieldStyle + "-fx-border-color: #4CAF50;");
             } else {
                 searchField.setStyle(fieldStyle + "-fx-border-color: #e07070;-fx-background-color: #221a0e;");
+            }
+        });
+
+        suggestionList.setOnMouseClicked(e -> {
+            if (!suggestionList.getSelectionModel().isEmpty()) {
+                String selected = suggestionList.getSelectionModel().getSelectedItem();
+                searchField.setText(selected);
+                suggestionList.setVisible(false);
             }
         });
 
@@ -311,8 +352,20 @@ public class MenuItemsController {
                 return;
             }
 
+            String unit = menuItemDAO.getIngredientUnit(searchText);
+            boolean isPcs = "pcs".equalsIgnoreCase(unit);
+
             try {
                 double qty = Double.parseDouble(qtyText);
+
+                if (isPcs) {
+                    if (qty != Math.floor(qty)) {
+                        qtyError.setText("Whole numbers only for pcs");
+                        qtyError.setVisible(true);
+                        return;
+                    }
+                }
+
                 List<Ingredient> results = menuItemDAO.searchIngredients(searchText);
                 if (!results.isEmpty()) {
                     Ingredient ing = results.get(0);
@@ -322,6 +375,7 @@ public class MenuItemsController {
                     searchField.clear();
                     qtyField.clear();
                     searchField.setStyle(fieldStyle);
+                    qtyError.setVisible(false);
                 }
             } catch (NumberFormatException ex) {
                 qtyError.setText("Enter valid number");
@@ -356,6 +410,22 @@ public class MenuItemsController {
             }
             return false;
         });
+
+        Runnable updateOkButtonState = () -> {
+            boolean hasErrors = nameError.isVisible() || priceError.isVisible() || qtyError.isVisible();
+            if (hasErrors) {
+                okButton.setDisable(true);
+                okButton.setStyle("-fx-background-color: #5c4828; -fx-text-fill: #8a7055; -fx-border-radius: 6; -fx-padding: 8 16 8 16; -fx-font-size: 12px; -fx-font-weight: bold;");
+            } else {
+                okButton.setDisable(false);
+                okButton.setStyle("-fx-background-color: #c8500a; -fx-text-fill: #f5ede0; -fx-border-radius: 6; -fx-padding: 8 16 8 16; -fx-font-size: 12px; -fx-font-weight: bold;");
+            }
+        };
+
+        nameField.textProperty().addListener(obs -> updateOkButtonState.run());
+        priceField.textProperty().addListener(obs -> updateOkButtonState.run());
+
+        updateOkButtonState.run();
 
         dialog.showAndWait().filter(result -> result).ifPresent(result -> {
             boolean valid = true;
