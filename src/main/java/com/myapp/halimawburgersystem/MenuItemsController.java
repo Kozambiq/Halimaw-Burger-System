@@ -252,18 +252,21 @@ public class MenuItemsController {
         javafx.scene.control.ListView<String> suggestionList = new javafx.scene.control.ListView<>();
         suggestionList.getStyleClass().add("suggestion-list");
         suggestionList.setFixedCellSize(24);
-        suggestionList.setVisible(false);
+        suggestionList.setMaxHeight(150);
+        suggestionList.setPrefWidth(200);
 
-        VBox searchContainer = new VBox(0);
-        searchContainer.setPrefWidth(200);
-        searchContainer.getChildren().addAll(searchField, suggestionList);
+        javafx.stage.Popup suggestionPopup = new javafx.stage.Popup();
+        suggestionPopup.setAutoHide(true);
+        suggestionPopup.getContent().add(suggestionList);
 
         TextField qtyField = new TextField();
+        qtyField.setLayoutY(0);
         qtyField.setStyle(fieldStyle);
         qtyField.setPrefWidth(80);
         qtyField.setPromptText("Qty");
 
         javafx.scene.control.Button addBtn = new javafx.scene.control.Button("Send");
+        addBtn.setLayoutY(0);
         addBtn.setStyle("-fx-background-color: #4CAF50; -fx-text-fill: white; -fx-font-weight: bold; -fx-border-radius: 6; -fx-background-radius: 6; -fx-padding: 8 12 8 12; -fx-font-size: 12px; -fx-cursor: hand;");
         addBtn.setOnMouseEntered(e -> addBtn.setStyle("-fx-background-color: #66BB6A; -fx-text-fill: white; -fx-font-weight: bold; -fx-border-radius: 6; -fx-background-radius: 6; -fx-padding: 8 12 8 12; -fx-font-size: 12px; -fx-cursor: hand;"));
         addBtn.setOnMouseExited(e -> addBtn.setStyle("-fx-background-color: #4CAF50; -fx-text-fill: white; -fx-font-weight: bold; -fx-border-radius: 6; -fx-background-radius: 6; -fx-padding: 8 12 8 12; -fx-font-size: 12px; -fx-cursor: hand;"));
@@ -272,7 +275,7 @@ public class MenuItemsController {
         qtyError.setStyle(errorStyle);
         qtyError.setVisible(false);
 
-        searchBox.getChildren().addAll(searchContainer, qtyField, addBtn, qtyError);
+        searchBox.getChildren().addAll(searchField, qtyField, addBtn, qtyError);
 
         VBox ingredientList = new VBox(5);
         final List<MenuItemIngredient> ingredientDataList = new ArrayList<>(currentIngredients);
@@ -289,7 +292,7 @@ public class MenuItemsController {
             if (query.isEmpty()) {
                 searchField.setStyle(fieldStyle);
                 qtyError.setVisible(false);
-                suggestionList.setVisible(false);
+                suggestionPopup.hide();
                 return;
             }
 
@@ -299,12 +302,13 @@ public class MenuItemsController {
                     .collect(Collectors.toList());
 
             if (!matches.isEmpty()) {
-                int rowCount = matches.size();
+                int rowCount = Math.min(matches.size(), 6);
                 suggestionList.setItems(FXCollections.observableArrayList(matches));
-                suggestionList.setPrefHeight(rowCount * 24);
-                suggestionList.setVisible(true);
+                suggestionList.setPrefHeight(rowCount * 24 + 8);
+                javafx.geometry.Bounds bounds = searchField.localToScreen(searchField.getBoundsInLocal());
+                suggestionPopup.show(searchField, bounds.getMinX(), bounds.getMaxY());
             } else {
-                suggestionList.setVisible(false);
+                suggestionPopup.hide();
             }
 
             boolean exists = menuItemDAO.ingredientExistsByName(query);
@@ -319,21 +323,13 @@ public class MenuItemsController {
             if (!suggestionList.getSelectionModel().isEmpty()) {
                 String selected = suggestionList.getSelectionModel().getSelectedItem();
                 searchField.setText(selected);
-                suggestionList.setVisible(false);
+                suggestionPopup.hide();
             }
         });
 
         searchField.focusedProperty().addListener((obs, wasFocused, isFocused) -> {
             if (!isFocused) {
-                javafx.concurrent.Task<Void> task = new javafx.concurrent.Task<>() {
-                    @Override
-                    protected Void call() throws Exception {
-                        Thread.sleep(200);
-                        return null;
-                    }
-                };
-                task.setOnSucceeded(e -> suggestionList.setVisible(false));
-                new Thread(task).start();
+                suggestionPopup.hide();
             }
         });
 
