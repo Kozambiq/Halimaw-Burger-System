@@ -14,7 +14,9 @@ public class Main extends Application {
     private static Parent loginRoot;
     private static Parent dashboardRoot;
     private static Parent inventoryRoot;
+    private static Parent menuItemsRoot;
     private static DashboardController dashboardController;
+    private static MenuItemsController menuItemsController;
 
     @Override
     public void start(Stage stage) throws Exception {
@@ -65,6 +67,8 @@ public class Main extends Application {
     }
 
     public static void showInventory() throws Exception {
+        clearMenuItemsCache();
+
         if (inventoryRoot == null) {
             FXMLLoader fxmlLoader = new FXMLLoader(Main.class.getResource("/fxml/inventory.fxml"));
             inventoryRoot = fxmlLoader.load();
@@ -85,8 +89,36 @@ public class Main extends Application {
         }
     }
     
+    public static void showMenuItems() throws Exception {
+        clearInventoryCache();
+
+        if (menuItemsRoot == null) {
+            FXMLLoader fxmlLoader = new FXMLLoader(Main.class.getResource("/fxml/menuitems.fxml"));
+            menuItemsRoot = fxmlLoader.load();
+            menuItemsController = fxmlLoader.getController();
+        }
+
+        if (cachedScene == null) {
+            cachedScene = new Scene(menuItemsRoot, 1280, 800);
+            mainStage.setScene(cachedScene);
+        } else {
+            cachedScene.setRoot(menuItemsRoot);
+        }
+
+        mainStage.setTitle("BurgerHQ - Menu Items");
+        mainStage.show();
+
+        if (menuItemsController != null) {
+            menuItemsController.setActiveNav("Menu Items");
+        }
+    }
+
     public static void clearInventoryCache() {
         inventoryRoot = null;
+    }
+
+    public static void clearMenuItemsCache() {
+        menuItemsRoot = null;
     }
 
     @Override

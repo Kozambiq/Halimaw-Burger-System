@@ -1040,11 +1040,11 @@ private void setupTableColumns() {
 
     @FXML
     private void onNavigateMenuItems() {
-        Alert alert = new Alert(Alert.AlertType.INFORMATION);
-        alert.setTitle("Menu Items");
-        alert.setHeaderText(null);
-        alert.setContentText("Coming soon!");
-        alert.showAndWait();
+        try {
+            Main.showMenuItems();
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
     }
 
     @FXML
