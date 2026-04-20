@@ -242,22 +242,21 @@ public class MenuItemsController {
         ingredientsLabel.setStyle(labelStyle);
 
         HBox searchBox = new HBox(10);
+        searchBox.setAlignment(javafx.geometry.Pos.CENTER_LEFT);
 
-        ComboBox<String> searchCombo = new ComboBox<>();
-        searchCombo.setEditable(true);
-        searchCombo.setStyle(fieldStyle);
-        searchCombo.setPrefWidth(200);
-        searchCombo.setPromptText("Search ingredient...");
-        TextField searchField = searchCombo.getEditor();
+        TextField searchField = new TextField();
+        searchField.setStyle(fieldStyle);
+        searchField.setPrefWidth(200);
+        searchField.setPromptText("Search ingredient...");
 
         javafx.scene.control.ListView<String> suggestionList = new javafx.scene.control.ListView<>();
-        suggestionList.setStyle("-fx-background-color: #2e2410; -fx-border-color: #4a3820; -fx-border-width: 1; -fx-border-radius: 6; -fx-background-radius: 6;");
-        suggestionList.setPrefHeight(100);
+        suggestionList.getStyleClass().add("suggestion-list");
+        suggestionList.setFixedCellSize(24);
         suggestionList.setVisible(false);
 
-        StackPane searchContainer = new StackPane();
-        searchContainer.getChildren().addAll(searchCombo, suggestionList);
+        VBox searchContainer = new VBox(0);
         searchContainer.setPrefWidth(200);
+        searchContainer.getChildren().addAll(searchField, suggestionList);
 
         TextField qtyField = new TextField();
         qtyField.setStyle(fieldStyle);
@@ -300,7 +299,9 @@ public class MenuItemsController {
                     .collect(Collectors.toList());
 
             if (!matches.isEmpty()) {
+                int rowCount = matches.size();
                 suggestionList.setItems(FXCollections.observableArrayList(matches));
+                suggestionList.setPrefHeight(rowCount * 24);
                 suggestionList.setVisible(true);
             } else {
                 suggestionList.setVisible(false);
@@ -319,6 +320,20 @@ public class MenuItemsController {
                 String selected = suggestionList.getSelectionModel().getSelectedItem();
                 searchField.setText(selected);
                 suggestionList.setVisible(false);
+            }
+        });
+
+        searchField.focusedProperty().addListener((obs, wasFocused, isFocused) -> {
+            if (!isFocused) {
+                javafx.concurrent.Task<Void> task = new javafx.concurrent.Task<>() {
+                    @Override
+                    protected Void call() throws Exception {
+                        Thread.sleep(200);
+                        return null;
+                    }
+                };
+                task.setOnSucceeded(e -> suggestionList.setVisible(false));
+                new Thread(task).start();
             }
         });
 
