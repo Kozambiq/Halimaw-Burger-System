@@ -248,11 +248,16 @@ public class MenuItemsController {
         qtyField.setPrefWidth(80);
         qtyField.setPromptText("Qty");
 
+        javafx.scene.control.Button addBtn = new javafx.scene.control.Button("Send");
+        addBtn.setStyle("-fx-background-color: #4CAF50; -fx-text-fill: white; -fx-font-weight: bold; -fx-border-radius: 6; -fx-background-radius: 6; -fx-padding: 8 12 8 12; -fx-font-size: 12px; -fx-cursor: hand;");
+        addBtn.setOnMouseEntered(e -> addBtn.setStyle("-fx-background-color: #66BB6A; -fx-text-fill: white; -fx-font-weight: bold; -fx-border-radius: 6; -fx-background-radius: 6; -fx-padding: 8 12 8 12; -fx-font-size: 12px; -fx-cursor: hand;"));
+        addBtn.setOnMouseExited(e -> addBtn.setStyle("-fx-background-color: #4CAF50; -fx-text-fill: white; -fx-font-weight: bold; -fx-border-radius: 6; -fx-background-radius: 6; -fx-padding: 8 12 8 12; -fx-font-size: 12px; -fx-cursor: hand;"));
+
         javafx.scene.control.Label qtyError = new javafx.scene.control.Label("");
         qtyError.setStyle(errorStyle);
         qtyError.setVisible(false);
 
-        searchBox.getChildren().addAll(searchField, qtyField, qtyError);
+        searchBox.getChildren().addAll(searchField, qtyField, addBtn, qtyError);
 
         VBox ingredientList = new VBox(5);
         final List<MenuItemIngredient> ingredientDataList = new ArrayList<>(currentIngredients);
@@ -276,7 +281,7 @@ public class MenuItemsController {
             }
         });
 
-        searchField.setOnAction(e -> {
+        addBtn.setOnAction(e -> {
             String searchText = searchField.getText().trim();
             String qtyText = qtyField.getText().trim();
 
