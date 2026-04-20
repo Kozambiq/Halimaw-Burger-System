@@ -213,6 +213,30 @@ public class MenuItemsController {
         ComboBox<String> categoryCombo = new ComboBox<>();
         categoryCombo.setStyle("-fx-background-color: #221a0e; -fx-text-fill: white; -fx-prompt-text-fill: #8a7055; -fx-border-color: #4a3820; -fx-border-width: 1; -fx-border-radius: 6; -fx-background-radius: 6; -fx-padding: 8 12 8 12; -fx-font-size: 13px;");
         categoryCombo.setPrefWidth(300);
+        categoryCombo.setCellFactory(list -> new javafx.scene.control.ListCell<String>() {
+            @Override
+            protected void updateItem(String item, boolean empty) {
+                super.updateItem(item, empty);
+                if (empty || item == null) {
+                    setText(null);
+                } else {
+                    setText(item);
+                    setStyle("-fx-background-color: #221a0e; -fx-text-fill: #f5ede0; -fx-font-size: 13px;");
+                }
+            }
+        });
+        categoryCombo.setButtonCell(new javafx.scene.control.ListCell<String>() {
+            @Override
+            protected void updateItem(String item, boolean empty) {
+                super.updateItem(item, empty);
+                if (empty || item == null) {
+                    setText(null);
+                } else {
+                    setText(item);
+                    setStyle("-fx-background-color: #221a0e; -fx-text-fill: white; -fx-font-size: 13px;");
+                }
+            }
+        });
         categoryCombo.getItems().addAll(categories);
         categoryCombo.getSelectionModel().select(fullItem.getCategory());
         categoryCombo.setOnShown(e -> {
@@ -355,11 +379,8 @@ public class MenuItemsController {
             }
 
             if (alreadyExists) {
-                Alert warn = new Alert(Alert.AlertType.WARNING);
-                warn.setTitle("Warning");
-                warn.setHeaderText("Ingredient already in list");
-                warn.setContentText(searchText + " is already added to this menu item.");
-                warn.showAndWait();
+                qtyError.setText(searchText + " already in list");
+                qtyError.setVisible(true);
                 return;
             }
 
