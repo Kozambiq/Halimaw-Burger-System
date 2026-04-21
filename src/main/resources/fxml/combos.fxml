@@ -5,6 +5,7 @@
 <?import javafx.scene.control.Label?>
 <?import javafx.scene.control.TableColumn?>
 <?import javafx.scene.control.TableView?>
+<?import javafx.scene.control.TextField?>
 <?import javafx.scene.layout.HBox?>
 <?import javafx.scene.layout.Region?>
 <?import javafx.scene.layout.StackPane?>
@@ -137,11 +138,13 @@
                         <Label styleClass="stat-label" text="ACTIVE"/>
                         <Label fx:id="lblActive" styleClass="stat-value" text="0" style="-fx-text-fill: #7ec470;"/>
                     </VBox>
+                    <TextField fx:id="searchField" promptText="Search combos..." prefWidth="180" style="-fx-background-color: #221a0e; -fx-text-fill: #f5ede0; -fx-prompt-text-fill: #8a7055; -fx-border-color: #4a3820; -fx-border-width: 1; -fx-border-radius: 6; -fx-background-radius: 6; -fx-padding: 8 12 8 12;"/>
+                    <Button fx:id="btnSearch" text="Search" style="-fx-background-color: #c8500a; -fx-text-fill: #f5ede0; -fx-font-weight: bold; -fx-border-radius: 6; -fx-background-radius: 6; -fx-padding: 8 16 8 16; -fx-font-size: 12px; -fx-cursor: hand;" onAction="#onSearchCombo"/>
                     <Region HBox.hgrow="ALWAYS"/>
                     <Button styleClass="btn-primary" text="+ Add Promo" prefWidth="140" onAction="#onAddPromo"/>
                 </HBox>
 
-                <StackPane VBox.vgrow="ALWAYS" maxHeight="Infinity" styleClass="table-wrap">
+<StackPane VBox.vgrow="ALWAYS" maxHeight="Infinity" styleClass="table-wrap">
                     <padding><Insets top="24" bottom="0"/></padding>
                     <TableView fx:id="combosTable" styleClass="combos-table" maxHeight="Infinity" VBox.vgrow="ALWAYS">
                         <columns>

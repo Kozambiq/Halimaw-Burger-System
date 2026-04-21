@@ -5,6 +5,7 @@
 <?import javafx.scene.control.Label?>
 <?import javafx.scene.control.TableColumn?>
 <?import javafx.scene.control.TableView?>
+<?import javafx.scene.control.TextField?>
 <?import javafx.scene.layout.HBox?>
 <?import javafx.scene.layout.Region?>
 <?import javafx.scene.layout.StackPane?>
@@ -141,6 +142,8 @@
                         <Label styleClass="stat-label" text="OUT OF STOCK"/>
                         <Label fx:id="lblOutOfStock" styleClass="stat-value" text="0" style="-fx-text-fill: #e07070;"/>
                     </VBox>
+                    <TextField fx:id="searchField" promptText="Search ingredients..." prefWidth="220" style="-fx-background-color: #221a0e; -fx-text-fill: #f5ede0; -fx-prompt-text-fill: #8a7055; -fx-border-color: #4a3820; -fx-border-width: 1; -fx-border-radius: 6; -fx-background-radius: 6; -fx-padding: 8 12 8 12;"/>
+                    <Button fx:id="btnSearch" text="Search" style="-fx-background-color: #c8500a; -fx-text-fill: #f5ede0; -fx-font-weight: bold; -fx-border-radius: 6; -fx-background-radius: 6; -fx-padding: 8 16 8 16; -fx-font-size: 12px; -fx-cursor: hand;" onAction="#onSearchIngredient"/>
                     <Region HBox.hgrow="ALWAYS"/>
                     <Button styleClass="btn-primary" text="+ Add Ingredient" onAction="#onAddIngredient" prefWidth="140"/>
                 </HBox>

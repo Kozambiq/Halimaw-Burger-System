@@ -335,4 +335,44 @@ public class MenuItemDAO {
         }
         return false;
     }
+
+    public List<String> searchByName(String query) {
+        List<String> items = new ArrayList<>();
+        String sql = "SELECT name FROM menu_items WHERE LOWER(name) LIKE LOWER(?) ORDER BY name LIMIT 10";
+        try (Connection conn = DatabaseConnection.getConnection();
+             PreparedStatement stmt = conn.prepareStatement(sql)) {
+            stmt.setString(1, "%" + query + "%");
+            try (ResultSet rs = stmt.executeQuery()) {
+                while (rs.next()) {
+                    items.add(rs.getString("name"));
+                }
+            }
+        } catch (SQLException e) {
+            System.err.println("Error searching menu items: " + e.getMessage());
+        }
+        return items;
+    }
+
+    public List<MenuItemModel> findByName(String name) {
+        List<MenuItemModel> menuItems = new ArrayList<>();
+        String sql = "SELECT id, name, category, price, availability FROM menu_items WHERE LOWER(name) = LOWER(?)";
+        try (Connection conn = DatabaseConnection.getConnection();
+             PreparedStatement stmt = conn.prepareStatement(sql)) {
+            stmt.setString(1, name);
+            try (ResultSet rs = stmt.executeQuery()) {
+                while (rs.next()) {
+                    menuItems.add(new MenuItemModel(
+                        rs.getInt("id"),
+                        rs.getString("name"),
+                        rs.getString("category"),
+                        rs.getDouble("price"),
+                        rs.getString("availability")
+                    ));
+                }
+            }
+        } catch (SQLException e) {
+            System.err.println("Error finding menu item by name: " + e.getMessage());
+        }
+        return menuItems;
+    }
 }

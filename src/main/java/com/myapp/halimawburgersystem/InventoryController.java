@@ -30,6 +30,7 @@ import javafx.util.Callback;
 import javafx.scene.paint.Color;
 
 import java.util.List;
+import java.util.stream.Collectors;
 
 public class InventoryController {
 
@@ -53,17 +54,114 @@ public class InventoryController {
     @FXML private Button btnSales;
     @FXML private Button btnStaff;
 
+    @FXML private TextField searchField;
+    @FXML private Button btnSearch;
+
     private IngredientDAO ingredientDAO = new IngredientDAO();
     private boolean alreadyLoaded = false;
+    private List<Ingredient> allIngredients;
 
     @FXML
     public void initialize() {
         if (alreadyLoaded) return;
         alreadyLoaded = true;
-        
+
         setActiveNav("Inventory");
         setupTableColumns();
+        setupSearchAutocomplete();
         loadInventory();
+    }
+
+    private void setupSearchAutocomplete() {
+        javafx.scene.control.ListView<String> suggestionList = new javafx.scene.control.ListView<>();
+        suggestionList.getStyleClass().add("suggestion-list");
+        suggestionList.setFixedCellSize(32);
+        suggestionList.setMaxHeight(200);
+        suggestionList.setPrefWidth(300);
+        suggestionList.setStyle(
+            "-fx-background-color: #2e2410;" +
+            "-fx-border-color: #4a3820;" +
+            "-fx-border-width: 1;" +
+            "-fx-border-radius: 6;" +
+            "-fx-background-radius: 6;" +
+            "-fx-padding: 4 0 4 0;"
+        );
+        suggestionList.setCellFactory(list -> new javafx.scene.control.ListCell<String>() {
+            @Override
+            protected void updateItem(String item, boolean empty) {
+                super.updateItem(item, empty);
+                if (empty || item == null) {
+                    setText(null);
+                    setGraphic(null);
+                } else {
+                    setText(item);
+                    setTextFill(Color.valueOf("#f5ede0"));
+                    setStyle("-fx-background-color: transparent; -fx-text-fill: #f5ede0; -fx-font-size: 13px; -fx-padding: 8 16 8 16; -fx-cursor: hand;");
+                }
+            }
+        });
+
+        javafx.stage.Popup suggestionPopup = new javafx.stage.Popup();
+        suggestionPopup.setAutoHide(true);
+        suggestionPopup.getContent().add(suggestionList);
+
+        List<String> allIngredientNames = ingredientDAO.searchByName("");
+
+        searchField.textProperty().addListener(obs -> {
+            String query = searchField.getText().trim().toLowerCase();
+            if (query.isEmpty()) {
+                suggestionPopup.hide();
+                return;
+            }
+
+            List<String> matches = allIngredientNames.stream()
+                    .filter(name -> name.toLowerCase().contains(query))
+                    .limit(10)
+                    .collect(Collectors.toList());
+
+            if (!matches.isEmpty()) {
+                int rowCount = Math.min(matches.size(), 6);
+                suggestionList.setItems(FXCollections.observableArrayList(matches));
+                suggestionList.setPrefHeight(rowCount * 32 + 8);
+                javafx.geometry.Bounds bounds = searchField.localToScreen(searchField.getBoundsInLocal());
+                suggestionPopup.show(searchField, bounds.getMinX(), bounds.getMaxY());
+            } else {
+                suggestionPopup.hide();
+            }
+        });
+
+        suggestionList.setOnMouseClicked(e -> {
+            if (!suggestionList.getSelectionModel().isEmpty()) {
+                String selected = suggestionList.getSelectionModel().getSelectedItem();
+                searchField.setText(selected);
+                suggestionPopup.hide();
+            }
+        });
+
+        searchField.focusedProperty().addListener((obs, wasFocused, isFocused) -> {
+            if (!isFocused) {
+                suggestionPopup.hide();
+            }
+        });
+    }
+
+    @FXML
+    private void onSearchIngredient() {
+        String searchText = searchField.getText().trim();
+        if (searchText.isEmpty()) {
+            loadInventory();
+            return;
+        }
+
+        List<Ingredient> results = ingredientDAO.findByName(searchText);
+
+        Platform.runLater(() -> {
+            if (!results.isEmpty()) {
+                inventoryTable.setItems(FXCollections.observableArrayList(results));
+                inventoryTable.getSelectionModel().select(0);
+                inventoryTable.scrollTo(0);
+            }
+        });
     }
 
     private void setActiveNav(String navName) {
@@ -340,13 +438,13 @@ private void setupTableColumns() {
             int total = ingredientDAO.getTotalCount();
             int low = ingredientDAO.getLowStockCount();
             int out = ingredientDAO.getOutOfStockCount();
-            List<Ingredient> ingredients = ingredientDAO.findAll();
+            allIngredients = ingredientDAO.findAll();
 
             Platform.runLater(() -> {
                 lblTotal.setText(String.valueOf(total));
                 lblLowStock.setText(String.valueOf(low));
                 lblOutOfStock.setText(String.valueOf(out));
-                inventoryTable.setItems(FXCollections.observableArrayList(ingredients));
+                inventoryTable.setItems(FXCollections.observableArrayList(allIngredients));
             });
         } catch (Exception e) {
             System.err.println("Error loading inventory: " + e.getMessage());

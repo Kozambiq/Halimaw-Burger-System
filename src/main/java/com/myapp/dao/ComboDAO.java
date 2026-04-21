@@ -153,4 +153,46 @@ public class ComboDAO {
         }
         return 0.0;
     }
+
+    public List<String> searchByName(String query) {
+        List<String> items = new ArrayList<>();
+        String sql = "SELECT name FROM combos WHERE LOWER(name) LIKE LOWER(?) ORDER BY name LIMIT 10";
+        try (Connection conn = DatabaseConnection.getConnection();
+             PreparedStatement stmt = conn.prepareStatement(sql)) {
+            stmt.setString(1, "%" + query + "%");
+            try (ResultSet rs = stmt.executeQuery()) {
+                while (rs.next()) {
+                    items.add(rs.getString("name"));
+                }
+            }
+        } catch (SQLException e) {
+            System.err.println("Error searching combos: " + e.getMessage());
+        }
+        return items;
+    }
+
+    public List<Combo> findByName(String name) {
+        List<Combo> combos = new ArrayList<>();
+        String sql = "SELECT id, name, includes, promo_price, original_price, valid_until, status FROM combos WHERE LOWER(name) = LOWER(?)";
+        try (Connection conn = DatabaseConnection.getConnection();
+             PreparedStatement stmt = conn.prepareStatement(sql)) {
+            stmt.setString(1, name);
+            try (ResultSet rs = stmt.executeQuery()) {
+                while (rs.next()) {
+                    combos.add(new Combo(
+                        rs.getInt("id"),
+                        rs.getString("name"),
+                        rs.getString("includes"),
+                        rs.getDouble("promo_price"),
+                        rs.getDouble("original_price"),
+                        rs.getDate("valid_until") != null ? rs.getDate("valid_until").toLocalDate() : null,
+                        rs.getString("status")
+                    ));
+                }
+            }
+        } catch (SQLException e) {
+            System.err.println("Error finding combo by name: " + e.getMessage());
+        }
+        return combos;
+    }
 }

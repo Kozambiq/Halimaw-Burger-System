@@ -191,6 +191,48 @@ public class IngredientDAO {
         return false;
     }
 
+    public List<String> searchByName(String query) {
+        List<String> items = new ArrayList<>();
+        String sql = "SELECT name FROM ingredients WHERE LOWER(name) LIKE LOWER(?) ORDER BY name LIMIT 10";
+        try (Connection conn = DatabaseConnection.getConnection();
+             PreparedStatement stmt = conn.prepareStatement(sql)) {
+            stmt.setString(1, "%" + query + "%");
+            try (ResultSet rs = stmt.executeQuery()) {
+                while (rs.next()) {
+                    items.add(rs.getString("name"));
+                }
+            }
+        } catch (SQLException e) {
+            System.err.println("Error searching ingredients: " + e.getMessage());
+        }
+        return items;
+    }
+
+    public List<Ingredient> findByName(String name) {
+        List<Ingredient> ingredients = new ArrayList<>();
+        String sql = "SELECT id, name, unit, quantity, min_threshold, max_stock, status FROM ingredients WHERE LOWER(name) = LOWER(?)";
+        try (Connection conn = DatabaseConnection.getConnection();
+             PreparedStatement stmt = conn.prepareStatement(sql)) {
+            stmt.setString(1, name);
+            try (ResultSet rs = stmt.executeQuery()) {
+                while (rs.next()) {
+                    ingredients.add(new Ingredient(
+                        rs.getInt("id"),
+                        rs.getString("name"),
+                        rs.getString("unit"),
+                        rs.getDouble("quantity"),
+                        rs.getDouble("min_threshold"),
+                        rs.getDouble("max_stock"),
+                        rs.getString("status")
+                    ));
+                }
+            }
+        } catch (SQLException e) {
+            System.err.println("Error finding ingredient by name: " + e.getMessage());
+        }
+        return ingredients;
+    }
+
     public boolean insert(String name, String unit, double quantity, double minThreshold, double maxStock) {
         String sql = "INSERT INTO ingredients (name, unit, quantity, min_threshold, max_stock) VALUES (?, ?, ?, ?, ?)";
         try (Connection conn = DatabaseConnection.getConnection();
