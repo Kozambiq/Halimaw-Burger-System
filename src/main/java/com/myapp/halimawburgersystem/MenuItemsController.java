@@ -129,7 +129,9 @@ public class MenuItemsController {
                 Label pill = new Label(status);
                 pill.getStyleClass().add("status-pill");
 
-                if ("Available".equals(status)) {
+                if ("Unavailable".equals(status)) {
+                    pill.getStyleClass().add("pill-out");
+                } else if ("Available".equals(status)) {
                     pill.getStyleClass().add("pill-ok");
                 } else if ("Low Stock".equals(status)) {
                     pill.getStyleClass().add("pill-low");
@@ -165,13 +167,18 @@ public class MenuItemsController {
                 edit.setStyle("-fx-text-fill: #f5ede0; -fx-font-size: 13px; -fx-padding: 8 16 8 16;");
                 edit.setOnAction(e -> showEditPopup(menuItem));
 
-                MenuItem availability = new MenuItem("Availability");
-                availability.setStyle("-fx-text-fill: #f5ede0; -fx-font-size: 13px; -fx-padding: 8 16 8 16;");
-
-                MenuItem delete = new MenuItem("Delete");
-                delete.setStyle("-fx-text-fill: #e07070; -fx-font-size: 13px; -fx-padding: 8 16 8 16;");
-
-                menuBtn.getItems().addAll(edit, availability, delete);
+                String currentAvailability = menuItem.getAvailability();
+                if ("Unavailable".equals(currentAvailability)) {
+                    MenuItem enable = new MenuItem("Enable");
+                    enable.setStyle("-fx-text-fill: #4CAF50; -fx-font-size: 13px; -fx-padding: 8 16 8 16;");
+                    enable.setOnAction(e -> showEnableConfirmation(menuItem));
+                    menuBtn.getItems().addAll(edit, enable);
+                } else {
+                    MenuItem disable = new MenuItem("Disable");
+                    disable.setStyle("-fx-text-fill: #e07070; -fx-font-size: 13px; -fx-padding: 8 16 8 16;");
+                    disable.setOnAction(e -> showDisableConfirmation(menuItem));
+                    menuBtn.getItems().addAll(edit, disable);
+                }
 
                 setGraphic(menuBtn);
                 setText(null);
@@ -515,8 +522,114 @@ public class MenuItemsController {
         ingredientList.getChildren().add(row);
     }
 
+    private void showDisableConfirmation(MenuItemModel menuItem) {
+        Alert alert = new Alert(Alert.AlertType.CONFIRMATION);
+        alert.setTitle("Disable Menu Item");
+        alert.setHeaderText("Disable " + menuItem.getName() + "?");
+        alert.setContentText("This menu item will no longer be available for orders.");
+        alert.setGraphic(null);
+        alert.getDialogPane().setGraphic(null);
+        alert.getDialogPane().getStyleClass().add("dialog-pane");
+        alert.getDialogPane().setStyle("-fx-background-color: #2e2410; -fx-border-color: #4a3820; -fx-border-width: 1; -fx-border-radius: 12; -fx-background-radius: 12;");
+
+        alert.getDialogPane().applyCss();
+        alert.getDialogPane().layout();
+
+        javafx.scene.Node header = alert.getDialogPane().lookup(".header-panel");
+        if (header != null) {
+            header.setStyle("-fx-background-color: transparent;");
+        }
+
+        javafx.scene.control.Label headerText = (javafx.scene.control.Label) alert.getDialogPane().lookup(".header-panel .label");
+        if (headerText == null) {
+            javafx.scene.Node hdrPanel = alert.getDialogPane().lookup(".header-panel");
+            if (hdrPanel != null) {
+                for (javafx.scene.Node n : hdrPanel.lookupAll(".label")) {
+                    n.setStyle("-fx-text-fill: #e07070; -fx-font-size: 14px;");
+                }
+            }
+        } else {
+            headerText.setStyle("-fx-text-fill: #e07070; -fx-font-size: 14px;");
+        }
+
+        javafx.scene.Node content = alert.getDialogPane().lookup(".content");
+        if (content != null) {
+            content.setStyle("-fx-text-fill: #e07070; -fx-font-size: 13px;");
+        }
+
+        javafx.scene.control.ButtonType okType = new javafx.scene.control.ButtonType("Disable");
+        javafx.scene.control.ButtonType cancelType = new javafx.scene.control.ButtonType("Cancel");
+        alert.getDialogPane().getButtonTypes().setAll(okType, cancelType);
+
+        javafx.scene.control.Button okButton = (javafx.scene.control.Button) alert.getDialogPane().lookupButton(okType);
+        okButton.setStyle("-fx-background-color: #c8500a; -fx-text-fill: #f5ede0; -fx-border-radius: 6; -fx-padding: 8 16 8 16; -fx-font-size: 12px; -fx-font-weight: bold;");
+        okButton.setOnAction(e -> {
+            menuItemDAO.updateAvailability(menuItem.getId(), "Unavailable");
+            loadMenuItems();
+        });
+
+        javafx.scene.control.Button cancelButton = (javafx.scene.control.Button) alert.getDialogPane().lookupButton(cancelType);
+        cancelButton.setStyle("-fx-background-color: transparent; -fx-text-fill: #a09070; -fx-border-color: #4a3820; -fx-border-width: 1; -fx-border-radius: 6; -fx-padding: 8 16 8 16; -fx-font-size: 12px;");
+
+        alert.showAndWait();
+    }
+
+    private void showEnableConfirmation(MenuItemModel menuItem) {
+        Alert alert = new Alert(Alert.AlertType.CONFIRMATION);
+        alert.setTitle("Enable Menu Item");
+        alert.setHeaderText("Enable " + menuItem.getName() + "?");
+        alert.setContentText("This menu item will be available for orders.");
+        alert.setGraphic(null);
+        alert.getDialogPane().setGraphic(null);
+        alert.getDialogPane().getStyleClass().add("dialog-pane");
+        alert.getDialogPane().setStyle("-fx-background-color: #2e2410; -fx-border-color: #4a3820; -fx-border-width: 1; -fx-border-radius: 12; -fx-background-radius: 12;");
+
+        alert.getDialogPane().applyCss();
+        alert.getDialogPane().layout();
+
+        javafx.scene.Node header = alert.getDialogPane().lookup(".header-panel");
+        if (header != null) {
+            header.setStyle("-fx-background-color: transparent;");
+        }
+
+        javafx.scene.control.Label headerText = (javafx.scene.control.Label) alert.getDialogPane().lookup(".header-panel .label");
+        if (headerText == null) {
+            javafx.scene.Node hdrPanel = alert.getDialogPane().lookup(".header-panel");
+            if (hdrPanel != null) {
+                for (javafx.scene.Node n : hdrPanel.lookupAll(".label")) {
+                    n.setStyle("-fx-text-fill: #4CAF50; -fx-font-size: 14px;");
+                }
+            }
+        } else {
+            headerText.setStyle("-fx-text-fill: #4CAF50; -fx-font-size: 14px;");
+        }
+
+        javafx.scene.Node content = alert.getDialogPane().lookup(".content");
+        if (content != null) {
+            content.setStyle("-fx-text-fill: #f5ede0; -fx-font-size: 13px;");
+        }
+
+        javafx.scene.control.ButtonType okType = new javafx.scene.control.ButtonType("Enable");
+        javafx.scene.control.ButtonType cancelType = new javafx.scene.control.ButtonType("Cancel");
+        alert.getDialogPane().getButtonTypes().setAll(okType, cancelType);
+
+        javafx.scene.control.Button okButton = (javafx.scene.control.Button) alert.getDialogPane().lookupButton(okType);
+        okButton.setStyle("-fx-background-color: #4CAF50; -fx-text-fill: #f5ede0; -fx-border-radius: 6; -fx-padding: 8 16 8 16; -fx-font-size: 12px; -fx-font-weight: bold;");
+        okButton.setOnAction(e -> {
+            menuItemDAO.updateAvailability(menuItem.getId(), "Available");
+            loadMenuItems();
+        });
+
+        javafx.scene.control.Button cancelButton = (javafx.scene.control.Button) alert.getDialogPane().lookupButton(cancelType);
+        cancelButton.setStyle("-fx-background-color: transparent; -fx-text-fill: #a09070; -fx-border-color: #4a3820; -fx-border-width: 1; -fx-border-radius: 6; -fx-padding: 8 16 8 16; -fx-font-size: 12px;");
+
+        alert.showAndWait();
+    }
+
     private void loadMenuItems() {
         try {
+            menuItemDAO.syncAvailabilityToDatabase();
+            
             int total = menuItemDAO.getTotalCount();
             int available = menuItemDAO.getAvailableCount();
             int low = menuItemDAO.getLowStockCount();

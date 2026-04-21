@@ -36,25 +36,25 @@ public class MenuItemDAO {
 
     public List<MenuItemModel> findAllWithIngredientStatus() {
         List<MenuItemModel> menuItems = new ArrayList<>();
-        String sql = "SELECT mi.id, mi.name, mi.category, mi.price " +
-                     "FROM menu_items mi ORDER BY mi.name";
+        String sql = "SELECT mi.id, mi.name, mi.category, mi.price, mi.availability " +
+                     "FROM menu_items mi WHERE mi.availability != 'Unavailable' " +
+                     "UNION ALL " +
+                     "SELECT mi.id, mi.name, mi.category, mi.price, mi.availability " +
+                     "FROM menu_items mi WHERE mi.availability = 'Unavailable' " +
+                     "ORDER BY name";
 
         try (Connection conn = DatabaseConnection.getConnection();
              PreparedStatement stmt = conn.prepareStatement(sql);
              ResultSet rs = stmt.executeQuery()) {
 
             while (rs.next()) {
-                int menuItemId = rs.getInt("id");
-                String availability = calculateAvailability(conn, menuItemId);
-
-                MenuItemModel item = new MenuItemModel(
+                menuItems.add(new MenuItemModel(
                     rs.getInt("id"),
                     rs.getString("name"),
                     rs.getString("category"),
                     rs.getDouble("price"),
-                    availability
-                );
-                menuItems.add(item);
+                    rs.getString("availability")
+                ));
             }
         } catch (SQLException e) {
             System.err.println("Error fetching menu items: " + e.getMessage());
@@ -63,7 +63,7 @@ public class MenuItemDAO {
     }
 
     private String calculateAvailability(Connection conn, int menuItemId) {
-        String sql = "SELECT i.quantity, i.min_threshold, i.max_stock " +
+        String sql = "SELECT i.quantity, i.min_threshold, i.max_stock, i.status as ing_status " +
                      "FROM menu_item_ingredients mmi " +
                      "JOIN ingredients i ON mmi.ingredient_id = i.id " +
                      "WHERE mmi.menu_item_id = ?";
@@ -76,6 +76,11 @@ public class MenuItemDAO {
             boolean hasIngredients = false;
 
             while (rs.next()) {
+                String ingStatus = rs.getString("ing_status");
+                if ("Unavailable".equals(ingStatus)) {
+                    continue;
+                }
+
                 hasIngredients = true;
                 double quantity = rs.getDouble("quantity");
                 double minThreshold = rs.getDouble("min_threshold");
@@ -100,8 +105,32 @@ public class MenuItemDAO {
         }
     }
 
+    public void syncAvailabilityToDatabase() {
+        String selectSql = "SELECT mi.id FROM menu_items mi WHERE mi.availability != 'Unavailable'";
+        String updateSql = "UPDATE menu_items SET availability = ? WHERE id = ?";
+
+        try (Connection conn = DatabaseConnection.getConnection()) {
+            try (PreparedStatement selectStmt = conn.prepareStatement(selectSql);
+                 PreparedStatement updateStmt = conn.prepareStatement(updateSql)) {
+
+                ResultSet rs = selectStmt.executeQuery();
+                while (rs.next()) {
+                    int menuItemId = rs.getInt("id");
+                    String availability = calculateAvailability(conn, menuItemId);
+                    updateStmt.setString(1, availability);
+                    updateStmt.setInt(2, menuItemId);
+                    updateStmt.addBatch();
+                }
+                updateStmt.executeBatch();
+                conn.commit();
+            }
+        } catch (SQLException e) {
+            System.err.println("Error syncing availability: " + e.getMessage());
+        }
+    }
+
     public int getTotalCount() {
-        String sql = "SELECT COUNT(*) FROM menu_items WHERE availability != 'Hidden'";
+        String sql = "SELECT COUNT(*) FROM menu_items WHERE availability != 'Unavailable'";
         return countQuery(sql);
     }
 
@@ -290,6 +319,19 @@ public class MenuItemDAO {
             return true;
         } catch (SQLException e) {
             System.err.println("Error updating menu item ingredients: " + e.getMessage());
+        }
+        return false;
+    }
+
+    public boolean updateAvailability(int id, String availability) {
+        String sql = "UPDATE menu_items SET availability = ? WHERE id = ?";
+        try (Connection conn = DatabaseConnection.getConnection();
+             PreparedStatement stmt = conn.prepareStatement(sql)) {
+            stmt.setString(1, availability);
+            stmt.setInt(2, id);
+            return stmt.executeUpdate() > 0;
+        } catch (SQLException e) {
+            System.err.println("Error updating availability: " + e.getMessage());
         }
         return false;
     }

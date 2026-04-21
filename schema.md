@@ -44,7 +44,7 @@ CREATE TABLE IF NOT EXISTS menu_items (
     name         VARCHAR(100)   NOT NULL,
     category     ENUM('Burgers','Chicken','Sides','Drinks','Others') NOT NULL,
     price        DECIMAL(10,2)  NOT NULL,
-    availability ENUM('Available','Low Stock','Hidden') NOT NULL DEFAULT 'Available',
+    availability ENUM('Available','Low Stock','Out of Stock','Unavailable') NOT NULL DEFAULT 'Available',
     created_at   DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
     updated_at   DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
 );
