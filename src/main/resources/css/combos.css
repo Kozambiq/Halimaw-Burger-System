@@ -2,26 +2,26 @@
     Menu Items Tab Styles
     ============================================================ */
 
-/* ── Menu Items Table ─────────────────────────────────── */
-.menu-items-table {
+/* ── Combos Table ─────────────────────────────────── */
+.combos-table {
     -fx-background-color: transparent;
     -fx-border-width: 0;
     -fx-background: transparent;
 }
 
-.menu-items-table .table-view {
+.combos-table .table-view {
     -fx-background-color: transparent;
 }
 
-.menu-items-table .column-header-background {
+.combos-table .column-header-background {
     -fx-background-color: #221a0e;
 }
 
-.menu-items-table .filler {
+.combos-table .filler {
     -fx-background-color: #221a0e;
 }
 
-.menu-items-table .column-header {
+.combos-table .column-header {
     -fx-background-color: #221a0e;
     -fx-background: #221a0e;
     -fx-text-fill: #8a7055;
@@ -30,24 +30,24 @@
     -fx-letter-spacing: 0.08em;
 }
 
-.menu-items-table .table-cell {
+.combos-table .table-cell {
     -fx-background-color: transparent;
     -fx-text-fill: #c4a882;
     -fx-font-size: 13px;
     -fx-border-width: 0;
 }
 
-.menu-items-table .table-row-cell {
+.combos-table .table-row-cell {
     -fx-background-color: transparent;
     -fx-border-color: #4a3820;
     -fx-border-width: 0 0 1 0;
 }
 
-.menu-items-table .table-row-cell:odd {
+.combos-table .table-row-cell:odd {
     -fx-background-color: transparent;
 }
 
-.menu-items-table .table-row-cell:hover {
+.combos-table .table-row-cell:hover {
     -fx-background-color: #3d2e1a;
 }
 

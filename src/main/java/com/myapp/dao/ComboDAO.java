@@ -120,4 +120,20 @@ public class ComboDAO {
         }
         return items;
     }
+
+    public double getMenuItemPrice(String name) {
+        String sql = "SELECT price FROM menu_items WHERE name = ?";
+        try (Connection conn = DatabaseConnection.getConnection();
+             PreparedStatement stmt = conn.prepareStatement(sql)) {
+            stmt.setString(1, name);
+            try (ResultSet rs = stmt.executeQuery()) {
+                if (rs.next()) {
+                    return rs.getDouble("price");
+                }
+            }
+        } catch (SQLException e) {
+            System.err.println("Error getting menu item price: " + e.getMessage());
+        }
+        return 0.0;
+    }
 }
