@@ -74,6 +74,11 @@
     -fx-text-fill: #e07070;
 }
 
+.pill-disabled {
+    -fx-background-color: rgba(92, 72, 40, 0.15);
+    -fx-text-fill: #c49050;
+}
+
 /* ── MenuButton Dots ─────────────────────────────────────── */
 .menu-btn-dots {
     -fx-background-color: #2e2410;

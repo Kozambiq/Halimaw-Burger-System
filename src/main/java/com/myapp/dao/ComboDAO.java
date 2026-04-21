@@ -92,6 +92,23 @@ public class ComboDAO {
         return false;
     }
 
+    public boolean update(int id, String name, String includes, double promoPrice, double originalPrice, Date validUntil) {
+        String sql = "UPDATE combos SET name = ?, includes = ?, promo_price = ?, original_price = ?, valid_until = ? WHERE id = ?";
+        try (Connection conn = DatabaseConnection.getConnection();
+             PreparedStatement stmt = conn.prepareStatement(sql)) {
+            stmt.setString(1, name);
+            stmt.setString(2, includes);
+            stmt.setDouble(3, promoPrice);
+            stmt.setDouble(4, originalPrice);
+            stmt.setDate(5, validUntil);
+            stmt.setInt(6, id);
+            return stmt.executeUpdate() > 0;
+        } catch (SQLException e) {
+            System.err.println("Error updating combo: " + e.getMessage());
+        }
+        return false;
+    }
+
     public boolean delete(int id) {
         String sql = "DELETE FROM combos WHERE id = ?";
         try (Connection conn = DatabaseConnection.getConnection();
