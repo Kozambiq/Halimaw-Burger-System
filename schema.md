@@ -10,6 +10,7 @@ USE burgerhq;
 ### Migration (for existing databases)
 ```sql
 ALTER TABLE ingredients ADD COLUMN max_stock DECIMAL(10,2) NOT NULL DEFAULT 0 AFTER min_threshold;
+ALTER TABLE ingredients ADD COLUMN status ENUM('Available','Unavailable') NOT NULL DEFAULT 'Available' AFTER max_stock;
 ```
 
 ## Tables

@@ -14,7 +14,7 @@ public class IngredientDAO {
 
     public List<Ingredient> findAll() {
         List<Ingredient> ingredients = new ArrayList<>();
-        String sql = "SELECT id, name, unit, quantity, min_threshold, max_stock FROM ingredients ORDER BY id";
+        String sql = "SELECT id, name, unit, quantity, min_threshold, max_stock, status FROM ingredients ORDER BY id";
 
         try (Connection conn = DatabaseConnection.getConnection();
              PreparedStatement stmt = conn.prepareStatement(sql);
@@ -27,7 +27,8 @@ public class IngredientDAO {
                     rs.getString("unit"),
                     rs.getDouble("quantity"),
                     rs.getDouble("min_threshold"),
-                    rs.getDouble("max_stock")
+                    rs.getDouble("max_stock"),
+                    rs.getString("status")
                 ));
             }
         } catch (SQLException e) {
@@ -35,6 +36,19 @@ public class IngredientDAO {
         }
 
         return ingredients;
+    }
+
+    public boolean updateAvailabilityStatus(int id, String status) {
+        String sql = "UPDATE ingredients SET status = ? WHERE id = ?";
+        try (Connection conn = DatabaseConnection.getConnection();
+             PreparedStatement stmt = conn.prepareStatement(sql)) {
+            stmt.setString(1, status);
+            stmt.setInt(2, id);
+            return stmt.executeUpdate() > 0;
+        } catch (SQLException e) {
+            System.err.println("Error updating availability status: " + e.getMessage());
+        }
+        return false;
     }
 
     public int getTotalCount() {

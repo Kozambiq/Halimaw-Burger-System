@@ -193,7 +193,13 @@ private void setupTableColumns() {
         
         inventoryTable.setColumnResizePolicy(TableView.CONSTRAINED_RESIZE_POLICY);
         
-        colStatus.setCellValueFactory(new PropertyValueFactory<>("status"));
+        colStatus.setCellValueFactory(cellData -> {
+            String availabilityStatus = cellData.getValue().getAvailabilityStatus();
+            if ("Unavailable".equals(availabilityStatus)) {
+                return new javafx.beans.property.SimpleStringProperty("Unavailable");
+            }
+            return new javafx.beans.property.SimpleStringProperty(cellData.getValue().getStatus());
+        });
         
         colStatus.setCellFactory(col -> new TableCell<Ingredient, String>() {
             @Override
@@ -208,7 +214,9 @@ private void setupTableColumns() {
                 Label pill = new Label(status);
                 pill.getStyleClass().add("status-pill");
 
-                if ("OK".equals(status)) {
+                if ("Unavailable".equals(status)) {
+                    pill.getStyleClass().add("pill-out");
+                } else if ("OK".equals(status)) {
                     pill.getStyleClass().add("pill-ok");
                 } else if ("Low".equals(status)) {
                     pill.getStyleClass().add("pill-low");
@@ -258,11 +266,18 @@ private void setupTableColumns() {
                 editThreshold.setStyle("-fx-text-fill: #f5ede0; -fx-font-size: 13px; -fx-padding: 8 16 8 16;");
                 editThreshold.setOnAction(e -> showEditThresholdDialog(ingredient));
 
-                MenuItem delete = new MenuItem("Delete");
-                delete.setStyle("-fx-text-fill: #e07070; -fx-font-size: 13px; -fx-padding: 8 16 8 16;");
-                delete.setOnAction(e -> showDeleteConfirmation(ingredient));
-
-                menuBtn.getItems().addAll(addStock, reduceStock, editThreshold, delete);
+                String availabilityStatus = ingredient.getAvailabilityStatus();
+                if ("Unavailable".equals(availabilityStatus)) {
+                    MenuItem enable = new MenuItem("Enable");
+                    enable.setStyle("-fx-text-fill: #4CAF50; -fx-font-size: 13px; -fx-padding: 8 16 8 16;");
+                    enable.setOnAction(e -> showEnableConfirmation(ingredient));
+                    menuBtn.getItems().addAll(addStock, reduceStock, editThreshold, enable);
+                } else {
+                    MenuItem disable = new MenuItem("Disable");
+                    disable.setStyle("-fx-text-fill: #e07070; -fx-font-size: 13px; -fx-padding: 8 16 8 16;");
+                    disable.setOnAction(e -> showDisableConfirmation(ingredient));
+                    menuBtn.getItems().addAll(addStock, reduceStock, editThreshold, disable);
+                }
 
                 setGraphic(menuBtn);
                 setText(null);
@@ -723,11 +738,11 @@ private void setupTableColumns() {
         }
     }
 
-    private void showDeleteConfirmation(Ingredient ingredient) {
+    private void showDisableConfirmation(Ingredient ingredient) {
         Alert alert = new Alert(Alert.AlertType.CONFIRMATION);
-        alert.setTitle("Delete Ingredient");
-        alert.setHeaderText("Delete " + ingredient.getName() + "?");
-        alert.setContentText("This action cannot be undone.");
+        alert.setTitle("Disable Ingredient");
+        alert.setHeaderText("Disable " + ingredient.getName() + "?");
+        alert.setContentText("This ingredient will no longer be available for menu items.");
         alert.setGraphic(null);
         alert.getDialogPane().setGraphic(null);
         alert.getDialogPane().getStyleClass().add("dialog-pane");
@@ -758,14 +773,66 @@ private void setupTableColumns() {
             content.setStyle("-fx-text-fill: #e07070; -fx-font-size: 13px;");
         }
 
-        javafx.scene.control.ButtonType okType = new javafx.scene.control.ButtonType("Delete");
+        javafx.scene.control.ButtonType okType = new javafx.scene.control.ButtonType("Disable");
         javafx.scene.control.ButtonType cancelType = new javafx.scene.control.ButtonType("Cancel");
         alert.getDialogPane().getButtonTypes().setAll(okType, cancelType);
 
         javafx.scene.control.Button okButton = (javafx.scene.control.Button) alert.getDialogPane().lookupButton(okType);
         okButton.setStyle("-fx-background-color: #c8500a; -fx-text-fill: #f5ede0; -fx-border-radius: 6; -fx-padding: 8 16 8 16; -fx-font-size: 12px; -fx-font-weight: bold;");
         okButton.setOnAction(e -> {
-            ingredientDAO.delete(ingredient.getId());
+            ingredientDAO.updateAvailabilityStatus(ingredient.getId(), "Unavailable");
+            loadInventory();
+        });
+
+        javafx.scene.control.Button cancelButton = (javafx.scene.control.Button) alert.getDialogPane().lookupButton(cancelType);
+        cancelButton.setStyle("-fx-background-color: transparent; -fx-text-fill: #a09070; -fx-border-color: #4a3820; -fx-border-width: 1; -fx-border-radius: 6; -fx-padding: 8 16 8 16; -fx-font-size: 12px;");
+
+        alert.showAndWait();
+    }
+
+    private void showEnableConfirmation(Ingredient ingredient) {
+        Alert alert = new Alert(Alert.AlertType.CONFIRMATION);
+        alert.setTitle("Enable Ingredient");
+        alert.setHeaderText("Enable " + ingredient.getName() + "?");
+        alert.setContentText("This ingredient will be available for menu items.");
+        alert.setGraphic(null);
+        alert.getDialogPane().setGraphic(null);
+        alert.getDialogPane().getStyleClass().add("dialog-pane");
+        alert.getDialogPane().setStyle("-fx-background-color: #2e2410; -fx-border-color: #4a3820; -fx-border-width: 1; -fx-border-radius: 12; -fx-background-radius: 12;");
+
+        alert.getDialogPane().applyCss();
+        alert.getDialogPane().layout();
+
+        javafx.scene.Node header = alert.getDialogPane().lookup(".header-panel");
+        if (header != null) {
+            header.setStyle("-fx-background-color: transparent;");
+        }
+
+        javafx.scene.control.Label headerText = (javafx.scene.control.Label) alert.getDialogPane().lookup(".header-panel .label");
+        if (headerText == null) {
+            javafx.scene.Node hdrPanel = alert.getDialogPane().lookup(".header-panel");
+            if (hdrPanel != null) {
+                for (javafx.scene.Node n : hdrPanel.lookupAll(".label")) {
+                    n.setStyle("-fx-text-fill: #4CAF50; -fx-font-size: 14px;");
+                }
+            }
+        } else {
+            headerText.setStyle("-fx-text-fill: #4CAF50; -fx-font-size: 14px;");
+        }
+
+        javafx.scene.Node content = alert.getDialogPane().lookup(".content");
+        if (content != null) {
+            content.setStyle("-fx-text-fill: #f5ede0; -fx-font-size: 13px;");
+        }
+
+        javafx.scene.control.ButtonType okType = new javafx.scene.control.ButtonType("Enable");
+        javafx.scene.control.ButtonType cancelType = new javafx.scene.control.ButtonType("Cancel");
+        alert.getDialogPane().getButtonTypes().setAll(okType, cancelType);
+
+        javafx.scene.control.Button okButton = (javafx.scene.control.Button) alert.getDialogPane().lookupButton(okType);
+        okButton.setStyle("-fx-background-color: #4CAF50; -fx-text-fill: #f5ede0; -fx-border-radius: 6; -fx-padding: 8 16 8 16; -fx-font-size: 12px; -fx-font-weight: bold;");
+        okButton.setOnAction(e -> {
+            ingredientDAO.updateAvailabilityStatus(ingredient.getId(), "Available");
             loadInventory();
         });
 
