@@ -78,6 +78,18 @@ CREATE TABLE IF NOT EXISTS restock_logs (
     FOREIGN KEY (ingredient_id) REFERENCES ingredients(id),
     FOREIGN KEY (restocked_by)  REFERENCES staff(id)
 );
+
+CREATE TABLE IF NOT EXISTS combos (
+    id            INT AUTO_INCREMENT PRIMARY KEY,
+    name          VARCHAR(100)  NOT NULL,
+    includes      VARCHAR(500)  NOT NULL,
+    promo_price   DECIMAL(10,2) NOT NULL,
+    original_price DECIMAL(10,2) NOT NULL,
+    valid_until   DATE,
+    status        ENUM('Active','Scheduled','Expired') NOT NULL DEFAULT 'Active',
+    created_at    DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    updated_at    DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
+);
 ```
 
 ## Seed Data

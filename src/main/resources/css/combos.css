@@ -1,0 +1,273 @@
+/* ============================================================
+    Menu Items Tab Styles
+    ============================================================ */
+
+/* ── Menu Items Table ─────────────────────────────────── */
+.menu-items-table {
+    -fx-background-color: transparent;
+    -fx-border-width: 0;
+    -fx-background: transparent;
+}
+
+.menu-items-table .table-view {
+    -fx-background-color: transparent;
+}
+
+.menu-items-table .column-header-background {
+    -fx-background-color: #221a0e;
+}
+
+.menu-items-table .filler {
+    -fx-background-color: #221a0e;
+}
+
+.menu-items-table .column-header {
+    -fx-background-color: #221a0e;
+    -fx-background: #221a0e;
+    -fx-text-fill: #8a7055;
+    -fx-font-size: 11px;
+    -fx-font-weight: bold;
+    -fx-letter-spacing: 0.08em;
+}
+
+.menu-items-table .table-cell {
+    -fx-background-color: transparent;
+    -fx-text-fill: #c4a882;
+    -fx-font-size: 13px;
+    -fx-border-width: 0;
+}
+
+.menu-items-table .table-row-cell {
+    -fx-background-color: transparent;
+    -fx-border-color: #4a3820;
+    -fx-border-width: 0 0 1 0;
+}
+
+.menu-items-table .table-row-cell:odd {
+    -fx-background-color: transparent;
+}
+
+.menu-items-table .table-row-cell:hover {
+    -fx-background-color: #3d2e1a;
+}
+
+/* ── Status Pills ───────────────────────────────────────── */
+.status-pill {
+    -fx-padding: 3 12 3 12;
+    -fx-background-radius: 20;
+    -fx-font-size: 11px;
+    -fx-font-weight: bold;
+}
+
+.pill-ok {
+    -fx-background-color: rgba(74, 140, 63, 0.15);
+    -fx-text-fill: #7ec470;
+}
+
+.pill-low {
+    -fx-background-color: rgba(176, 122, 24, 0.15);
+    -fx-text-fill: #e8b84b;
+}
+
+.pill-out {
+    -fx-background-color: rgba(140, 48, 48, 0.15);
+    -fx-text-fill: #e07070;
+}
+
+/* ── MenuButton Dots ─────────────────────────────────────── */
+.menu-btn-dots {
+    -fx-background-color: #2e2410;
+    -fx-text-fill: #f5ede0;
+    -fx-font-size: 13px;
+    -fx-font-weight: bold;
+    -fx-padding: 4 10 4 10;
+    -fx-cursor: hand;
+    -fx-border-color: #4a3820;
+    -fx-border-width: 1;
+    -fx-border-radius: 4;
+    -fx-background-radius: 4;
+}
+
+.menu-btn-dots:hover {
+    -fx-background-color: #3a2e18;
+    -fx-text-fill: #f5ede0;
+    -fx-border-color: #5c4828;
+}
+
+.menu-btn-dots:focused {
+    -fx-border-color: #c8500a;
+}
+
+.menu-btn-dots .arrow {
+    -fx-background-color: #f5ede0;
+}
+
+/* ── MenuButton Dropdown / ContextMenu ─────────────────── */
+.menu-btn-dots .context-menu {
+    -fx-background-color: #2e2410;
+    -fx-border-color: #4a3820;
+    -fx-border-width: 1;
+    -fx-border-radius: 6;
+    -fx-background-radius: 6;
+    -fx-padding: 4 0 4 0;
+}
+
+.menu-btn-dots .context-menu .menu-item {
+    -fx-background-color: transparent;
+    -fx-text-fill: #f5ede0;
+    -fx-font-size: 13px;
+    -fx-padding: 8 16 8 16;
+    -fx-cursor: hand;
+}
+
+.menu-btn-dots .context-menu .menu-item:hover {
+    -fx-background-color: #4a3820;
+    -fx-text-fill: #f5ede0;
+}
+
+.menu-btn-dots .context-menu .menu-item:pressed {
+    -fx-background-color: #5c4828;
+    -fx-text-fill: #f5ede0;
+}
+
+.menu-btn-dots .context-menu .menu-item:focused {
+    -fx-background-color: #4a3820;
+    -fx-text-fill: #f5ede0;
+}
+
+/* ── Autocomplete Suggestion List ───────────────────────── */
+.suggestion-list {
+    -fx-background-color: #2e2410;
+    -fx-border-color: #4a3820;
+    -fx-border-width: 1;
+    -fx-border-radius: 6;
+    -fx-background-radius: 6;
+    -fx-padding: 4 0 4 0;
+}
+
+.suggestion-list .list-cell {
+    -fx-background-color: transparent;
+    -fx-text-fill: #f5ede0;
+    -fx-font-size: 13px;
+    -fx-padding: 8 16 8 16;
+    -fx-cursor: hand;
+}
+
+.suggestion-list .list-cell:hover {
+    -fx-background-color: #4a3820;
+    -fx-text-fill: #f5ede0;
+}
+
+.suggestion-list .list-cell:selected {
+    -fx-background-color: #5c4828;
+    -fx-text-fill: #f5ede0;
+}
+
+/* ── ComboBox (Category Dropdown) ───────────────────────── */
+.dialog-pane .combo-box {
+    -fx-background-color: #221a0e;
+    -fx-border-color: #4a3820;
+    -fx-border-width: 1;
+    -fx-border-radius: 6;
+    -fx-background-radius: 6;
+}
+
+.dialog-pane .combo-box .text-field {
+    -fx-background-color: #221a0e;
+    -fx-text-fill: white;
+}
+
+.dialog-pane .combo-box .text {
+    -fx-fill: white;
+}
+
+.dialog-pane .combo-box .button {
+    -fx-background-color: #221a0e;
+}
+
+.dialog-pane .combo-box .arrow {
+    -fx-background-color: #f5ede0;
+}
+
+.dialog-pane .combo-box .list-cell {
+    -fx-background-color: #221a0e;
+    -fx-text-fill: white;
+    -fx-padding: 8 12 8 12;
+}
+
+.dialog-pane .combo-box .list-cell:hover {
+    -fx-background-color: #3d2e1a;
+}
+
+.dialog-pane .combo-box-popup .list-view {
+    -fx-background-color: #2e2410;
+    -fx-border-color: #4a3820;
+    -fx-border-width: 1;
+    -fx-border-radius: 6;
+    -fx-background-radius: 6;
+}
+
+.dialog-pane .combo-box-popup .list-view .list-cell {
+    -fx-background-color: transparent;
+    -fx-text-fill: #f5ede0;
+    -fx-font-size: 13px;
+    -fx-padding: 6 12 6 12;
+    -fx-cursor: hand;
+}
+
+.dialog-pane .combo-box-popup .list-view .list-cell:hover {
+    -fx-background-color: #4a3820;
+    -fx-text-fill: #f5ede0;
+}
+
+.dialog-pane .combo-box-popup .list-view .list-cell:selected {
+    -fx-background-color: #5c4828;
+    -fx-text-fill: #f5ede0;
+}
+
+.dialog-pane .combo-box-popup .list-view .list-cell:selected {
+    -fx-background-color: #5c4828;
+}
+
+/* ── Scrollbar ───────────────────────────────────────────── */
+.scroll-bar {
+    -fx-background-color: #221a0e;
+}
+
+.scroll-bar:vertical {
+    -fx-pref-width: 8;
+}
+
+.scroll-bar:horizontal {
+    -fx-pref-height: 8;
+}
+
+.scroll-bar .track {
+    -fx-background-color: #221a0e;
+    -fx-background-radius: 4;
+}
+
+.scroll-bar .track-background {
+    -fx-background-color: #221a0e;
+}
+
+.scroll-bar .thumb {
+    -fx-background-color: #4a3820;
+    -fx-background-radius: 4;
+}
+
+.scroll-bar .thumb:hover {
+    -fx-background-color: #5c4828;
+}
+
+.scroll-bar .thumb:pressed {
+    -fx-background-color: #c8500a;
+}
+
+.scroll-bar .increment-button,
+.scroll-bar .decrement-button {
+    -fx-background-color: transparent;
+    -fx-pref-width: 0;
+    -fx-pref-height: 0;
+    -fx-opacity: 0;
+}

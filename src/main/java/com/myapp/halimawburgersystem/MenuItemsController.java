@@ -687,7 +687,11 @@ public class MenuItemsController {
 
     @FXML
     private void onNavigateCombos() {
-        System.out.println("Combos & Promos - Coming soon");
+        try {
+            Main.showCombos();
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
     }
 
     @FXML

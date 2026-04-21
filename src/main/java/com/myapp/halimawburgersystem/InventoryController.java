@@ -1116,11 +1116,11 @@ private void setupTableColumns() {
 
     @FXML
     private void onNavigateCombos() {
-        Alert alert = new Alert(Alert.AlertType.INFORMATION);
-        alert.setTitle("Combos & Promos");
-        alert.setHeaderText(null);
-        alert.setContentText("Coming soon!");
-        alert.showAndWait();
+        try {
+            Main.showCombos();
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
     }
 
     @FXML

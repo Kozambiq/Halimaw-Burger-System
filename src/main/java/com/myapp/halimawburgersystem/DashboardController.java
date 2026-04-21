@@ -49,6 +49,12 @@ public class DashboardController {
             } catch (Exception e) {
                 e.printStackTrace();
             }
+        } else if (text.contains("Combos")) {
+            try {
+                Main.showCombos();
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
         }
     }
 

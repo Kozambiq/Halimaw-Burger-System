@@ -15,8 +15,10 @@ public class Main extends Application {
     private static Parent dashboardRoot;
     private static Parent inventoryRoot;
     private static Parent menuItemsRoot;
+    private static Parent combosRoot;
     private static DashboardController dashboardController;
     private static MenuItemsController menuItemsController;
+    private static CombosController combosController;
 
     @Override
     public void start(Stage stage) throws Exception {
@@ -90,7 +92,7 @@ public class Main extends Application {
     }
     
     public static void showMenuItems() throws Exception {
-        clearInventoryCache();
+        clearCombosCache();
 
         if (menuItemsRoot == null) {
             FXMLLoader fxmlLoader = new FXMLLoader(Main.class.getResource("/fxml/menuitems.fxml"));
@@ -113,12 +115,40 @@ public class Main extends Application {
         }
     }
 
+    public static void showCombos() throws Exception {
+        clearMenuItemsCache();
+
+        if (combosRoot == null) {
+            FXMLLoader fxmlLoader = new FXMLLoader(Main.class.getResource("/fxml/combos.fxml"));
+            combosRoot = fxmlLoader.load();
+            combosController = fxmlLoader.getController();
+        }
+
+        if (cachedScene == null) {
+            cachedScene = new Scene(combosRoot, 1280, 800);
+            mainStage.setScene(cachedScene);
+        } else {
+            cachedScene.setRoot(combosRoot);
+        }
+
+        mainStage.setTitle("BurgerHQ - Combos & Promos");
+        mainStage.show();
+
+        if (combosController != null) {
+            combosController.setActiveNav("Combos & Promos");
+        }
+    }
+
     public static void clearInventoryCache() {
         inventoryRoot = null;
     }
 
     public static void clearMenuItemsCache() {
         menuItemsRoot = null;
+    }
+
+    public static void clearCombosCache() {
+        combosRoot = null;
     }
 
     @Override
