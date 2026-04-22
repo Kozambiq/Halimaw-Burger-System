@@ -14,7 +14,9 @@ import java.util.Optional;
 public class UserDAO {
 
     public Optional<User> authenticate(String email, String password) {
-        String sql = "SELECT id, staff_id, email, password_hash, role, is_active FROM users WHERE email = ? AND is_active = 1";
+        String sql = "SELECT u.id, u.staff_id, u.email, u.password_hash, u.role, u.is_active " +
+                     "FROM users u JOIN staff s ON u.staff_id = s.id " +
+                     "WHERE u.email = ? AND u.is_active = 1 AND s.status != 'Disabled'";
         
         try (Connection conn = DatabaseConnection.getConnection();
              PreparedStatement stmt = conn.prepareStatement(sql)) {
@@ -120,6 +122,43 @@ public class UserDAO {
         return password.equals(storedHash);
     }
 
+    public Optional<String> findPasswordHashByStaffId(int staffId) {
+        String sql = "SELECT password_hash FROM users WHERE staff_id = ?";
+        
+        try (Connection conn = DatabaseConnection.getConnection();
+             PreparedStatement stmt = conn.prepareStatement(sql)) {
+            
+            stmt.setInt(1, staffId);
+            
+            try (ResultSet rs = stmt.executeQuery()) {
+                if (rs.next()) {
+                    return Optional.of(rs.getString("password_hash"));
+                }
+            }
+        } catch (SQLException e) {
+            System.err.println("Error finding password hash: " + e.getMessage());
+        }
+        
+        return Optional.empty();
+    }
+    
+    public boolean updatePasswordByStaffId(int staffId, String newPassword) {
+        String sql = "UPDATE users SET password_hash = ? WHERE staff_id = ?";
+        
+        try (Connection conn = DatabaseConnection.getConnection();
+             PreparedStatement stmt = conn.prepareStatement(sql)) {
+            
+            stmt.setString(1, BCrypt.hashpw(newPassword, BCrypt.gensalt()));
+            stmt.setInt(2, staffId);
+            
+            return stmt.executeUpdate() > 0;
+        } catch (SQLException e) {
+            System.err.println("Error updating password: " + e.getMessage());
+        }
+        
+        return false;
+    }
+    
     private void updateLastLogin(int userId) {
         String sql = "UPDATE users SET last_login = NOW() WHERE id = ?";
         

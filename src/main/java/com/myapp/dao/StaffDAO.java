@@ -67,6 +67,32 @@ public class StaffDAO {
         return false;
     }
 
+    public boolean updateName(int id, String name) {
+        String sql = "UPDATE staff SET name = ? WHERE id = ?";
+        try (Connection conn = DatabaseConnection.getConnection();
+             PreparedStatement stmt = conn.prepareStatement(sql)) {
+            stmt.setString(1, name);
+            stmt.setInt(2, id);
+            return stmt.executeUpdate() > 0;
+        } catch (SQLException e) {
+            System.err.println("Error updating name: " + e.getMessage());
+        }
+        return false;
+    }
+
+    public boolean updateEmail(int id, String email) {
+        String sql = "UPDATE staff SET email = ? WHERE id = ?";
+        try (Connection conn = DatabaseConnection.getConnection();
+             PreparedStatement stmt = conn.prepareStatement(sql)) {
+            stmt.setString(1, email);
+            stmt.setInt(2, id);
+            return stmt.executeUpdate() > 0;
+        } catch (SQLException e) {
+            System.err.println("Error updating email: " + e.getMessage());
+        }
+        return false;
+    }
+
     public boolean updateRole(int id, String role) {
         String sql = "UPDATE staff SET role = ? WHERE id = ?";
         try (Connection conn = DatabaseConnection.getConnection();

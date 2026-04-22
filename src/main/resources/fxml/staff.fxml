@@ -151,6 +151,7 @@
                         <columns>
                             <TableColumn text="" fx:id="colAvatar" prefWidth="50"/>
                             <TableColumn text="NAME" fx:id="colName" prefWidth="1" minWidth="160"/>
+                            <TableColumn text="EMAIL" fx:id="colEmail" prefWidth="1" minWidth="180"/>
                             <TableColumn text="ROLE" fx:id="colRole" prefWidth="1" minWidth="120"/>
                             <TableColumn text="SHIFT HOURS" fx:id="colShiftHours" prefWidth="1" minWidth="120"/>
                             <TableColumn text="STATUS" fx:id="colStatus" prefWidth="1" minWidth="100"/>

@@ -1,6 +1,7 @@
 package com.myapp.halimawburgersystem;
 
 import com.myapp.dao.StaffDAO;
+import com.myapp.dao.UserDAO;
 import com.myapp.model.Staff;
 import javafx.application.Platform;
 import javafx.collections.FXCollections;
@@ -25,8 +26,10 @@ import javafx.scene.layout.BackgroundFill;
 import javafx.scene.layout.CornerRadii;
 import javafx.scene.layout.HBox;
 import javafx.scene.layout.Pane;
+import javafx.scene.layout.Priority;
 import javafx.scene.layout.Region;
 import javafx.scene.paint.Color;
+import javafx.scene.shape.SVGPath;
 
 import java.time.LocalTime;
 import java.util.List;
@@ -41,6 +44,7 @@ public class StaffController {
     @FXML private TableView<Staff> staffTable;
     @FXML private TableColumn<Staff, String> colAvatar;
     @FXML private TableColumn<Staff, String> colName;
+    @FXML private TableColumn<Staff, String> colEmail;
     @FXML private TableColumn<Staff, String> colRole;
     @FXML private TableColumn<Staff, String> colShiftHours;
     @FXML private TableColumn<Staff, String> colStatus;
@@ -71,6 +75,7 @@ public class StaffController {
 
     private void setupTableColumns() {
         colName.setCellValueFactory(new PropertyValueFactory<>("name"));
+        colEmail.setCellValueFactory(new PropertyValueFactory<>("email"));
         colRole.setCellValueFactory(new PropertyValueFactory<>("role"));
         colShiftHours.setCellValueFactory(new PropertyValueFactory<>("shiftHours"));
 
@@ -228,6 +233,56 @@ public class StaffController {
         nameLabel.setStyle(labelStyle);
         TextField nameField = new TextField(staff.getName());
         nameField.setStyle(fieldStyle);
+
+        Label emailLabel = new Label("Email:");
+        emailLabel.setStyle(labelStyle);
+        TextField emailField = new TextField(staff.getEmail());
+        emailField.setStyle(fieldStyle);
+
+        Label passwordLabel = new Label("Password:");
+        passwordLabel.setStyle(labelStyle);
+        HBox passwordBox = new HBox(4);
+        PasswordField passwordField = new PasswordField();
+        TextField passwordVisibleField = new TextField();
+        final UserDAO userDAO = new UserDAO();
+        String originalPassword = "";
+        if (userDAO.findPasswordHashByStaffId(staff.getId()).isPresent()) {
+            String hash = userDAO.findPasswordHashByStaffId(staff.getId()).get();
+            if (hash.startsWith("$2") && hash.length() == 60) {
+                originalPassword = "••••••••";
+            } else {
+                originalPassword = hash;
+            }
+        }
+        passwordField.setText(originalPassword);
+        passwordVisibleField.setText(originalPassword);
+        passwordField.setStyle(fieldStyle);
+        passwordVisibleField.setStyle(fieldStyle);
+        passwordVisibleField.setVisible(false);
+
+        final String finalOriginalPassword = originalPassword;
+
+        SVGPath eyeIcon = new SVGPath();
+        eyeIcon.setContent("M12 4.5C7 4.5 2.73 7.61 1 12c1.73 4.39 6 7.5 11 7.5s9.27-3.11 11-7.5c-1.73-4.39-6-7.5-11-7.5zM12 17c-2.76 0-5-2.24-5-5s2.24-5 5-5 5 2.24 5 5-2.24 5-5 5zm0-8c-1.66 0-3 1.34-3 3s1.34 3 3 3 3-1.34 3-3-1.34-3-3-3z");
+        eyeIcon.setFill(Color.web("#8a7055"));
+        eyeIcon.setStyle("-fx-cursor: hand;");
+        eyeIcon.setOnMouseClicked(e -> {
+            if (passwordVisibleField.isVisible()) {
+                passwordField.setText(passwordVisibleField.getText());
+                passwordField.setVisible(true);
+                passwordVisibleField.setVisible(false);
+                eyeIcon.setContent("M12 4.5C7 4.5 2.73 7.61 1 12c1.73 4.39 6 7.5 11 7.5s9.27-3.11 11-7.5c-1.73-4.39-6-7.5-11-7.5zM12 17c-2.76 0-5-2.24-5-5s2.24-5 5-5 5 2.24 5 5-2.24 5-5 5zm0-8c-1.66 0-3 1.34-3 3s1.34 3 3 3 3-1.34 3-3-1.34-3-3-3z");
+            } else {
+                passwordVisibleField.setText(passwordField.getText());
+                passwordVisibleField.setVisible(true);
+                passwordField.setVisible(false);
+                eyeIcon.setContent("M18 6.5L9.5 15 2 6.5l1.5 1.5 6 6-6 6 1.5 1.5 9.5-9.5-6-6zm-6 8.5c-2.76 0-5-2.24-5-5s2.24-5 5-5c.55 0 1.05.09 1.53.24l1.5-1.5c-.71-.28-1.47-.43-2.27-.43-2.76 0-5 2.24-5 5s2.24 5 5 5c.8 0 1.56-.15 2.27-.43l1.5-1.5c-.48-.15-.98-.24-1.53-.24z");
+            }
+        });
+
+        passwordBox.getChildren().addAll(passwordField, passwordVisibleField, eyeIcon);
+        HBox.setHgrow(passwordField, Priority.ALWAYS);
+        HBox.setHgrow(passwordVisibleField, Priority.ALWAYS);
 
         Label roleLabel = new Label("Role:");
         roleLabel.setStyle(labelStyle);
@@ -445,7 +500,7 @@ public class StaffController {
             endAmPm.setValue("PM");
         }
 
-        vbox.getChildren().addAll(nameLabel, nameField, roleLabel, roleChoice, startLabel, startBox, endLabel, endBox);
+        vbox.getChildren().addAll(nameLabel, nameField, emailLabel, emailField, passwordLabel, passwordBox, roleLabel, roleChoice, startLabel, startBox, endLabel, endBox);
         dialog.getDialogPane().setContent(vbox);
         dialog.getDialogPane().getButtonTypes().addAll(
             javafx.scene.control.ButtonType.CANCEL,
@@ -462,6 +517,8 @@ public class StaffController {
             if (btn == javafx.scene.control.ButtonType.OK) {
                 return new String[]{
                     nameField.getText(),
+                    emailField.getText(),
+                    passwordVisibleField.isVisible() ? passwordVisibleField.getText() : passwordField.getText(),
                     roleChoice.getValue(),
                     convertTo24Hour(startHour.getValue(), startMinute.getValue(), startAmPm.getValue()),
                     convertTo24Hour(endHour.getValue(), endMinute.getValue(), endAmPm.getValue())
@@ -471,13 +528,27 @@ public class StaffController {
         });
 
         dialog.showAndWait().ifPresent(result -> {
-            if (result != null && result.length == 4) {
+            if (result != null && result.length == 6) {
                 String name = result[0].trim();
-                String role = result[1];
-                String startTime = result[2];
-                String endTime = result[3];
+                String email = result[1].trim();
+                String password = result[2];
+                String role = result[3];
+                String startTime = result[4];
+                String endTime = result[5];
 
                 if (!name.isEmpty()) {
+                    staffDAO.updateName(staff.getId(), name);
+                    staff.setName(name);
+
+                    if (!email.isEmpty() && !email.equals(staff.getEmail())) {
+                        staffDAO.updateEmail(staff.getId(), email);
+                        staff.setEmail(email);
+                    }
+
+                    if (password != null && !password.equals(finalOriginalPassword) && !password.isEmpty() && !password.equals("••••••••")) {
+                        userDAO.updatePasswordByStaffId(staff.getId(), password);
+                    }
+
                     staffDAO.updateRole(staff.getId(), role);
                     staff.setRole(role);
 
