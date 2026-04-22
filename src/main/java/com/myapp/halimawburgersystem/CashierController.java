@@ -18,14 +18,17 @@ import javafx.scene.layout.ColumnConstraints;
 import javafx.scene.layout.CornerRadii;
 import javafx.scene.layout.GridPane;
 import javafx.scene.layout.HBox;
+import javafx.scene.layout.Priority;
 import javafx.scene.layout.Region;
 import javafx.scene.layout.StackPane;
 import javafx.scene.layout.VBox;
 import javafx.scene.paint.Color;
+import javafx.scene.shape.Line;
 import javafx.stage.Stage;
 import javafx.scene.Scene;
 import javafx.application.Platform;
 
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -104,6 +107,7 @@ public class CashierController {
     private void loadMenuItems() {
         try {
             allMenuItems = menuItemDAO.findAllWithIngredientStatus();
+            menuGrid.getChildren().clear();
             menuGrid.getColumnConstraints().clear();
 
             int columns = calculateColumns();
@@ -115,32 +119,66 @@ public class CashierController {
                 menuGrid.getColumnConstraints().add(col);
             }
 
-            int row = 0;
-            int col = 0;
+            Map<String, List<MenuItemModel>> byCategory = new HashMap<>();
             for (MenuItemModel item : allMenuItems) {
-                itemPrices.put(-item.getId(), item.getPrice());
-                StackPane card = createMenuCard(item, false);
-                GridPane.setConstraints(card, col, row);
-                menuGrid.getChildren().add(card);
+                byCategory.computeIfAbsent(item.getCategory(), k -> new ArrayList<>()).add(item);
+            }
 
-                col++;
-                if (col >= columns) {
-                    col = 0;
-                    row++;
-                }
+            int row = 0;
+            for (String category : byCategory.keySet()) {
+                row = addCategorySection(category, byCategory.get(category), columns, row);
             }
         } catch (Exception e) {
             System.err.println("Error loading menu items: " + e.getMessage());
         }
     }
 
+    private int addCategorySection(String category, List<MenuItemModel> items, int columns, int startRow) {
+        int row = startRow;
+
+        Label dividerLabel = new Label(category.toUpperCase() + "  ─────────────────");
+        dividerLabel.getStyleClass().add("menu-divider-label");
+        GridPane.setConstraints(dividerLabel, 0, row, columns, 1);
+        dividerLabel.setMaxWidth(Double.MAX_VALUE);
+        GridPane.setMargin(dividerLabel, new Insets(16, 0, 8, 0));
+        menuGrid.getChildren().add(dividerLabel);
+        row++;
+
+        int col = 0;
+        for (MenuItemModel item : items) {
+            itemPrices.put(-item.getId(), item.getPrice());
+            StackPane card = createMenuCard(item, false);
+            GridPane.setConstraints(card, col, row);
+            menuGrid.getChildren().add(card);
+
+            col++;
+            if (col >= columns) {
+                col = 0;
+                row++;
+            }
+        }
+        if (col > 0) row++;
+
+        return row;
+    }
+
     private void loadCombos() {
         try {
             allCombos = comboDAO.findAll();
 
+            if (allCombos.isEmpty()) return;
+
             int columns = calculateColumns();
             int existingItems = menuGrid.getChildren().size();
             int startRow = (existingItems + columns - 1) / columns;
+
+            Label dividerLabel = new Label("PROMOS & COMBOS  ─────────────────");
+            dividerLabel.getStyleClass().add("menu-divider-label");
+            GridPane.setConstraints(dividerLabel, 0, startRow, columns, 1);
+            dividerLabel.setMaxWidth(Double.MAX_VALUE);
+            GridPane.setMargin(dividerLabel, new Insets(16, 0, 8, 0));
+            menuGrid.getChildren().add(dividerLabel);
+            startRow++;
 
             int row = startRow;
             int col = 0;

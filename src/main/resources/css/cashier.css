@@ -225,6 +225,15 @@
     -fx-background-radius: 3;
 }
 
+/* Category Divider */
+.menu-divider-label {
+    -fx-font-family: 'DM Sans', sans-serif;
+    -fx-font-size: 11px;
+    -fx-font-weight: 700;
+    -fx-letter-spacing: 0.12em;
+    -fx-text-fill: #8a7055;
+}
+
 /* ── Order Panel ──────────────────────────────────── */
 .order-panel-header {
     -fx-background-color: #2e2410;
