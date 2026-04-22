@@ -2,6 +2,7 @@ package com.myapp.dao;
 
 import com.myapp.model.User;
 import com.myapp.util.DatabaseConnection;
+import org.mindrot.jbcrypt.BCrypt;
 
 import java.lang.reflect.Method;
 import java.sql.Connection;
@@ -105,7 +106,17 @@ public class UserDAO {
             return false;
         }
         
-        // Plain text comparison (e.g., "admin123")
+        // Check if it's a BCrypt hash (starts with $2a$ or $2b$)
+        if (storedHash.startsWith("$2") && storedHash.length() == 60) {
+            try {
+                return BCrypt.checkpw(password, storedHash);
+            } catch (Exception e) {
+                System.err.println("Error verifying password: " + e.getMessage());
+                return false;
+            }
+        }
+        
+        // Plain text comparison for backwards compatibility
         return password.equals(storedHash);
     }
 

@@ -11,6 +11,8 @@ USE burgerhq;
 ```sql
 ALTER TABLE ingredients ADD COLUMN max_stock DECIMAL(10,2) NOT NULL DEFAULT 0 AFTER min_threshold;
 ALTER TABLE ingredients ADD COLUMN status ENUM('Available','Unavailable') NOT NULL DEFAULT 'Available' AFTER max_stock;
+ALTER TABLE staff ADD COLUMN email VARCHAR(100) AFTER name;
+ALTER TABLE staff MODIFY COLUMN status ENUM('Active','Break','Off Shift','Disabled') NOT NULL DEFAULT 'Off Shift';
 ```
 
 ## Tables
@@ -19,10 +21,11 @@ ALTER TABLE ingredients ADD COLUMN status ENUM('Available','Unavailable') NOT NU
 CREATE TABLE IF NOT EXISTS staff (
     id          INT AUTO_INCREMENT PRIMARY KEY,
     name        VARCHAR(100)  NOT NULL,
+    email       VARCHAR(100),
     role        ENUM('Manager','Cashier','Cook') NOT NULL,
     shift_start TIME,
     shift_end   TIME,
-    status      ENUM('Active','Break','Off Shift') NOT NULL DEFAULT 'Off Shift',
+    status      ENUM('Active','Break','Off Shift','Disabled') NOT NULL DEFAULT 'Off Shift',
     created_at  DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP
 );
 
@@ -95,12 +98,12 @@ CREATE TABLE IF NOT EXISTS combos (
 ## Seed Data
 
 ```sql
-INSERT INTO staff (name, role, shift_start, shift_end, status) VALUES
-('Maria G.',  'Manager', '08:00:00', '18:00:00', 'Active'),
-('Jose R.',   'Cashier', '09:00:00', '17:00:00', 'Active'),
-('Ana L.',    'Cook',    '10:00:00', '20:00:00', 'Break'),
-('Ben P.',    'Cashier', '08:00:00', '16:00:00', 'Active'),
-('Carlo S.',  'Cook',    '10:00:00', '20:00:00', 'Active');
+INSERT INTO staff (name, email, role, shift_start, shift_end, status) VALUES
+('Maria G.',  'maria@halimaw.ph',  'Manager', '08:00:00', '18:00:00', 'Active'),
+('Jose R.',   'jose@halimaw.ph',   'Cashier', '09:00:00', '17:00:00', 'Active'),
+('Ana L.',    'ana@halimaw.ph',    'Cook',    '10:00:00', '20:00:00', 'Break'),
+('Ben P.',    'ben@halimaw.ph',    'Cashier', '08:00:00', '16:00:00', 'Active'),
+('Carlo S.',  'carlo@halimaw.ph',  'Cook',    '10:00:00', '20:00:00', 'Active');
 
 INSERT INTO menu_items (name, category, price, availability) VALUES
 ('Halimaw Burger',   'Burgers', 185.00, 'Available'),
@@ -143,8 +146,8 @@ INSERT INTO menu_item_ingredients (menu_item_id, ingredient_id, quantity_used) V
 (6, 7, 150),   -- Classic Fries   → 150g Potato
 (6, 8, 0.05);  -- Classic Fries   → 0.05L Cooking Oil
 
-INSERT INTO users (staff_id, email, password_hash, role, is_active) VALUES
-(1, 'maria@halimaw.ph', 'admin123', 'Manager', 1);
+`INSERT INTO users (staff_id, email, password_hash, role, is_active) VALUES
+(1, 'maria@halimaw.ph', 'admin123', 'Manager', 1);`
 ```
 
 ## Default Credentials

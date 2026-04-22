@@ -142,11 +142,15 @@ public class LoginController {
         userDAO.authenticate(email, password).ifPresentOrElse(
             user -> {
                 try {
-                    Main.showDashboard();
+                    if ("Cashier".equals(user.getRole())) {
+                        Main.showCashier();
+                    } else {
+                        Main.showDashboard();
+                    }
                 } catch (Exception e) {
                     showStyledAlert(AlertType.ERROR,
                             "Navigation Error",
-                            "Failed to load dashboard: " + e.getMessage());
+                            "Failed to load: " + e.getMessage());
                 }
             },
             () -> {

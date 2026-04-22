@@ -2,6 +2,7 @@ package com.myapp.dao;
 
 import com.myapp.model.Staff;
 import com.myapp.util.DatabaseConnection;
+import org.mindrot.jbcrypt.BCrypt;
 
 import java.sql.Connection;
 import java.sql.PreparedStatement;
@@ -15,7 +16,7 @@ public class StaffDAO {
 
     public List<Staff> findAll() {
         List<Staff> staffList = new ArrayList<>();
-        String sql = "SELECT id, name, role, shift_start, shift_end, status FROM staff ORDER BY id";
+        String sql = "SELECT id, name, email, role, shift_start, shift_end, status FROM staff ORDER BY id";
 
         try (Connection conn = DatabaseConnection.getConnection();
              PreparedStatement stmt = conn.prepareStatement(sql);
@@ -25,6 +26,7 @@ public class StaffDAO {
                 staffList.add(new Staff(
                     rs.getInt("id"),
                     rs.getString("name"),
+                    rs.getString("email"),
                     rs.getString("role"),
                     rs.getTime("shift_start") != null ? rs.getTime("shift_start").toLocalTime() : null,
                     rs.getTime("shift_end") != null ? rs.getTime("shift_end").toLocalTime() : null,
@@ -90,17 +92,59 @@ public class StaffDAO {
         return false;
     }
 
-    public boolean insert(String name, String role, LocalTime shiftStart, LocalTime shiftEnd) {
-        String sql = "INSERT INTO staff (name, role, shift_start, shift_end, status) VALUES (?, ?, ?, ?, 'Off Shift')";
+    public boolean insert(String name, String email, String password, String role, LocalTime shiftStart, LocalTime shiftEnd) {
+        try {
+            String hashedPassword = org.mindrot.jbcrypt.BCrypt.hashpw(password, org.mindrot.jbcrypt.BCrypt.gensalt());
+
+            String staffSql = "INSERT INTO staff (name, email, role, shift_start, shift_end, status) VALUES (?, ?, ?, ?, ?, 'Off Shift')";
+            int staffId;
+            try (Connection conn = DatabaseConnection.getConnection();
+                 PreparedStatement stmt = conn.prepareStatement(staffSql, java.sql.Statement.RETURN_GENERATED_KEYS)) {
+                stmt.setString(1, name);
+                stmt.setString(2, email);
+                stmt.setString(3, role);
+                stmt.setTime(4, java.sql.Time.valueOf(shiftStart));
+                stmt.setTime(5, java.sql.Time.valueOf(shiftEnd));
+                stmt.executeUpdate();
+
+                try (java.sql.ResultSet rs = stmt.getGeneratedKeys()) {
+                    if (rs.next()) {
+                        staffId = rs.getInt(1);
+                    } else {
+                        return false;
+                    }
+                }
+            }
+
+            String userSql = "INSERT INTO users (staff_id, email, password_hash, role, is_active) VALUES (?, ?, ?, ?, 1)";
+            try (Connection conn = DatabaseConnection.getConnection();
+                 PreparedStatement stmt = conn.prepareStatement(userSql)) {
+                stmt.setInt(1, staffId);
+                stmt.setString(2, email);
+                stmt.setString(3, hashedPassword);
+                stmt.setString(4, role);
+                stmt.executeUpdate();
+            }
+
+            return true;
+        } catch (SQLException e) {
+            System.err.println("Error inserting staff and user: " + e.getMessage());
+        }
+        return false;
+    }
+
+    public boolean existsByEmail(String email) {
+        String sql = "SELECT COUNT(*) FROM staff WHERE LOWER(email) = LOWER(?)";
         try (Connection conn = DatabaseConnection.getConnection();
              PreparedStatement stmt = conn.prepareStatement(sql)) {
-            stmt.setString(1, name);
-            stmt.setString(2, role);
-            stmt.setTime(3, java.sql.Time.valueOf(shiftStart));
-            stmt.setTime(4, java.sql.Time.valueOf(shiftEnd));
-            return stmt.executeUpdate() > 0;
+            stmt.setString(1, email);
+            try (ResultSet rs = stmt.executeQuery()) {
+                if (rs.next()) {
+                    return rs.getInt(1) > 0;
+                }
+            }
         } catch (SQLException e) {
-            System.err.println("Error inserting staff: " + e.getMessage());
+            System.err.println("Error checking email: " + e.getMessage());
         }
         return false;
     }

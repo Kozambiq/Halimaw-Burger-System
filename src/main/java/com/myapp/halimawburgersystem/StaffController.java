@@ -13,6 +13,7 @@ import javafx.scene.control.ButtonType;
 import javafx.scene.control.Dialog;
 import javafx.scene.control.Label;
 import javafx.scene.control.MenuButton;
+import javafx.scene.control.PasswordField;
 import javafx.scene.control.MenuItem;
 import javafx.scene.control.TableCell;
 import javafx.scene.control.TableColumn;
@@ -93,6 +94,8 @@ public class StaffController {
                     pill.getStyleClass().add("pill-low");
                 } else if ("Off Shift".equals(status)) {
                     pill.getStyleClass().add("pill-off");
+                } else if ("Disabled".equals(status)) {
+                    pill.getStyleClass().add("pill-disabled");
                 }
 
                 setGraphic(pill);
@@ -172,10 +175,10 @@ public class StaffController {
                     MenuItem active = new MenuItem("Start Shift");
                     active.setStyle("-fx-text-fill: #4CAF50; -fx-font-size: 13px; -fx-padding: 8 16 8 16;");
                     active.setOnAction(e -> updateStatus(staff.getId(), "Active"));
-                    MenuItem remove = new MenuItem("Remove");
-                    remove.setStyle("-fx-text-fill: #e07070; -fx-font-size: 13px; -fx-padding: 8 16 8 16;");
-                    remove.setOnAction(e -> showRemoveConfirmation(staff));
-                    menuBtn.getItems().addAll(edit, active, remove);
+                    MenuItem disable = new MenuItem("Disabled");
+                    disable.setStyle("-fx-text-fill: #e07070; -fx-font-size: 13px; -fx-padding: 8 16 8 16;");
+                    disable.setOnAction(e -> updateStatus(staff.getId(), "Disabled"));
+                    menuBtn.getItems().addAll(edit, active, disable);
                 }
 
                 setGraphic(menuBtn);
@@ -541,6 +544,24 @@ public class StaffController {
         nameError.setStyle(errorStyle);
         nameError.setVisible(false);
 
+        Label emailLabel = new Label("Email:");
+        emailLabel.setStyle(labelStyle);
+        TextField emailField = new TextField();
+        emailField.setStyle(fieldStyle);
+        emailField.setPromptText("e.g. staff@halimaw.ph");
+        Label emailError = new Label();
+        emailError.setStyle(errorStyle);
+        emailError.setVisible(false);
+
+        Label passwordLabel = new Label("Password:");
+        passwordLabel.setStyle(labelStyle);
+        PasswordField passwordField = new PasswordField();
+        passwordField.setStyle(fieldStyle);
+        passwordField.setPromptText("Min. 6 characters");
+        Label passwordError = new Label();
+        passwordError.setStyle(errorStyle);
+        passwordError.setVisible(false);
+
         Label roleLabel = new Label("Role:");
         roleLabel.setStyle(labelStyle);
         ComboBox<String> roleChoice = new ComboBox<>();
@@ -749,7 +770,7 @@ public class StaffController {
         endError.setStyle(errorStyle);
         endError.setVisible(false);
 
-        vbox.getChildren().addAll(nameLabel, nameField, nameError, roleLabel, roleChoice, startLabel, startBox, startError, endLabel, endBox, endError);
+        vbox.getChildren().addAll(nameLabel, nameField, nameError, emailLabel, emailField, emailError, passwordLabel, passwordField, passwordError, roleLabel, roleChoice, startLabel, startBox, startError, endLabel, endBox, endError);
         dialog.getDialogPane().setContent(vbox);
         dialog.getDialogPane().getButtonTypes().addAll(
             javafx.scene.control.ButtonType.CANCEL,
@@ -763,6 +784,8 @@ public class StaffController {
         javafx.beans.InvalidationListener validator = obs -> {
             boolean valid = true;
             String name = nameField.getText().trim();
+            String email = emailField.getText().trim();
+            String password = passwordField.getText();
 
             if (name.isEmpty()) {
                 nameError.setText("Required");
@@ -779,7 +802,42 @@ public class StaffController {
                 nameField.setStyle(fieldStyle);
             }
 
-            if (valid && !name.isEmpty()) {
+            if (email.isEmpty()) {
+                emailError.setText("Required");
+                emailError.setVisible(true);
+                emailField.setStyle(fieldStyle + "-fx-border-color: #e07070;");
+                valid = false;
+            } else if (!email.contains("@") || !email.contains(".")) {
+                emailError.setText("Invalid email format");
+                emailError.setVisible(true);
+                emailField.setStyle(fieldStyle + "-fx-border-color: #e07070;");
+                valid = false;
+            } else if (staffDAO.existsByEmail(email)) {
+                emailError.setText("Email already exists");
+                emailError.setVisible(true);
+                emailField.setStyle(fieldStyle + "-fx-border-color: #e07070;");
+                valid = false;
+            } else {
+                emailError.setVisible(false);
+                emailField.setStyle(fieldStyle);
+            }
+
+            if (password.isEmpty()) {
+                passwordError.setText("Required");
+                passwordError.setVisible(true);
+                passwordField.setStyle(fieldStyle + "-fx-border-color: #e07070;");
+                valid = false;
+            } else if (password.length() < 6) {
+                passwordError.setText("Min. 6 characters");
+                passwordError.setVisible(true);
+                passwordField.setStyle(fieldStyle + "-fx-border-color: #e07070;");
+                valid = false;
+            } else {
+                passwordError.setVisible(false);
+                passwordField.setStyle(fieldStyle);
+            }
+
+            if (valid && !name.isEmpty() && !email.isEmpty() && email.contains("@") && email.contains(".") && password.length() >= 6) {
                 okButton.setStyle("-fx-background-color: #c8500a; -fx-text-fill: #f5ede0; -fx-border-radius: 6; -fx-padding: 8 16 8 16; -fx-font-size: 12px; -fx-font-weight: bold;");
                 okButton.setDisable(false);
             } else {
@@ -789,6 +847,8 @@ public class StaffController {
         };
 
         nameField.textProperty().addListener(validator);
+        emailField.textProperty().addListener(validator);
+        passwordField.textProperty().addListener(validator);
 
         dialog.getDialogPane().lookupButton(javafx.scene.control.ButtonType.CANCEL).setStyle(
             "-fx-background-color: transparent; -fx-text-fill: #a09070; -fx-border-color: #4a3820; -fx-border-width: 1; -fx-border-radius: 6; -fx-padding: 8 16 8 16; -fx-font-size: 12px;");
@@ -797,6 +857,8 @@ public class StaffController {
             if (btn == javafx.scene.control.ButtonType.OK) {
                 return new String[]{
                     nameField.getText(),
+                    emailField.getText(),
+                    passwordField.getText(),
                     roleChoice.getValue(),
                     convertTo24Hour(startHour.getValue(), startMinute.getValue(), startAmPm.getValue()),
                     convertTo24Hour(endHour.getValue(), endMinute.getValue(), endAmPm.getValue())
@@ -806,17 +868,19 @@ public class StaffController {
         });
 
         dialog.showAndWait().ifPresent(result -> {
-            if (result != null && result.length == 4) {
+            if (result != null && result.length == 6) {
                 String name = result[0].trim();
-                String role = result[1];
-                String startTime = result[2];
-                String endTime = result[3];
+                String email = result[1].trim();
+                String password = result[2];
+                String role = result[3];
+                String startTime = result[4];
+                String endTime = result[5];
 
-                if (!name.isEmpty() && startTime != null && endTime != null) {
+                if (!name.isEmpty() && !email.isEmpty() && email.contains("@") && email.contains(".") && password.length() >= 6 && startTime != null && endTime != null) {
                     try {
                         LocalTime start = LocalTime.parse(startTime);
                         LocalTime end = LocalTime.parse(endTime);
-                        staffDAO.insert(name, role, start, end);
+                        staffDAO.insert(name, email, password, role, start, end);
                         loadStaff();
                     } catch (Exception e) {
                         System.err.println("Invalid time format: " + e.getMessage());
