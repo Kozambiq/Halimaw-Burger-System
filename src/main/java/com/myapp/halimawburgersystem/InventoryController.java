@@ -1241,10 +1241,10 @@ private void setupTableColumns() {
 
     @FXML
     private void onNavigateStaff() {
-        Alert alert = new Alert(Alert.AlertType.INFORMATION);
-        alert.setTitle("Staff");
-        alert.setHeaderText(null);
-        alert.setContentText("Coming soon!");
-        alert.showAndWait();
+        try {
+            Main.showStaff();
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
     }
 }

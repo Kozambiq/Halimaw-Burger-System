@@ -55,6 +55,12 @@ public class DashboardController {
             } catch (Exception e) {
                 e.printStackTrace();
             }
+        } else if (text.contains("Staff")) {
+            try {
+                Main.showStaff();
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
         }
     }
 

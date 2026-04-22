@@ -16,9 +16,11 @@ public class Main extends Application {
     private static Parent inventoryRoot;
     private static Parent menuItemsRoot;
     private static Parent combosRoot;
+    private static Parent staffRoot;
     private static DashboardController dashboardController;
     private static MenuItemsController menuItemsController;
     private static CombosController combosController;
+    private static StaffController staffController;
 
     @Override
     public void start(Stage stage) throws Exception {
@@ -147,8 +149,36 @@ public class Main extends Application {
         menuItemsRoot = null;
     }
 
+    public static void showStaff() throws Exception {
+        clearCombosCache();
+
+        if (staffRoot == null) {
+            FXMLLoader fxmlLoader = new FXMLLoader(Main.class.getResource("/fxml/staff.fxml"));
+            staffRoot = fxmlLoader.load();
+            staffController = fxmlLoader.getController();
+        }
+
+        if (cachedScene == null) {
+            cachedScene = new Scene(staffRoot, 1280, 800);
+            mainStage.setScene(cachedScene);
+        } else {
+            cachedScene.setRoot(staffRoot);
+        }
+
+        mainStage.setTitle("BurgerHQ - Staff");
+        mainStage.show();
+
+        if (staffController != null) {
+            staffController.setActiveNav("Staff");
+        }
+    }
+
     public static void clearCombosCache() {
         combosRoot = null;
+    }
+
+    public static void clearStaffCache() {
+        staffRoot = null;
     }
 
     @Override

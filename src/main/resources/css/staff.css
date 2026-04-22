@@ -1,0 +1,22 @@
+/* ============================================================
+    Staff Tab Styles
+    ============================================================ */
+
+/* ── Staff Avatar ──────────────────────────────────── */
+.staff-avatar {
+    -fx-min-width: 32;
+    -fx-min-height: 32;
+    -fx-pref-width: 32;
+    -fx-pref-height: 32;
+    -fx-max-width: 32;
+    -fx-max-height: 32;
+    -fx-background-color: rgba(212, 89, 30, 0.12);
+    -fx-border-color: #5c4828;
+    -fx-border-width: 1;
+    -fx-border-radius: 16;
+    -fx-background-radius: 16;
+    -fx-text-fill: #c8500a;
+    -fx-font-size: 10px;
+    -fx-font-weight: bold;
+    -fx-alignment: center;
+}
