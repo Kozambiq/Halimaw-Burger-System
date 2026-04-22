@@ -149,7 +149,7 @@
                     <TextField fx:id="searchField" promptText="Search menu items..." prefWidth="180" style="-fx-background-color: #221a0e; -fx-text-fill: #f5ede0; -fx-prompt-text-fill: #8a7055; -fx-border-color: #4a3820; -fx-border-width: 1; -fx-border-radius: 6; -fx-background-radius: 6; -fx-padding: 8 12 8 12;"/>
                     <Button fx:id="btnSearch" text="Search" style="-fx-background-color: #c8500a; -fx-text-fill: #f5ede0; -fx-font-weight: bold; -fx-border-radius: 6; -fx-background-radius: 6; -fx-padding: 8 16 8 16; -fx-font-size: 12px; -fx-cursor: hand;" onAction="#onSearchMenuItem"/>
                     <Region HBox.hgrow="ALWAYS"/>
-                    <Button styleClass="btn-primary" text="+ Add Item" prefWidth="140"/>
+                    <Button fx:id="btnAddItem" styleClass="btn-primary" text="+ Add Item" prefWidth="140" onAction="#onAddItem"/>
                 </HBox>
 
 <StackPane VBox.vgrow="ALWAYS" maxHeight="Infinity" styleClass="table-wrap">

@@ -293,6 +293,55 @@ public class MenuItemDAO {
         return false;
     }
 
+    public boolean insert(String name, String category, double price) {
+        String sql = "INSERT INTO menu_items (name, category, price) VALUES (?, ?, ?)";
+        try (Connection conn = DatabaseConnection.getConnection();
+             PreparedStatement stmt = conn.prepareStatement(sql)) {
+            stmt.setString(1, name);
+            stmt.setString(2, category);
+            stmt.setDouble(3, price);
+            return stmt.executeUpdate() > 0;
+        } catch (SQLException e) {
+            System.err.println("Error inserting menu item: " + e.getMessage());
+        }
+        return false;
+    }
+
+    public boolean existsByName(String name) {
+        String sql = "SELECT COUNT(*) FROM menu_items WHERE LOWER(name) = LOWER(?)";
+        try (Connection conn = DatabaseConnection.getConnection();
+             PreparedStatement stmt = conn.prepareStatement(sql)) {
+            stmt.setString(1, name);
+            try (ResultSet rs = stmt.executeQuery()) {
+                if (rs.next()) {
+                    return rs.getInt(1) > 0;
+                }
+            }
+        } catch (SQLException e) {
+            System.err.println("Error checking menu item: " + e.getMessage());
+        }
+        return false;
+    }
+
+    public int insertAndGetId(String name, String category, double price) {
+        String sql = "INSERT INTO menu_items (name, category, price) VALUES (?, ?, ?)";
+        try (Connection conn = DatabaseConnection.getConnection();
+             PreparedStatement stmt = conn.prepareStatement(sql, Statement.RETURN_GENERATED_KEYS)) {
+            stmt.setString(1, name);
+            stmt.setString(2, category);
+            stmt.setDouble(3, price);
+            stmt.executeUpdate();
+            try (ResultSet rs = stmt.getGeneratedKeys()) {
+                if (rs.next()) {
+                    return rs.getInt(1);
+                }
+            }
+        } catch (SQLException e) {
+            System.err.println("Error inserting menu item: " + e.getMessage());
+        }
+        return -1;
+    }
+
     public boolean updateMenuItemIngredients(int menuItemId, List<MenuItemIngredient> ingredients) {
         String deleteSql = "DELETE FROM menu_item_ingredients WHERE menu_item_id = ?";
         String insertSql = "INSERT INTO menu_item_ingredients (menu_item_id, ingredient_id, quantity_used) VALUES (?, ?, ?)";

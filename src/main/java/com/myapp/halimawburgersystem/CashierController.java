@@ -169,8 +169,7 @@ public class CashierController {
             if (allCombos.isEmpty()) return;
 
             int columns = calculateColumns();
-            int existingItems = menuGrid.getChildren().size();
-            int startRow = (existingItems + columns - 1) / columns;
+            int startRow = menuGrid.getChildren().size() / columns + 1;
 
             Label dividerLabel = new Label("PROMOS & COMBOS  ─────────────────");
             dividerLabel.getStyleClass().add("menu-divider-label");
