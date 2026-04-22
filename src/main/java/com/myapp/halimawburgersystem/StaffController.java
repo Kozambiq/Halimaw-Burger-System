@@ -228,10 +228,33 @@ public class StaffController {
 
         Label roleLabel = new Label("Role:");
         roleLabel.setStyle(labelStyle);
-        javafx.scene.control.ChoiceBox<String> roleChoice = new javafx.scene.control.ChoiceBox<>();
+        ComboBox<String> roleChoice = new ComboBox<>();
         roleChoice.getItems().addAll("Manager", "Cashier", "Cook");
         roleChoice.setValue(staff.getRole());
         roleChoice.setStyle(fieldStyle);
+        roleChoice.setButtonCell(new javafx.scene.control.ListCell<String>() {
+            @Override
+            protected void updateItem(String item, boolean empty) {
+                super.updateItem(item, empty);
+                if (!empty && item != null) {
+                    setText(item);
+                    setTextFill(Color.web("#ffffff"));
+                }
+            }
+        });
+        roleChoice.setCellFactory(listView -> new javafx.scene.control.ListCell<String>() {
+            {
+                setBackground(new Background(new BackgroundFill(Color.web("#221a0e"), CornerRadii.EMPTY, Insets.EMPTY)));
+            }
+            @Override
+            protected void updateItem(String item, boolean empty) {
+                super.updateItem(item, empty);
+                if (!empty && item != null) {
+                    setText(item);
+                    setTextFill(Color.web("#f5ede0"));
+                }
+            }
+        });
 
         Label startLabel = new Label("Shift Start:");
         startLabel.setStyle(labelStyle);
@@ -239,12 +262,81 @@ public class StaffController {
         ComboBox<Integer> startHour = new ComboBox<>();
         for (int h = 1; h <= 12; h++) startHour.getItems().add(h);
         startHour.setStyle(fieldStyle);
+        startHour.setButtonCell(new javafx.scene.control.ListCell<Integer>() {
+            @Override
+            protected void updateItem(Integer item, boolean empty) {
+                super.updateItem(item, empty);
+                if (!empty && item != null) {
+                    setText(String.format("%02d", item));
+                    setTextFill(Color.web("#ffffff"));
+                }
+            }
+        });
+        startHour.setCellFactory(listView -> new javafx.scene.control.ListCell<Integer>() {
+            {
+                setBackground(new Background(new BackgroundFill(Color.web("#221a0e"), CornerRadii.EMPTY, Insets.EMPTY)));
+            }
+            @Override
+            protected void updateItem(Integer item, boolean empty) {
+                super.updateItem(item, empty);
+                if (!empty && item != null) {
+                    setText(String.format("%02d", item));
+                    setTextFill(Color.web("#f5ede0"));
+                }
+            }
+        });
         ComboBox<Integer> startMinute = new ComboBox<>();
         for (int m = 0; m < 60; m += 5) startMinute.getItems().add(m);
         startMinute.setStyle(fieldStyle);
+        startMinute.setButtonCell(new javafx.scene.control.ListCell<Integer>() {
+            @Override
+            protected void updateItem(Integer item, boolean empty) {
+                super.updateItem(item, empty);
+                if (!empty && item != null) {
+                    setText(String.format("%02d", item));
+                    setTextFill(Color.web("#ffffff"));
+                }
+            }
+        });
+        startMinute.setCellFactory(listView -> new javafx.scene.control.ListCell<Integer>() {
+            {
+                setBackground(new Background(new BackgroundFill(Color.web("#221a0e"), CornerRadii.EMPTY, Insets.EMPTY)));
+            }
+            @Override
+            protected void updateItem(Integer item, boolean empty) {
+                super.updateItem(item, empty);
+                if (!empty && item != null) {
+                    setText(String.format("%02d", item));
+                    setTextFill(Color.web("#f5ede0"));
+                }
+            }
+        });
         ComboBox<String> startAmPm = new ComboBox<>();
         startAmPm.getItems().addAll("AM", "PM");
         startAmPm.setStyle(fieldStyle);
+        startAmPm.setButtonCell(new javafx.scene.control.ListCell<String>() {
+            @Override
+            protected void updateItem(String item, boolean empty) {
+                super.updateItem(item, empty);
+                if (!empty && item != null) {
+                    setText(item);
+                    setTextFill(Color.web("#ffffff"));
+                }
+            }
+        });
+        startAmPm.setCellFactory(listView -> new javafx.scene.control.ListCell<String>() {
+            {
+                setBackground(new Background(new BackgroundFill(Color.web("#221a0e"), CornerRadii.EMPTY, Insets.EMPTY)));
+            }
+            @Override
+            protected void updateItem(String item, boolean empty) {
+                super.updateItem(item, empty);
+                if (!empty && item != null) {
+                    setText(item);
+                    setTextFill(Color.web("#f5ede0"));
+                }
+            }
+        });
         startBox.getChildren().addAll(startHour, startMinute, startAmPm);
         if (staff.getShiftStart() != null) {
             int sh = staff.getShiftStart().getHour();
@@ -263,12 +355,81 @@ public class StaffController {
         ComboBox<Integer> endHour = new ComboBox<>();
         for (int h = 1; h <= 12; h++) endHour.getItems().add(h);
         endHour.setStyle(fieldStyle);
+        endHour.setButtonCell(new javafx.scene.control.ListCell<Integer>() {
+            @Override
+            protected void updateItem(Integer item, boolean empty) {
+                super.updateItem(item, empty);
+                if (!empty && item != null) {
+                    setText(String.format("%02d", item));
+                    setTextFill(Color.web("#ffffff"));
+                }
+            }
+        });
+        endHour.setCellFactory(listView -> new javafx.scene.control.ListCell<Integer>() {
+            {
+                setBackground(new Background(new BackgroundFill(Color.web("#221a0e"), CornerRadii.EMPTY, Insets.EMPTY)));
+            }
+            @Override
+            protected void updateItem(Integer item, boolean empty) {
+                super.updateItem(item, empty);
+                if (!empty && item != null) {
+                    setText(String.format("%02d", item));
+                    setTextFill(Color.web("#f5ede0"));
+                }
+            }
+        });
         ComboBox<Integer> endMinute = new ComboBox<>();
         for (int m = 0; m < 60; m += 5) endMinute.getItems().add(m);
         endMinute.setStyle(fieldStyle);
+        endMinute.setButtonCell(new javafx.scene.control.ListCell<Integer>() {
+            @Override
+            protected void updateItem(Integer item, boolean empty) {
+                super.updateItem(item, empty);
+                if (!empty && item != null) {
+                    setText(String.format("%02d", item));
+                    setTextFill(Color.web("#ffffff"));
+                }
+            }
+        });
+        endMinute.setCellFactory(listView -> new javafx.scene.control.ListCell<Integer>() {
+            {
+                setBackground(new Background(new BackgroundFill(Color.web("#221a0e"), CornerRadii.EMPTY, Insets.EMPTY)));
+            }
+            @Override
+            protected void updateItem(Integer item, boolean empty) {
+                super.updateItem(item, empty);
+                if (!empty && item != null) {
+                    setText(String.format("%02d", item));
+                    setTextFill(Color.web("#f5ede0"));
+                }
+            }
+        });
         ComboBox<String> endAmPm = new ComboBox<>();
         endAmPm.getItems().addAll("AM", "PM");
         endAmPm.setStyle(fieldStyle);
+        endAmPm.setButtonCell(new javafx.scene.control.ListCell<String>() {
+            @Override
+            protected void updateItem(String item, boolean empty) {
+                super.updateItem(item, empty);
+                if (!empty && item != null) {
+                    setText(item);
+                    setTextFill(Color.web("#ffffff"));
+                }
+            }
+        });
+        endAmPm.setCellFactory(listView -> new javafx.scene.control.ListCell<String>() {
+            {
+                setBackground(new Background(new BackgroundFill(Color.web("#221a0e"), CornerRadii.EMPTY, Insets.EMPTY)));
+            }
+            @Override
+            protected void updateItem(String item, boolean empty) {
+                super.updateItem(item, empty);
+                if (!empty && item != null) {
+                    setText(item);
+                    setTextFill(Color.web("#f5ede0"));
+                }
+            }
+        });
         endBox.getChildren().addAll(endHour, endMinute, endAmPm);
         if (staff.getShiftEnd() != null) {
             int eh = staff.getShiftEnd().getHour();
