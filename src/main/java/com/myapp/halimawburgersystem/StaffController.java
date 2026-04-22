@@ -241,7 +241,7 @@ public class StaffController {
 
         Label passwordLabel = new Label("Password:");
         passwordLabel.setStyle(labelStyle);
-        HBox passwordBox = new HBox(4);
+        javafx.scene.layout.StackPane passwordBox = new javafx.scene.layout.StackPane();
         PasswordField passwordField = new PasswordField();
         TextField passwordVisibleField = new TextField();
         final UserDAO userDAO = new UserDAO();
@@ -265,24 +265,30 @@ public class StaffController {
         SVGPath eyeIcon = new SVGPath();
         eyeIcon.setContent("M12 4.5C7 4.5 2.73 7.61 1 12c1.73 4.39 6 7.5 11 7.5s9.27-3.11 11-7.5c-1.73-4.39-6-7.5-11-7.5zM12 17c-2.76 0-5-2.24-5-5s2.24-5 5-5 5 2.24 5 5-2.24 5-5 5zm0-8c-1.66 0-3 1.34-3 3s1.34 3 3 3 3-1.34 3-3-1.34-3-3-3z");
         eyeIcon.setFill(Color.web("#8a7055"));
-        eyeIcon.setStyle("-fx-cursor: hand;");
-        eyeIcon.setOnMouseClicked(e -> {
-            if (passwordVisibleField.isVisible()) {
-                passwordField.setText(passwordVisibleField.getText());
-                passwordField.setVisible(true);
-                passwordVisibleField.setVisible(false);
-                eyeIcon.setContent("M12 4.5C7 4.5 2.73 7.61 1 12c1.73 4.39 6 7.5 11 7.5s9.27-3.11 11-7.5c-1.73-4.39-6-7.5-11-7.5zM12 17c-2.76 0-5-2.24-5-5s2.24-5 5-5 5 2.24 5 5-2.24 5-5 5zm0-8c-1.66 0-3 1.34-3 3s1.34 3 3 3 3-1.34 3-3-1.34-3-3-3z");
-            } else {
+        eyeIcon.setMouseTransparent(true);
+
+        Button togglePassword = new Button();
+        togglePassword.setGraphic(eyeIcon);
+        togglePassword.setStyle("-fx-background-color: transparent; -fx-cursor: hand; -fx-padding: 0 8 0 0;");
+        javafx.scene.layout.StackPane.setAlignment(togglePassword, javafx.geometry.Pos.CENTER_RIGHT);
+
+        passwordBox.getChildren().addAll(passwordField, passwordVisibleField, togglePassword);
+
+        final boolean[] passwordVisible = {false};
+        togglePassword.setOnAction(e -> {
+            passwordVisible[0] = !passwordVisible[0];
+            if (passwordVisible[0]) {
                 passwordVisibleField.setText(passwordField.getText());
                 passwordVisibleField.setVisible(true);
                 passwordField.setVisible(false);
                 eyeIcon.setContent("M18 6.5L9.5 15 2 6.5l1.5 1.5 6 6-6 6 1.5 1.5 9.5-9.5-6-6zm-6 8.5c-2.76 0-5-2.24-5-5s2.24-5 5-5c.55 0 1.05.09 1.53.24l1.5-1.5c-.71-.28-1.47-.43-2.27-.43-2.76 0-5 2.24-5 5s2.24 5 5 5c.8 0 1.56-.15 2.27-.43l1.5-1.5c-.48-.15-.98-.24-1.53-.24z");
+            } else {
+                passwordField.setText(passwordVisibleField.getText());
+                passwordField.setVisible(true);
+                passwordVisibleField.setVisible(false);
+                eyeIcon.setContent("M12 4.5C7 4.5 2.73 7.61 1 12c1.73 4.39 6 7.5 11 7.5s9.27-3.11 11-7.5c-1.73-4.39-6-7.5-11-7.5zM12 17c-2.76 0-5-2.24-5-5s2.24-5 5-5 5 2.24 5 5-2.24 5-5 5zm0-8c-1.66 0-3 1.34-3 3s1.34 3 3 3 3-1.34 3-3-1.34-3-3-3z");
             }
         });
-
-        passwordBox.getChildren().addAll(passwordField, passwordVisibleField, eyeIcon);
-        HBox.setHgrow(passwordField, Priority.ALWAYS);
-        HBox.setHgrow(passwordVisibleField, Priority.ALWAYS);
 
         Label roleLabel = new Label("Role:");
         roleLabel.setStyle(labelStyle);
@@ -518,7 +524,7 @@ public class StaffController {
                 return new String[]{
                     nameField.getText(),
                     emailField.getText(),
-                    passwordVisibleField.isVisible() ? passwordVisibleField.getText() : passwordField.getText(),
+                    passwordVisible[0] ? passwordVisibleField.getText() : passwordField.getText(),
                     roleChoice.getValue(),
                     convertTo24Hour(startHour.getValue(), startMinute.getValue(), startAmPm.getValue()),
                     convertTo24Hour(endHour.getValue(), endMinute.getValue(), endAmPm.getValue())
