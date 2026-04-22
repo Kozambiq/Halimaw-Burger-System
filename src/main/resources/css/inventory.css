@@ -81,6 +81,11 @@
     -fx-text-fill: #e07070;
 }
 
+.pill-off {
+    -fx-background-color: rgba(100, 80, 60, 0.2);
+    -fx-text-fill: #8a7055;
+}
+
 /* ── MenuButton Dots ─────────────────────────────────────── */
 .menu-btn-dots {
     -fx-background-color: #2e2410;
