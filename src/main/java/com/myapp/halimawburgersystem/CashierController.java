@@ -5,6 +5,7 @@ import com.myapp.dao.MenuItemDAO;
 import com.myapp.model.Combo;
 import com.myapp.model.MenuItemModel;
 import javafx.fxml.FXML;
+import javafx.fxml.FXMLLoader;
 import javafx.geometry.Insets;
 import javafx.scene.control.Button;
 import javafx.scene.control.Label;
@@ -21,6 +22,9 @@ import javafx.scene.layout.Region;
 import javafx.scene.layout.StackPane;
 import javafx.scene.layout.VBox;
 import javafx.scene.paint.Color;
+import javafx.stage.Stage;
+import javafx.scene.Scene;
+import javafx.application.Platform;
 
 import java.util.HashMap;
 import java.util.List;
@@ -48,28 +52,66 @@ public class CashierController {
     private String currentOrderType = "Dine-in";
     private int orderNumber = 1;
     private double subtotal = 0.0;
+    private static final int CARD_WIDTH = 150;
+    private static final int CARD_HGAP = 10;
+    private static final int RIGHT_PANEL_WIDTH = 360;
+    private static final int GRID_PADDING = 32;
 
     @FXML
     public void initialize() {
-        loadMenuItems();
-        loadCombos();
         updateOrderNumber();
         updateTotals();
         setActiveToggle(btnDineIn);
+
+        menuGrid.parentProperty().addListener((obs, oldParent, newParent) -> {
+            if (newParent != null) {
+                newParent.layoutBoundsProperty().addListener((o, oldBounds, newBounds) -> {
+                    if (newBounds.getWidth() > 0 && menuGrid.getChildren().isEmpty()) {
+                        reloadMenu();
+                    }
+                });
+            }
+        });
+
+        menuGrid.sceneProperty().addListener((observable, oldScene, newScene) -> {
+            if (newScene != null) {
+                newScene.widthProperty().addListener((o, ov, nv) ->
+                    Platform.runLater(() -> reloadMenu()));
+            }
+        });
+    }
+
+    private int calculateColumns() {
+        double availableWidth = 0;
+        if (menuGrid.getParent() != null) {
+            availableWidth = menuGrid.getParent().getLayoutBounds().getWidth() - GRID_PADDING;
+        }
+        if (availableWidth <= 0) return 4;
+        int columns = (int) (availableWidth / (CARD_WIDTH + CARD_HGAP));
+        return Math.max(columns, 1);
+    }
+
+    private void reloadMenu() {
+        try {
+            menuGrid.getChildren().clear();
+            loadMenuItems();
+            loadCombos();
+        } catch (Exception e) {
+            System.err.println("Error reloading menu: " + e.getMessage());
+        }
     }
 
     private void loadMenuItems() {
         try {
             allMenuItems = menuItemDAO.findAllWithIngredientStatus();
-            menuGrid.getChildren().clear();
             menuGrid.getColumnConstraints().clear();
 
-            int columns = 4;
+            int columns = calculateColumns();
             for (int i = 0; i < columns; i++) {
                 ColumnConstraints col = new ColumnConstraints();
-                col.setPrefWidth(150);
-                col.setMinWidth(150);
-                col.setMaxWidth(150);
+                col.setPrefWidth(CARD_WIDTH);
+                col.setMinWidth(CARD_WIDTH);
+                col.setMaxWidth(CARD_WIDTH);
                 menuGrid.getColumnConstraints().add(col);
             }
 
@@ -96,8 +138,8 @@ public class CashierController {
         try {
             allCombos = comboDAO.findAll();
 
+            int columns = calculateColumns();
             int existingItems = menuGrid.getChildren().size();
-            int columns = 5;
             int startRow = (existingItems + columns - 1) / columns;
 
             int row = startRow;
