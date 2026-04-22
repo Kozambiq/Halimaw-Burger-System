@@ -22,7 +22,9 @@
     <VBox styleClass="cashier-left" HBox.hgrow="ALWAYS">
         <HBox styleClass="cashier-topbar" prefHeight="56">
             <padding><Insets top="12" right="16" bottom="12" left="16"/></padding>
-            <Label styleClass="cashier-logo" text="BurgerHQ"/>
+            <Label styleClass="cashier-logo" text="BurgerHQ">
+                <styleClass>cashier-logo-text</styleClass>
+            </Label>
             <Region HBox.hgrow="ALWAYS"/>
             <HBox styleClass="toggle-group" spacing="2">
                 <Button fx:id="btnDineIn" styleClass="toggle-btn" text="Dine-in" onAction="#onToggleDineIn"/>
@@ -30,9 +32,8 @@
             </HBox>
         </HBox>
 
-        <HBox styleClass="cat-filters" prefHeight="48">
-            <padding><Insets top="10" right="16" bottom="10" left="16"/></padding>
-            <Button fx:id="btnCatAll" styleClass="cat-btn-active" text="All" onAction="#onFilterCategory"/>
+        <HBox styleClass="cat-filters" prefHeight="48" spacing="4">
+            <Button fx:id="btnCatAll" styleClass="cat-btn cat-btn-active" text="All" onAction="#onFilterCategory"/>
             <Button fx:id="btnCatBurgers" styleClass="cat-btn" text="Burgers" onAction="#onFilterCategory"/>
             <Button fx:id="btnCatChicken" styleClass="cat-btn" text="Chicken" onAction="#onFilterCategory"/>
             <Button fx:id="btnCatSides" styleClass="cat-btn" text="Sides" onAction="#onFilterCategory"/>
@@ -48,8 +49,8 @@
     </VBox>
 
     <VBox styleClass="cashier-right" prefWidth="360">
-        <HBox styleClass="order-panel-header" prefHeight="56">
-            <padding><Insets top="12" right="16" bottom="12" left="16"/></padding>
+        <HBox styleClass="order-panel-header" prefHeight="60">
+            <padding><Insets top="16" right="16" bottom="16" left="16"/></padding>
             <Label styleClass="order-num" text="ORDER #"/>
             <Label fx:id="lblOrderNum" styleClass="order-num-bold" text="0001"/>
             <Region HBox.hgrow="ALWAYS"/>
@@ -62,7 +63,7 @@
         </ScrollPane>
 
         <VBox styleClass="order-notes">
-            <padding><Insets top="0" right="0" bottom="12" left="0"/></padding>
+            <padding><Insets top="0" right="12" bottom="12" left="12"/></padding>
             <TextField fx:id="txtOrderNotes" styleClass="order-notes-input" promptText="Order notes..."/>
         </VBox>
 
@@ -85,10 +86,10 @@
             </HBox>
         </VBox>
 
-        <HBox styleClass="payment-btns" prefHeight="120">
+        <HBox styleClass="payment-btns" prefHeight="120" spacing="8">
             <padding><Insets top="12" right="12" bottom="12" left="12"/></padding>
-            <Button fx:id="btnCash" styleClass="pay-btn" text="Cash" onAction="#onPayCash"/>
-            <Button fx:id="btnCard" styleClass="pay-btn" text="Card" onAction="#onPayCard"/>
+            <Button fx:id="btnCash" styleClass="pay-btn" text="Cash" onAction="#onPayCash" HBox.hgrow="ALWAYS" maxWidth="9999"/>
+            <Button fx:id="btnCard" styleClass="pay-btn" text="Card" onAction="#onPayCard" HBox.hgrow="ALWAYS" maxWidth="9999"/>
         </HBox>
     </VBox>
 

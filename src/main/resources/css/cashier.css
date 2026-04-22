@@ -21,12 +21,13 @@
     -fx-border-color: #4a3820;
     -fx-border-width: 0 0 1 0;
     -fx-border-style: solid;
+    -fx-padding: 12 16 12 16;
 }
 
 .cashier-logo {
-    -fx-font-family: 'DM Sans', sans-serif;
+    -fx-font-family: 'Playfair Display', serif;
     -fx-font-size: 18px;
-    -fx-font-weight: bold;
+    -fx-font-weight: 700;
     -fx-text-fill: #f5ede0;
 }
 
@@ -63,10 +64,11 @@
 
 /* ── Category Filters ──────────────────────────────────── */
 .cat-filters {
-    -fx-background-color: #1a1208;
+    -fx-background-color: #2d2010;
     -fx-border-color: #4a3820;
     -fx-border-width: 0 0 1 0;
     -fx-border-style: solid;
+    -fx-padding: 10 16 10 16;
 }
 
 .cat-btn {
@@ -152,6 +154,7 @@
     -fx-border-color: #4a3820;
     -fx-border-width: 0 0 1 0;
     -fx-border-style: solid;
+    -fx-padding: 16 16 16 16;
 }
 
 .order-num {
@@ -159,7 +162,6 @@
     -fx-font-size: 11px;
     -fx-font-weight: 600;
     -fx-letter-spacing: 0.08em;
-    -fx-text-transform: uppercase;
     -fx-text-fill: #8a7055;
 }
 
