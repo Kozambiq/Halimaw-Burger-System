@@ -30,6 +30,8 @@ import javafx.scene.paint.Color;
 import java.time.LocalTime;
 import java.util.List;
 
+import javafx.scene.control.ComboBox;
+
 public class StaffController {
 
     @FXML private Label lblTotal;
@@ -231,17 +233,55 @@ public class StaffController {
         roleChoice.setValue(staff.getRole());
         roleChoice.setStyle(fieldStyle);
 
-        Label startLabel = new Label("Shift Start (HH:mm):");
+        Label startLabel = new Label("Shift Start:");
         startLabel.setStyle(labelStyle);
-        TextField startField = new TextField(staff.getShiftStart() != null ? staff.getShiftStart().toString() : "");
-        startField.setStyle(fieldStyle);
+        HBox startBox = new HBox(4);
+        ComboBox<Integer> startHour = new ComboBox<>();
+        for (int h = 1; h <= 12; h++) startHour.getItems().add(h);
+        startHour.setStyle(fieldStyle);
+        ComboBox<Integer> startMinute = new ComboBox<>();
+        for (int m = 0; m < 60; m += 5) startMinute.getItems().add(m);
+        startMinute.setStyle(fieldStyle);
+        ComboBox<String> startAmPm = new ComboBox<>();
+        startAmPm.getItems().addAll("AM", "PM");
+        startAmPm.setStyle(fieldStyle);
+        startBox.getChildren().addAll(startHour, startMinute, startAmPm);
+        if (staff.getShiftStart() != null) {
+            int sh = staff.getShiftStart().getHour();
+            startHour.setValue(sh == 0 ? 12 : (sh > 12 ? sh - 12 : sh));
+            startMinute.setValue(staff.getShiftStart().getMinute());
+            startAmPm.setValue(sh >= 12 ? "PM" : "AM");
+        } else {
+            startHour.setValue(8);
+            startMinute.setValue(0);
+            startAmPm.setValue("AM");
+        }
 
-        Label endLabel = new Label("Shift End (HH:mm):");
+        Label endLabel = new Label("Shift End:");
         endLabel.setStyle(labelStyle);
-        TextField endField = new TextField(staff.getShiftEnd() != null ? staff.getShiftEnd().toString() : "");
-        endField.setStyle(fieldStyle);
+        HBox endBox = new HBox(4);
+        ComboBox<Integer> endHour = new ComboBox<>();
+        for (int h = 1; h <= 12; h++) endHour.getItems().add(h);
+        endHour.setStyle(fieldStyle);
+        ComboBox<Integer> endMinute = new ComboBox<>();
+        for (int m = 0; m < 60; m += 5) endMinute.getItems().add(m);
+        endMinute.setStyle(fieldStyle);
+        ComboBox<String> endAmPm = new ComboBox<>();
+        endAmPm.getItems().addAll("AM", "PM");
+        endAmPm.setStyle(fieldStyle);
+        endBox.getChildren().addAll(endHour, endMinute, endAmPm);
+        if (staff.getShiftEnd() != null) {
+            int eh = staff.getShiftEnd().getHour();
+            endHour.setValue(eh == 0 ? 12 : (eh > 12 ? eh - 12 : eh));
+            endMinute.setValue(staff.getShiftEnd().getMinute());
+            endAmPm.setValue(eh >= 12 ? "PM" : "AM");
+        } else {
+            endHour.setValue(5);
+            endMinute.setValue(0);
+            endAmPm.setValue("PM");
+        }
 
-        vbox.getChildren().addAll(nameLabel, nameField, roleLabel, roleChoice, startLabel, startField, endLabel, endField);
+        vbox.getChildren().addAll(nameLabel, nameField, roleLabel, roleChoice, startLabel, startBox, endLabel, endBox);
         dialog.getDialogPane().setContent(vbox);
         dialog.getDialogPane().getButtonTypes().addAll(
             javafx.scene.control.ButtonType.CANCEL,
@@ -259,8 +299,8 @@ public class StaffController {
                 return new String[]{
                     nameField.getText(),
                     roleChoice.getValue(),
-                    startField.getText(),
-                    endField.getText()
+                    convertTo24Hour(startHour.getValue(), startMinute.getValue(), startAmPm.getValue()),
+                    convertTo24Hour(endHour.getValue(), endMinute.getValue(), endAmPm.getValue())
                 };
             }
             return null;
@@ -270,16 +310,16 @@ public class StaffController {
             if (result != null && result.length == 4) {
                 String name = result[0].trim();
                 String role = result[1];
-                String startTime = result[2].trim();
-                String endTime = result[3].trim();
+                String startTime = result[2];
+                String endTime = result[3];
 
                 if (!name.isEmpty()) {
                     staffDAO.updateRole(staff.getId(), role);
                     staff.setRole(role);
 
                     try {
-                        LocalTime start = startTime.isEmpty() ? null : LocalTime.parse(startTime);
-                        LocalTime end = endTime.isEmpty() ? null : LocalTime.parse(endTime);
+                        LocalTime start = startTime != null ? LocalTime.parse(startTime) : null;
+                        LocalTime end = endTime != null ? LocalTime.parse(endTime) : null;
                         if (start != null && end != null) {
                             staffDAO.updateShift(staff.getId(), start, end);
                         }
@@ -347,25 +387,167 @@ public class StaffController {
         roleChoice.setValue("Cashier");
         roleChoice.setStyle(fieldStyle);
 
-        Label startLabel = new Label("Shift Start (HH:mm):");
+        Label startLabel = new Label("Shift Start:");
         startLabel.setStyle(labelStyle);
-        TextField startField = new TextField();
-        startField.setStyle(fieldStyle);
-        startField.setPromptText("e.g. 08:00");
+        HBox startBox = new HBox(4);
+        ComboBox<Integer> startHour = new ComboBox<>();
+        for (int h = 1; h <= 12; h++) startHour.getItems().add(h);
+        startHour.setValue(8);
+        startHour.setStyle(fieldStyle);
+        startHour.setButtonCell(new javafx.scene.control.ListCell<Integer>() {
+            @Override
+            protected void updateItem(Integer item, boolean empty) {
+                super.updateItem(item, empty);
+                if (!empty && item != null) {
+                    setText(String.format("%02d", item));
+                    setTextFill(Color.web("#ffffff"));
+                }
+            }
+        });
+        startHour.setCellFactory(listView -> new javafx.scene.control.ListCell<Integer>() {
+            @Override
+            protected void updateItem(Integer item, boolean empty) {
+                super.updateItem(item, empty);
+                if (!empty && item != null) {
+                    setText(String.format("%02d", item));
+                    setTextFill(Color.web("#f5ede0"));
+                }
+            }
+        });
+        ComboBox<Integer> startMinute = new ComboBox<>();
+        for (int m = 0; m < 60; m += 5) startMinute.getItems().add(m);
+        startMinute.setValue(0);
+        startMinute.setStyle(fieldStyle);
+        startMinute.setButtonCell(new javafx.scene.control.ListCell<Integer>() {
+            @Override
+            protected void updateItem(Integer item, boolean empty) {
+                super.updateItem(item, empty);
+                if (!empty && item != null) {
+                    setText(String.format("%02d", item));
+                    setTextFill(Color.web("#ffffff"));
+                }
+            }
+        });
+        startMinute.setCellFactory(listView -> new javafx.scene.control.ListCell<Integer>() {
+            @Override
+            protected void updateItem(Integer item, boolean empty) {
+                super.updateItem(item, empty);
+                if (!empty && item != null) {
+                    setText(String.format("%02d", item));
+                    setTextFill(Color.web("#f5ede0"));
+                }
+            }
+        });
+        ComboBox<String> startAmPm = new ComboBox<>();
+        startAmPm.getItems().addAll("AM", "PM");
+        startAmPm.setValue("AM");
+        startAmPm.setStyle(fieldStyle);
+        startAmPm.setButtonCell(new javafx.scene.control.ListCell<String>() {
+            @Override
+            protected void updateItem(String item, boolean empty) {
+                super.updateItem(item, empty);
+                if (!empty && item != null) {
+                    setText(item);
+                    setTextFill(Color.web("#ffffff"));
+                }
+            }
+        });
+        startAmPm.setCellFactory(listView -> new javafx.scene.control.ListCell<String>() {
+            @Override
+            protected void updateItem(String item, boolean empty) {
+                super.updateItem(item, empty);
+                if (!empty && item != null) {
+                    setText(item);
+                    setTextFill(Color.web("#f5ede0"));
+                }
+            }
+        });
+        startBox.getChildren().addAll(startHour, startMinute, startAmPm);
         Label startError = new Label();
         startError.setStyle(errorStyle);
         startError.setVisible(false);
 
-        Label endLabel = new Label("Shift End (HH:mm):");
+        Label endLabel = new Label("Shift End:");
         endLabel.setStyle(labelStyle);
-        TextField endField = new TextField();
-        endField.setStyle(fieldStyle);
-        endField.setPromptText("e.g. 17:00");
+        HBox endBox = new HBox(4);
+        ComboBox<Integer> endHour = new ComboBox<>();
+        for (int h = 1; h <= 12; h++) endHour.getItems().add(h);
+        endHour.setValue(5);
+        endHour.setStyle(fieldStyle);
+        endHour.setButtonCell(new javafx.scene.control.ListCell<Integer>() {
+            @Override
+            protected void updateItem(Integer item, boolean empty) {
+                super.updateItem(item, empty);
+                if (!empty && item != null) {
+                    setText(String.format("%02d", item));
+                    setTextFill(Color.web("#ffffff"));
+                }
+            }
+        });
+        endHour.setCellFactory(listView -> new javafx.scene.control.ListCell<Integer>() {
+            @Override
+            protected void updateItem(Integer item, boolean empty) {
+                super.updateItem(item, empty);
+                if (!empty && item != null) {
+                    setText(String.format("%02d", item));
+                    setTextFill(Color.web("#f5ede0"));
+                }
+            }
+        });
+        ComboBox<Integer> endMinute = new ComboBox<>();
+        for (int m = 0; m < 60; m += 5) endMinute.getItems().add(m);
+        endMinute.setValue(0);
+        endMinute.setStyle(fieldStyle);
+        endMinute.setButtonCell(new javafx.scene.control.ListCell<Integer>() {
+            @Override
+            protected void updateItem(Integer item, boolean empty) {
+                super.updateItem(item, empty);
+                if (!empty && item != null) {
+                    setText(String.format("%02d", item));
+                    setTextFill(Color.web("#ffffff"));
+                }
+            }
+        });
+        endMinute.setCellFactory(listView -> new javafx.scene.control.ListCell<Integer>() {
+            @Override
+            protected void updateItem(Integer item, boolean empty) {
+                super.updateItem(item, empty);
+                if (!empty && item != null) {
+                    setText(String.format("%02d", item));
+                    setTextFill(Color.web("#f5ede0"));
+                }
+            }
+        });
+        ComboBox<String> endAmPm = new ComboBox<>();
+        endAmPm.getItems().addAll("AM", "PM");
+        endAmPm.setValue("PM");
+        endAmPm.setStyle(fieldStyle);
+        endAmPm.setButtonCell(new javafx.scene.control.ListCell<String>() {
+            @Override
+            protected void updateItem(String item, boolean empty) {
+                super.updateItem(item, empty);
+                if (!empty && item != null) {
+                    setText(item);
+                    setTextFill(Color.web("#ffffff"));
+                }
+            }
+        });
+        endAmPm.setCellFactory(listView -> new javafx.scene.control.ListCell<String>() {
+            @Override
+            protected void updateItem(String item, boolean empty) {
+                super.updateItem(item, empty);
+                if (!empty && item != null) {
+                    setText(item);
+                    setTextFill(Color.web("#f5ede0"));
+                }
+            }
+        });
+        endBox.getChildren().addAll(endHour, endMinute, endAmPm);
         Label endError = new Label();
         endError.setStyle(errorStyle);
         endError.setVisible(false);
 
-        vbox.getChildren().addAll(nameLabel, nameField, nameError, roleLabel, roleChoice, startLabel, startField, startError, endLabel, endField, endError);
+        vbox.getChildren().addAll(nameLabel, nameField, nameError, roleLabel, roleChoice, startLabel, startBox, startError, endLabel, endBox, endError);
         dialog.getDialogPane().setContent(vbox);
         dialog.getDialogPane().getButtonTypes().addAll(
             javafx.scene.control.ButtonType.CANCEL,
@@ -379,8 +561,6 @@ public class StaffController {
         javafx.beans.InvalidationListener validator = obs -> {
             boolean valid = true;
             String name = nameField.getText().trim();
-            String start = startField.getText().trim();
-            String end = endField.getText().trim();
 
             if (name.isEmpty()) {
                 nameError.setText("Required");
@@ -397,29 +577,7 @@ public class StaffController {
                 nameField.setStyle(fieldStyle);
             }
 
-            try {
-                if (!start.isEmpty()) {
-                    LocalTime.parse(start);
-                }
-                startError.setVisible(false);
-            } catch (Exception e) {
-                startError.setText("Invalid format (HH:mm)");
-                startError.setVisible(true);
-                valid = false;
-            }
-
-            try {
-                if (!end.isEmpty()) {
-                    LocalTime.parse(end);
-                }
-                endError.setVisible(false);
-            } catch (Exception e) {
-                endError.setText("Invalid format (HH:mm)");
-                endError.setVisible(true);
-                valid = false;
-            }
-
-            if (valid && !name.isEmpty() && !start.isEmpty() && !end.isEmpty()) {
+            if (valid && !name.isEmpty()) {
                 okButton.setStyle("-fx-background-color: #c8500a; -fx-text-fill: #f5ede0; -fx-border-radius: 6; -fx-padding: 8 16 8 16; -fx-font-size: 12px; -fx-font-weight: bold;");
                 okButton.setDisable(false);
             } else {
@@ -429,8 +587,6 @@ public class StaffController {
         };
 
         nameField.textProperty().addListener(validator);
-        startField.textProperty().addListener(validator);
-        endField.textProperty().addListener(validator);
 
         dialog.getDialogPane().lookupButton(javafx.scene.control.ButtonType.CANCEL).setStyle(
             "-fx-background-color: transparent; -fx-text-fill: #a09070; -fx-border-color: #4a3820; -fx-border-width: 1; -fx-border-radius: 6; -fx-padding: 8 16 8 16; -fx-font-size: 12px;");
@@ -440,8 +596,8 @@ public class StaffController {
                 return new String[]{
                     nameField.getText(),
                     roleChoice.getValue(),
-                    startField.getText(),
-                    endField.getText()
+                    convertTo24Hour(startHour.getValue(), startMinute.getValue(), startAmPm.getValue()),
+                    convertTo24Hour(endHour.getValue(), endMinute.getValue(), endAmPm.getValue())
                 };
             }
             return null;
@@ -451,10 +607,10 @@ public class StaffController {
             if (result != null && result.length == 4) {
                 String name = result[0].trim();
                 String role = result[1];
-                String startTime = result[2].trim();
-                String endTime = result[3].trim();
+                String startTime = result[2];
+                String endTime = result[3];
 
-                if (!name.isEmpty() && !startTime.isEmpty() && !endTime.isEmpty()) {
+                if (!name.isEmpty() && startTime != null && endTime != null) {
                     try {
                         LocalTime start = LocalTime.parse(startTime);
                         LocalTime end = LocalTime.parse(endTime);
@@ -466,6 +622,13 @@ public class StaffController {
                 }
             }
         });
+    }
+
+    private String convertTo24Hour(Integer hour, Integer minute, String amPm) {
+        int h = hour;
+        if ("PM".equals(amPm) && hour != 12) h += 12;
+        if ("AM".equals(amPm) && hour == 12) h = 0;
+        return String.format("%02d:%02d", h, minute);
     }
 
     public void setActiveNav(String navName) {
