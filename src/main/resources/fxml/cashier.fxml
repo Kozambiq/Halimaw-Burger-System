@@ -17,7 +17,8 @@
 <HBox xmlns="http://javafx.com/javafx/17"
       xmlns:fx="http://javafx.com/fxml/1"
       fx:controller="com.myapp.halimawburgersystem.CashierController"
-      stylesheets="@../css/common.css, @../css/login.css, @../css/dashboard.css, @../css/inventory.css">
+      style="-fx-background-color: #1a1208;"
+stylesheets="@../css/cashier.css, @../css/common.css, @../css/login.css, @../css/dashboard.css, @../css/inventory.css">
 
     <VBox styleClass="cashier-left" HBox.hgrow="ALWAYS">
         <HBox styleClass="cashier-topbar" prefHeight="56">
@@ -41,9 +42,8 @@
             <Button fx:id="btnCatOthers" styleClass="cat-btn" text="Others" onAction="#onFilterCategory"/>
         </HBox>
 
-        <ScrollPane styleClass="menu-grid-scroll" VBox.vgrow="ALWAYS">
+        <ScrollPane styleClass="menu-grid-scroll" VBox.vgrow="ALWAYS" fitToWidth="true" fitToHeight="true">
             <GridPane fx:id="menuGrid" styleClass="menu-grid" hgap="10" vgap="10">
-                <padding><Insets top="16" right="16" bottom="16" left="16"/></padding>
             </GridPane>
         </ScrollPane>
     </VBox>
@@ -57,7 +57,7 @@
             <Button styleClass="btn-outline btn-sm" text="Clear" onAction="#onClearOrder"/>
         </HBox>
 
-        <ScrollPane styleClass="order-items-scroll" VBox.vgrow="ALWAYS">
+        <ScrollPane styleClass="order-items-scroll" VBox.vgrow="ALWAYS" fitToWidth="true" fitToHeight="true">
             <VBox fx:id="orderItemsList" styleClass="order-items-list" spacing="0">
             </VBox>
         </ScrollPane>

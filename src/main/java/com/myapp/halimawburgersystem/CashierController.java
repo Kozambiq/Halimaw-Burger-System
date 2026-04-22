@@ -1,6 +1,8 @@
 package com.myapp.halimawburgersystem;
 
+import com.myapp.dao.ComboDAO;
 import com.myapp.dao.MenuItemDAO;
+import com.myapp.model.Combo;
 import com.myapp.model.MenuItemModel;
 import javafx.fxml.FXML;
 import javafx.geometry.Insets;
@@ -11,10 +13,12 @@ import javafx.scene.control.TextField;
 import javafx.scene.input.MouseEvent;
 import javafx.scene.layout.Background;
 import javafx.scene.layout.BackgroundFill;
+import javafx.scene.layout.ColumnConstraints;
 import javafx.scene.layout.CornerRadii;
 import javafx.scene.layout.GridPane;
 import javafx.scene.layout.HBox;
 import javafx.scene.layout.Region;
+import javafx.scene.layout.StackPane;
 import javafx.scene.layout.VBox;
 import javafx.scene.paint.Color;
 
@@ -35,9 +39,12 @@ public class CashierController {
     @FXML private Button btnTakeout;
 
     private MenuItemDAO menuItemDAO = new MenuItemDAO();
+    private ComboDAO comboDAO = new ComboDAO();
     private Map<Integer, Integer> orderItems = new HashMap<>();
     private Map<Integer, Double> itemPrices = new HashMap<>();
+    private Map<Integer, Double> comboPrices = new HashMap<>();
     private List<MenuItemModel> allMenuItems;
+    private List<Combo> allCombos;
     private String currentOrderType = "Dine-in";
     private int orderNumber = 1;
     private double subtotal = 0.0;
@@ -45,6 +52,7 @@ public class CashierController {
     @FXML
     public void initialize() {
         loadMenuItems();
+        loadCombos();
         updateOrderNumber();
         updateTotals();
         setActiveToggle(btnDineIn);
@@ -54,48 +62,160 @@ public class CashierController {
         try {
             allMenuItems = menuItemDAO.findAllWithIngredientStatus();
             menuGrid.getChildren().clear();
+            menuGrid.getColumnConstraints().clear();
 
+            int columns = 4;
+            for (int i = 0; i < columns; i++) {
+                ColumnConstraints col = new ColumnConstraints();
+                col.setPrefWidth(150);
+                col.setMinWidth(150);
+                col.setMaxWidth(150);
+                menuGrid.getColumnConstraints().add(col);
+            }
+
+            int row = 0;
+            int col = 0;
             for (MenuItemModel item : allMenuItems) {
-                itemPrices.put(item.getId(), item.getPrice());
-                VBox card = createMenuCard(item);
+                itemPrices.put(-item.getId(), item.getPrice());
+                StackPane card = createMenuCard(item, false);
+                GridPane.setConstraints(card, col, row);
                 menuGrid.getChildren().add(card);
+
+                col++;
+                if (col >= columns) {
+                    col = 0;
+                    row++;
+                }
             }
         } catch (Exception e) {
             System.err.println("Error loading menu items: " + e.getMessage());
         }
     }
 
-    private VBox createMenuCard(MenuItemModel item) {
-        VBox card = new VBox(4);
-        card.setPadding(new Insets(12));
-        card.setPrefSize(130, 100);
+    private void loadCombos() {
+        try {
+            allCombos = comboDAO.findAll();
+
+            int existingItems = menuGrid.getChildren().size();
+            int columns = 5;
+            int startRow = (existingItems + columns - 1) / columns;
+
+            int row = startRow;
+            int col = 0;
+
+            for (Combo combo : allCombos) {
+                if (!"Active".equals(combo.getStatus())) continue;
+                comboPrices.put(combo.getId(), combo.getPromoPrice());
+                StackPane card = createComboCard(combo);
+                GridPane.setConstraints(card, col, row);
+                menuGrid.getChildren().add(card);
+
+                col++;
+                if (col >= columns) {
+                    col = 0;
+                    row++;
+                }
+            }
+        } catch (Exception e) {
+            System.err.println("Error loading combos: " + e.getMessage());
+        }
+    }
+
+    private StackPane createMenuCard(MenuItemModel item, boolean isCombo) {
+        StackPane card = new StackPane();
+        card.setPrefSize(150, 110);
+        card.setMinSize(150, 110);
+        card.setMaxSize(150, 110);
         card.getStyleClass().add("menu-card");
-        card.setBackground(new Background(new BackgroundFill(Color.web("#332615"), CornerRadii.EMPTY, Insets.EMPTY)));
+
+        VBox content = new VBox(4);
+        content.setPadding(new Insets(12));
 
         Label nameLabel = new Label(item.getName());
         nameLabel.getStyleClass().add("menu-card-name");
 
-        Label priceLabel = new Label("₱" + item.getFormattedPrice().replace("₱", ""));
+        Label priceLabel = new Label("₱" + String.format("%.2f", item.getPrice()));
         priceLabel.getStyleClass().add("menu-card-price");
 
         Label catLabel = new Label(item.getCategory());
         catLabel.getStyleClass().add("menu-card-cat");
 
-        card.getChildren().addAll(nameLabel, priceLabel, catLabel);
+        content.getChildren().addAll(nameLabel, priceLabel, catLabel);
 
+        boolean isOutOfStock = "Out of Stock".equals(item.getAvailability());
+        if (isOutOfStock) {
+            card.getStyleClass().add("menu-card-disabled");
+
+            Label outLabel = new Label("OUT OF STOCK");
+            outLabel.getStyleClass().add("menu-out-label");
+            StackPane.setAlignment(outLabel, javafx.geometry.Pos.CENTER);
+            card.getChildren().addAll(content, outLabel);
+        } else {
+            card.getChildren().add(content);
+        }
+
+        final MenuItemModel clickedItem = item;
         card.setOnMouseClicked((MouseEvent event) -> {
-            addToOrder(item);
+            if (!isOutOfStock) {
+                addMenuItemToOrder(clickedItem);
+            }
         });
 
         return card;
     }
 
-    private void addToOrder(MenuItemModel item) {
-        int itemId = item.getId();
+    private StackPane createComboCard(Combo combo) {
+        StackPane card = new StackPane();
+        card.setPrefSize(150, 110);
+        card.setMinSize(150, 110);
+        card.setMaxSize(150, 110);
+        card.getStyleClass().add("menu-card");
+        card.getStyleClass().add("menu-card-promo");
+
+        VBox content = new VBox(2);
+        content.setPadding(new Insets(8, 12, 8, 12));
+        content.setAlignment(javafx.geometry.Pos.TOP_LEFT);
+
+        Label promoBadge = new Label("PROMO");
+        promoBadge.getStyleClass().add("menu-promo-badge");
+
+        Label nameLabel = new Label(combo.getName());
+        nameLabel.getStyleClass().add("menu-card-name");
+
+        Label priceLabel = new Label("₱" + String.format("%.2f", combo.getPromoPrice()));
+        priceLabel.getStyleClass().add("menu-card-price");
+
+        Label includesLabel = new Label(combo.getIncludes());
+        includesLabel.getStyleClass().add("menu-card-cat");
+        includesLabel.setWrapText(true);
+
+        content.getChildren().addAll(promoBadge, nameLabel, priceLabel, includesLabel);
+        card.getChildren().add(content);
+
+        final Combo clickedCombo = combo;
+        card.setOnMouseClicked((MouseEvent event) -> {
+            addComboToOrder(clickedCombo);
+        });
+
+        return card;
+    }
+
+    private void addMenuItemToOrder(MenuItemModel item) {
+        int itemId = -item.getId();
         int quantity = orderItems.getOrDefault(itemId, 0) + 1;
         orderItems.put(itemId, quantity);
 
         subtotal += item.getPrice();
+        updateOrderDisplay();
+        updateTotals();
+    }
+
+    private void addComboToOrder(Combo combo) {
+        int comboId = combo.getId();
+        int quantity = orderItems.getOrDefault(comboId, 0) + 1;
+        orderItems.put(comboId, quantity);
+
+        subtotal += combo.getPromoPrice();
         updateOrderDisplay();
         updateTotals();
     }
@@ -107,41 +227,111 @@ public class CashierController {
             int itemId = entry.getKey();
             int qty = entry.getValue();
 
-            MenuItemModel item = findMenuItemById(itemId);
-            if (item == null || qty <= 0) continue;
-
-            HBox row = new HBox(8);
-            row.getStyleClass().add("order-item-row");
-            row.setPadding(new Insets(8, 0, 8, 0));
-
-            Label nameLabel = new Label(item.getName());
-            nameLabel.getStyleClass().add("order-item-name");
-            nameLabel.setMaxWidth(Double.MAX_VALUE);
-            HBox.setHgrow(nameLabel, javafx.scene.layout.Priority.ALWAYS);
-
-            HBox qtyCtrl = new HBox(6);
-            qtyCtrl.getStyleClass().add("qty-ctrl");
-
-            Button minusBtn = new Button("-");
-            minusBtn.getStyleClass().add("qty-btn");
-            minusBtn.setOnAction(e -> updateItemQuantity(item, qty - 1));
-
-            Label qtyLabel = new Label(String.valueOf(qty));
-            qtyLabel.getStyleClass().add("qty-val");
-
-            Button plusBtn = new Button("+");
-            plusBtn.getStyleClass().add("qty-btn");
-            plusBtn.setOnAction(e -> updateItemQuantity(item, qty + 1));
-
-            qtyCtrl.getChildren().addAll(minusBtn, qtyLabel, plusBtn);
-
-            double itemTotal = item.getPrice() * qty;
-            Label totalLabel = new Label("₱" + String.format("%.2f", itemTotal));
-            totalLabel.getStyleClass().add("order-item-total");
-
-            row.getChildren().addAll(nameLabel, qtyCtrl, totalLabel);
-            orderItemsList.getChildren().add(row);
+            if (itemId > 0) {
+                Combo combo = findComboById(itemId);
+                if (combo == null || qty <= 0) continue;
+                addOrderRow(combo.getName(), qty, combo.getPromoPrice());
+            } else {
+                MenuItemModel item = findMenuItemById(-itemId);
+                if (item == null || qty <= 0) continue;
+                addOrderRow(item.getName(), qty, item.getPrice());
+            }
         }
+    }
+
+    private void addOrderRow(String name, int qty, double price) {
+        HBox row = new HBox(8);
+        row.getStyleClass().add("order-item-row");
+        row.setPadding(new Insets(8, 0, 8, 0));
+
+        Label nameLabel = new Label(name);
+        nameLabel.getStyleClass().add("order-item-name");
+        nameLabel.setMaxWidth(Double.MAX_VALUE);
+        HBox.setHgrow(nameLabel, javafx.scene.layout.Priority.ALWAYS);
+
+        HBox qtyCtrl = new HBox(6);
+        qtyCtrl.getStyleClass().add("qty-ctrl");
+
+        Button minusBtn = new Button("-");
+        minusBtn.getStyleClass().add("qty-btn");
+        final int finalQty = qty;
+        final String finalName = name;
+        final double finalPrice = price;
+        minusBtn.setOnAction(e -> decrementItem(finalName, finalPrice));
+
+        Label qtyLabel = new Label(String.valueOf(qty));
+        qtyLabel.getStyleClass().add("qty-val");
+
+        Button plusBtn = new Button("+");
+        plusBtn.getStyleClass().add("qty-btn");
+        plusBtn.setOnAction(e -> incrementItem(finalName, finalPrice));
+
+        qtyCtrl.getChildren().addAll(minusBtn, qtyLabel, plusBtn);
+
+        double itemTotal = price * qty;
+        Label totalLabel = new Label("₱" + String.format("%.2f", itemTotal));
+        totalLabel.getStyleClass().add("order-item-total");
+
+        row.getChildren().addAll(nameLabel, qtyCtrl, totalLabel);
+        orderItemsList.getChildren().add(row);
+    }
+
+    private void decrementItem(String name, double price) {
+        for (Map.Entry<Integer, Integer> entry : orderItems.entrySet()) {
+            int id = entry.getKey();
+            if (id > 0) {
+                Combo combo = findComboById(id);
+                if (combo != null && combo.getName().equals(name)) {
+                    int qty = entry.getValue() - 1;
+                    if (qty <= 0) {
+                        orderItems.remove(id);
+                        subtotal -= combo.getPromoPrice() * entry.getValue();
+                    } else {
+                        entry.setValue(qty);
+                        subtotal -= combo.getPromoPrice();
+                    }
+                    break;
+                }
+            } else {
+                MenuItemModel item = findMenuItemById(-id);
+                if (item != null && item.getName().equals(name)) {
+                    int qty = entry.getValue() - 1;
+                    if (qty <= 0) {
+                        orderItems.remove(id);
+                        subtotal -= item.getPrice() * entry.getValue();
+                    } else {
+                        entry.setValue(qty);
+                        subtotal -= item.getPrice();
+                    }
+                    break;
+                }
+            }
+        }
+        updateOrderDisplay();
+        updateTotals();
+    }
+
+    private void incrementItem(String name, double price) {
+        for (Map.Entry<Integer, Integer> entry : orderItems.entrySet()) {
+            int id = entry.getKey();
+            if (id > 0) {
+                Combo combo = findComboById(id);
+                if (combo != null && combo.getName().equals(name)) {
+                    entry.setValue(entry.getValue() + 1);
+                    subtotal += combo.getPromoPrice();
+                    break;
+                }
+            } else {
+                MenuItemModel item = findMenuItemById(-id);
+                if (item != null && item.getName().equals(name)) {
+                    entry.setValue(entry.getValue() + 1);
+                    subtotal += item.getPrice();
+                    break;
+                }
+            }
+        }
+        updateOrderDisplay();
+        updateTotals();
     }
 
     private MenuItemModel findMenuItemById(int id) {
@@ -151,20 +341,11 @@ public class CashierController {
         return null;
     }
 
-    private void updateItemQuantity(MenuItemModel item, int newQty) {
-        int itemId = item.getId();
-        int oldQty = orderItems.getOrDefault(itemId, 0);
-
-        if (newQty <= 0) {
-            orderItems.remove(itemId);
-            subtotal -= item.getPrice() * oldQty;
-        } else {
-            orderItems.put(itemId, newQty);
-            subtotal += item.getPrice() * (newQty - oldQty);
+    private Combo findComboById(int id) {
+        for (Combo combo : allCombos) {
+            if (combo.getId() == id) return combo;
         }
-
-        updateOrderDisplay();
-        updateTotals();
+        return null;
     }
 
     private void updateTotals() {

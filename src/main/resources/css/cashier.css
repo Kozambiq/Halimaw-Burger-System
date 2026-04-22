@@ -15,6 +15,29 @@
     -fx-pref-width: 360;
 }
 
+/* Menu scroll container fills left panel */
+.menu-grid-scroll {
+    -fx-background-color: #1a1208;
+}
+
+.menu-grid-scroll > .viewport {
+    -fx-background-color: #1a1208;
+}
+
+.menu-grid-scroll .scroll-bar:vertical,
+.menu-grid-scroll .scroll-bar:horizontal {
+    -fx-background-color: #1a1208;
+}
+
+/* Order items scroll */
+.order-items-scroll {
+    -fx-background-color: #221a0e;
+}
+
+.order-items-scroll > .viewport {
+    -fx-background-color: #221a0e;
+}
+
 /* ── Cashier Topbar ──────────────────────────────────── */
 .cashier-topbar {
     -fx-background-color: #2e2410;
@@ -97,17 +120,18 @@
 
 /* ── Menu Grid ──────────────────────────────────── */
 .menu-grid-scroll {
-    -fx-background: transparent;
+    -fx-background-color: #1a1208;
     -fx-padding: 0;
 }
 
 .menu-grid {
-    -fx-background: transparent;
+    -fx-background-color: #1a1208;
     -fx-hgap: 10;
     -fx-vgap: 10;
     -fx-padding: 16;
 }
 
+/* Menu Card */
 .menu-card {
     -fx-background-color: #332615;
     -fx-border-color: #4a3820;
@@ -116,29 +140,43 @@
     -fx-background-radius: 12;
     -fx-padding: 12;
     -fx-cursor: hand;
-    -fx-pref-width: 130;
-    -fx-pref-height: 100;
+    -fx-pref-width: 150;
+    -fx-pref-height: 110;
 }
 
 .menu-card:hover {
     -fx-border-color: #d4591e;
-    -fx-translate-y: -2;
 }
 
+/* Menu Card - Hover Animation */
+.menu-card:hover {
+    -fx-effect: dropshadow(gaussian, rgba(212,89,30,0.3), 8, 0, 0, 2);
+}
+
+/* Menu Card - Promo/Combo styling */
 .menu-card-promo {
     -fx-border-color: #4a8c3f;
+    -fx-border-width: 2;
 }
 
+.menu-card-promo:hover {
+    -fx-border-color: #7ec470;
+    -fx-effect: dropshadow(gaussian, rgba(74,140,63,0.4), 10, 0, 0, 2);
+}
+
+/* Menu Card Content */
 .menu-card-name {
     -fx-font-family: 'DM Sans', sans-serif;
     -fx-font-size: 13px;
     -fx-font-weight: 500;
     -fx-text-fill: #f5ede0;
+    -fx-wrap-text: true;
 }
 
 .menu-card-price {
     -fx-font-family: 'DM Mono', monospace;
     -fx-font-size: 12px;
+    -fx-font-weight: 500;
     -fx-text-fill: #d4591e;
 }
 
@@ -148,6 +186,45 @@
     -fx-text-fill: #8a7055;
 }
 
+/* Out of Stock Overlay */
+.menu-card-overlay {
+    -fx-background-color: rgba(26, 18, 8, 0.85);
+    -fx-border-radius: 12;
+    -fx-background-radius: 12;
+}
+
+.menu-card-disabled {
+    -fx-opacity: 0.6;
+}
+
+.menu-card-disabled .menu-card-name,
+.menu-card-disabled .menu-card-price {
+    -fx-text-fill: #8a7055;
+}
+
+.menu-out-label {
+    -fx-font-family: 'DM Sans', sans-serif;
+    -fx-font-size: 9px;
+    -fx-font-weight: 600;
+    -fx-letter-spacing: 0.1em;
+    -fx-text-fill: #e07070;
+    -fx-background-color: #8c3030;
+    -fx-padding: 2 8 2 8;
+    -fx-background-radius: 3;
+}
+
+/* Combo/Promo Badge */
+.menu-promo-badge {
+    -fx-font-family: 'DM Sans', sans-serif;
+    -fx-font-size: 9px;
+    -fx-font-weight: 600;
+    -fx-letter-spacing: 0.1em;
+    -fx-text-fill: #7ec470;
+    -fx-background-color: rgba(74, 140, 63, 0.2);
+    -fx-padding: 2 8 2 8;
+    -fx-background-radius: 3;
+}
+
 /* ── Order Panel ──────────────────────────────────── */
 .order-panel-header {
     -fx-background-color: #2e2410;
@@ -155,6 +232,10 @@
     -fx-border-width: 0 0 1 0;
     -fx-border-style: solid;
     -fx-padding: 16 16 16 16;
+}
+
+.order-items-scroll {
+    -fx-background-color: #221a0e;
 }
 
 .order-num {
@@ -172,13 +253,8 @@
     -fx-text-fill: #d4591e;
 }
 
-.order-items-scroll {
-    -fx-background: transparent;
-    -fx-padding: 0;
-}
-
 .order-items-list {
-    -fx-background: transparent;
+    -fx-background-color: #221a0e;
     -fx-padding: 12;
 }
 
