@@ -382,10 +382,33 @@ public class StaffController {
 
         Label roleLabel = new Label("Role:");
         roleLabel.setStyle(labelStyle);
-        javafx.scene.control.ChoiceBox<String> roleChoice = new javafx.scene.control.ChoiceBox<>();
+        ComboBox<String> roleChoice = new ComboBox<>();
         roleChoice.getItems().addAll("Manager", "Cashier", "Cook");
         roleChoice.setValue("Cashier");
         roleChoice.setStyle(fieldStyle);
+        roleChoice.setButtonCell(new javafx.scene.control.ListCell<String>() {
+            @Override
+            protected void updateItem(String item, boolean empty) {
+                super.updateItem(item, empty);
+                if (!empty && item != null) {
+                    setText(item);
+                    setTextFill(Color.web("#ffffff"));
+                }
+            }
+        });
+        roleChoice.setCellFactory(listView -> new javafx.scene.control.ListCell<String>() {
+            {
+                setBackground(new Background(new BackgroundFill(Color.web("#221a0e"), CornerRadii.EMPTY, Insets.EMPTY)));
+            }
+            @Override
+            protected void updateItem(String item, boolean empty) {
+                super.updateItem(item, empty);
+                if (!empty && item != null) {
+                    setText(item);
+                    setTextFill(Color.web("#f5ede0"));
+                }
+            }
+        });
 
         Label startLabel = new Label("Shift Start:");
         startLabel.setStyle(labelStyle);
@@ -405,6 +428,9 @@ public class StaffController {
             }
         });
         startHour.setCellFactory(listView -> new javafx.scene.control.ListCell<Integer>() {
+            {
+                setBackground(new Background(new BackgroundFill(Color.web("#221a0e"), CornerRadii.EMPTY, Insets.EMPTY)));
+            }
             @Override
             protected void updateItem(Integer item, boolean empty) {
                 super.updateItem(item, empty);
@@ -429,6 +455,9 @@ public class StaffController {
             }
         });
         startMinute.setCellFactory(listView -> new javafx.scene.control.ListCell<Integer>() {
+            {
+                setBackground(new Background(new BackgroundFill(Color.web("#221a0e"), CornerRadii.EMPTY, Insets.EMPTY)));
+            }
             @Override
             protected void updateItem(Integer item, boolean empty) {
                 super.updateItem(item, empty);
@@ -453,6 +482,9 @@ public class StaffController {
             }
         });
         startAmPm.setCellFactory(listView -> new javafx.scene.control.ListCell<String>() {
+            {
+                setBackground(new Background(new BackgroundFill(Color.web("#221a0e"), CornerRadii.EMPTY, Insets.EMPTY)));
+            }
             @Override
             protected void updateItem(String item, boolean empty) {
                 super.updateItem(item, empty);
@@ -485,6 +517,9 @@ public class StaffController {
             }
         });
         endHour.setCellFactory(listView -> new javafx.scene.control.ListCell<Integer>() {
+            {
+                setBackground(new Background(new BackgroundFill(Color.web("#221a0e"), CornerRadii.EMPTY, Insets.EMPTY)));
+            }
             @Override
             protected void updateItem(Integer item, boolean empty) {
                 super.updateItem(item, empty);
@@ -509,6 +544,9 @@ public class StaffController {
             }
         });
         endMinute.setCellFactory(listView -> new javafx.scene.control.ListCell<Integer>() {
+            {
+                setBackground(new Background(new BackgroundFill(Color.web("#221a0e"), CornerRadii.EMPTY, Insets.EMPTY)));
+            }
             @Override
             protected void updateItem(Integer item, boolean empty) {
                 super.updateItem(item, empty);
@@ -533,6 +571,9 @@ public class StaffController {
             }
         });
         endAmPm.setCellFactory(listView -> new javafx.scene.control.ListCell<String>() {
+            {
+                setBackground(new Background(new BackgroundFill(Color.web("#221a0e"), CornerRadii.EMPTY, Insets.EMPTY)));
+            }
             @Override
             protected void updateItem(String item, boolean empty) {
                 super.updateItem(item, empty);

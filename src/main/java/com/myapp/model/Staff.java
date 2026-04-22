@@ -95,8 +95,14 @@ public class Staff {
         if (shiftStart == null || shiftEnd == null) {
             return "--:--";
         }
-        String start = String.format("%02d:%02d", shiftStart.getHour(), shiftStart.getMinute());
-        String end = String.format("%02d:%02d", shiftEnd.getHour(), shiftEnd.getMinute());
-        return start + "–" + end;
+        return formatTo12Hour(shiftStart) + " – " + formatTo12Hour(shiftEnd);
+    }
+
+    private String formatTo12Hour(LocalTime time) {
+        int hour = time.getHour();
+        int minute = time.getMinute();
+        String amPm = hour >= 12 ? "PM" : "AM";
+        int hour12 = hour == 0 ? 12 : (hour > 12 ? hour - 12 : hour);
+        return String.format("%d:%02d %s", hour12, minute, amPm);
     }
 }
