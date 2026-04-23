@@ -73,6 +73,11 @@
     -fx-background-color: rgba(176, 122, 24, 0.15);
 }
 
+.order-card.cancelled-card {
+    -fx-border-color: #8a3838;
+    -fx-background-color: rgba(138, 56, 56, 0.2);
+}
+
 .card-order {
     -fx-font-family: 'DM Mono', monospace;
     -fx-font-weight: 600;

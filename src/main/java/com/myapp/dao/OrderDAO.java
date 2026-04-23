@@ -65,7 +65,7 @@ public class OrderDAO {
 
     public List<Order> findByDateRange(LocalDateTime start, LocalDateTime end) {
         List<Order> orders = new ArrayList<>();
-        String sql = "SELECT * FROM orders WHERE created_at BETWEEN ? AND ? ORDER BY created_at DESC";
+        String sql = "SELECT o.*, COALESCE((SELECT GROUP_CONCAT(CONCAT(quantity, 'x ', item_name) SEPARATOR ', ') FROM order_items WHERE order_id = o.id), 'No items') as summary FROM orders o WHERE o.created_at BETWEEN ? AND ? ORDER BY o.created_at DESC";
 
         try (Connection conn = DatabaseConnection.getConnection();
              PreparedStatement stmt = conn.prepareStatement(sql)) {
@@ -88,6 +88,7 @@ public class OrderDAO {
                     );
                     order.setId(rs.getInt("id"));
                     order.setCreatedAt(rs.getTimestamp("created_at").toLocalDateTime());
+                    order.setItemsSummary(rs.getString("summary"));
                     orders.add(order);
                 }
             }
@@ -135,7 +136,7 @@ public class OrderDAO {
 
     public List<Order> findAll() {
         List<Order> orders = new ArrayList<>();
-        String sql = "SELECT * FROM orders ORDER BY created_at DESC";
+        String sql = "SELECT o.*, COALESCE((SELECT GROUP_CONCAT(CONCAT(quantity, 'x ', item_name) SEPARATOR ', ') FROM order_items WHERE order_id = o.id), 'No items') as summary FROM orders o ORDER BY o.created_at DESC";
         try (Connection conn = DatabaseConnection.getConnection();
              PreparedStatement stmt = conn.prepareStatement(sql);
              ResultSet rs = stmt.executeQuery()) {
@@ -155,6 +156,7 @@ public class OrderDAO {
                 order.setId(rs.getInt("id"));
                 order.setCreatedAt(rs.getTimestamp("created_at").toLocalDateTime());
                 order.setStatus(rs.getString("status"));
+                order.setItemsSummary(rs.getString("summary"));
                 orders.add(order);
             }
         } catch (SQLException e) {
@@ -165,13 +167,13 @@ public class OrderDAO {
 
     public List<Order> findByFilters(String orderType, LocalDateTime startDate, LocalDateTime endDate) {
         List<Order> orders = new ArrayList<>();
-        StringBuilder sql = new StringBuilder("SELECT o.*, (SELECT GROUP_CONCAT(CONCAT(quantity, 'x ', item_name) SEPARATOR ', ') FROM order_items WHERE order_id = o.id) as summary FROM orders o WHERE 1=1");
+        StringBuilder sql = new StringBuilder("SELECT o.*, COALESCE((SELECT GROUP_CONCAT(CONCAT(quantity, 'x ', item_name) SEPARATOR ', ') FROM order_items WHERE order_id = o.id), 'No items') as summary FROM orders o WHERE 1=1");
 
         if (orderType != null && !orderType.isEmpty() && !orderType.equals("All Types")) {
-            sql.append(" AND order_type = ?");
+            sql.append(" AND o.order_type = ?");
         }
         if (startDate != null && endDate != null) {
-            sql.append(" AND DATE(created_at) BETWEEN DATE(?) AND DATE(?)");
+            sql.append(" AND DATE(o.created_at) BETWEEN DATE(?) AND DATE(?)");
         }
         sql.append(" ORDER BY o.created_at DESC");
 

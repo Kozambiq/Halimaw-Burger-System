@@ -309,6 +309,25 @@
     -fx-text-fill: #f5ede0;
 }
 
+.btn-modal-danger {
+    -fx-background-color: transparent;
+    -fx-border-color: #8a3838;
+    -fx-border-width: 1;
+    -fx-border-radius: 6;
+    -fx-background-radius: 6;
+    -fx-text-fill: #e07070;
+    -fx-font-family: 'DM Sans', sans-serif;
+    -fx-font-size: 13px;
+    -fx-font-weight: 600;
+    -fx-padding: 10 20 10 20;
+    -fx-cursor: hand;
+}
+
+.btn-modal-danger:hover {
+    -fx-background-color: rgba(224, 112, 112, 0.1);
+    -fx-border-color: #e07070;
+}
+
 .btn-modal-primary {
     -fx-background-color: #d4591e;
     -fx-border-radius: 6;

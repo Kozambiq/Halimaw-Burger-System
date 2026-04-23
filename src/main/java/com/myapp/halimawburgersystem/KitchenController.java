@@ -8,7 +8,9 @@ import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
 import javafx.geometry.Insets;
 import javafx.geometry.Pos;
+import javafx.scene.control.Alert;
 import javafx.scene.control.Button;
+import javafx.scene.control.ButtonType;
 import javafx.scene.control.Label;
 import javafx.scene.control.ScrollPane;
 import javafx.scene.layout.HBox;
@@ -18,7 +20,9 @@ import javafx.scene.layout.VBox;
 
 import java.time.Duration;
 import java.time.LocalDateTime;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
@@ -51,6 +55,7 @@ public class KitchenController {
 
     private OrderDAO orderDAO = new OrderDAO();
     private ScheduledExecutorService timerService;
+    private Map<Integer, LocalDateTime> cancelledOrdersTime = new HashMap<>();
 
     @FXML
     public void initialize() {
@@ -87,9 +92,25 @@ public class KitchenController {
         colReady.getChildren().clear();
 
         int n = 0, p = 0, r = 0;
+        LocalDateTime now = LocalDateTime.now();
 
         for (Order order : allOrders) {
             String status = order.getStatus();
+            
+            if ("Cancelled".equals(status)) {
+                if (!cancelledOrdersTime.containsKey(order.getId())) {
+                    cancelledOrdersTime.put(order.getId(), now);
+                }
+                
+                long secsSinceCancel = Duration.between(cancelledOrdersTime.get(order.getId()), now).getSeconds();
+                if (secsSinceCancel > 60) continue; 
+
+                // Show cancelled at top of New column with red highlight
+                VBox card = createOrderCard(order);
+                colNew.getChildren().add(0, card);
+                continue;
+            }
+
             if ("New".equals(status)) {
                 colNew.getChildren().add(createOrderCard(order));
                 n++;
@@ -97,8 +118,6 @@ public class KitchenController {
                 colPreparing.getChildren().add(createOrderCard(order));
                 p++;
             } else if ("Done".equals(status)) {
-                // Done in DB maps to "Ready" in Kanban logic if not yet picked up
-                // For now, let's treat "Done" as "Ready" for the kitchen perspective
                 colReady.getChildren().add(createOrderCard(order));
                 r++;
             }
@@ -113,10 +132,13 @@ public class KitchenController {
         VBox card = new VBox(8);
         card.getStyleClass().add("order-card");
         
+        if ("Cancelled".equals(order.getStatus())) {
+            card.getStyleClass().add("cancelled-card");
+        }
+        
         long mins = Duration.between(order.getCreatedAt(), LocalDateTime.now()).toMinutes();
         boolean isUrgent = false;
 
-        // Warning Logic: New > 5m, Preparing > 15m
         if ("New".equals(order.getStatus()) && mins >= 5) {
             isUrgent = true;
         } else if ("Preparing".equals(order.getStatus()) && mins >= 15) {
@@ -150,13 +172,16 @@ public class KitchenController {
         // Footer: Timer | Action Button
         HBox footer = new HBox();
         footer.setAlignment(Pos.CENTER_LEFT);
-        Label timer = new Label(mins + "m ago" + (isUrgent ? " ⚠" : ""));
+        
+        String timerText = mins + "m ago";
+        if ("Cancelled".equals(order.getStatus())) timerText = "CANCELLED";
+        else if ("Done".equals(order.getStatus())) timerText = "Ready " + mins + "m";
+
+        Label timer = new Label(timerText + (isUrgent ? " ⚠" : ""));
         timer.getStyleClass().add("card-timer");
         if (isUrgent) timer.getStyleClass().add("urgent-text");
-        if ("Done".equals(order.getStatus())) {
-            timer.setText("Ready " + mins + "m");
-            timer.setStyle("-fx-text-fill: #7ec470;");
-        }
+        if ("Done".equals(order.getStatus())) timer.setStyle("-fx-text-fill: #7ec470;");
+        if ("Cancelled".equals(order.getStatus())) timer.setStyle("-fx-text-fill: #e07070;");
 
         Region footerSpacer = new Region();
         HBox.setHgrow(footerSpacer, Priority.ALWAYS);
@@ -174,11 +199,29 @@ public class KitchenController {
             actionBtn.setText("Complete");
             actionBtn.setStyle("-fx-background-color: #4a8c3f;");
             actionBtn.setOnAction(e -> updateStatus(order, "Completed")); 
+        } else {
+            actionBtn.setVisible(false);
+            actionBtn.setManaged(false);
         }
 
         footer.getChildren().addAll(timer, footerSpacer, actionBtn);
         card.getChildren().addAll(header, items, footer);
         
+        card.setOnMouseClicked(e -> {
+            if (!"Cancelled".equals(order.getStatus()) && !"Completed".equals(order.getStatus())) {
+                Alert confirm = new Alert(Alert.AlertType.CONFIRMATION);
+                confirm.setTitle("Cancel Kitchen Order");
+                confirm.setHeaderText("Cancel Order #" + String.format("%04d", order.getOrderNumber()) + "?");
+                confirm.setContentText("This will move the order to 'Cancelled' status.");
+                confirm.getDialogPane().setStyle("-fx-background-color: #2e2410; -fx-border-color: #4a3820; -fx-border-width: 1;");
+                
+                if (confirm.showAndWait().get() == ButtonType.OK) {
+                    updateStatus(order, "Cancelled");
+                    cancelledOrdersTime.put(order.getId(), LocalDateTime.now());
+                }
+            }
+        });
+
         return card;
     }
 
@@ -188,10 +231,6 @@ public class KitchenController {
         }
     }
 
-    private void refreshTimers() {
-        loadQueue(); // Simple way to refresh UI, or we could surgically update labels
-    }
-
     @FXML
     private void onNavigate(ActionEvent event) {
         Button clicked = (Button) event.getSource();
@@ -199,6 +238,7 @@ public class KitchenController {
         try {
             if (text.contains("Dashboard")) Main.showDashboard();
             else if (text.contains("Orders")) Main.showOrders();
+            else if (text.contains("Kitchen")) return;
             else if (text.contains("Menu Items")) Main.showMenuItems();
             else if (text.contains("Combos")) Main.showCombos();
             else if (text.contains("Inventory")) Main.showInventory();

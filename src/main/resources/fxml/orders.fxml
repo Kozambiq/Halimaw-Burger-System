@@ -112,9 +112,9 @@
         </VBox>
     </VBox>
 
-    <StackPane HBox.hgrow="ALWAYS">
-        <VBox styleClass="main-content">
-            <HBox styleClass="topbar" prefHeight="56">
+    <StackPane HBox.hgrow="ALWAYS" maxWidth="Infinity">
+        <VBox styleClass="main-content" HBox.hgrow="ALWAYS" maxWidth="Infinity">
+            <HBox styleClass="topbar" prefHeight="56" maxWidth="Infinity">
                 <padding><Insets top="16" right="24" bottom="16" left="24"/></padding>
                 <Label fx:id="pageTitle" styleClass="topbar-title" text="Orders"/>
                 <Region HBox.hgrow="ALWAYS"/>
@@ -124,11 +124,11 @@
                 <Label styleClass="topbar-date" text="Sat, Apr 18 2026 · 1:32 PM"/>
             </HBox>
 
-            <StackPane VBox.vgrow="ALWAYS" maxHeight="Infinity" styleClass="content-area">
-                <VBox spacing="16" VBox.vgrow="ALWAYS">
+            <StackPane VBox.vgrow="ALWAYS" maxHeight="Infinity" maxWidth="Infinity" styleClass="content-area">
+                <VBox spacing="16" VBox.vgrow="ALWAYS" maxWidth="Infinity">
                     <padding><Insets top="24" right="32" bottom="24" left="32"/></padding>
 
-                    <HBox spacing="8" alignment="CENTER_LEFT">
+                    <HBox spacing="8" alignment="CENTER_LEFT" maxWidth="Infinity">
                         <ComboBox fx:id="cmbOrderType" styleClass="filter-combo" prefWidth="140" onAction="#onFilterChanged"/>
                         <ComboBox fx:id="cmbDateFilter" styleClass="filter-combo" prefWidth="140" onAction="#onDateFilterChanged"/>
                         <HBox fx:id="datePickerBox" styleClass="date-picker-box" spacing="8" visible="false" managed="false">
@@ -139,35 +139,35 @@
                         <Region HBox.hgrow="ALWAYS"/>
                     </HBox>
 
-                    <HBox alignment="CENTER_LEFT" spacing="12">
-                        <VBox styleClass="stat-card">
+                    <HBox alignment="CENTER_LEFT" spacing="12" maxWidth="Infinity">
+                        <VBox styleClass="stat-card" HBox.hgrow="ALWAYS">
                             <Label styleClass="stat-label" text="TOTAL ORDERS"/>
                             <Label fx:id="lblTotalOrders" styleClass="stat-value" text="0"/>
                         </VBox>
-                        <VBox styleClass="stat-card">
+                        <VBox styleClass="stat-card" HBox.hgrow="ALWAYS">
                             <Label styleClass="stat-label" text="PREPARING"/>
                             <Label fx:id="lblPreparing" styleClass="stat-value" text="0" style="-fx-text-fill: #e8b84b;"/>
                         </VBox>
-                        <VBox styleClass="stat-card">
+                        <VBox styleClass="stat-card" HBox.hgrow="ALWAYS">
                             <Label styleClass="stat-label" text="COMPLETED"/>
                             <Label fx:id="lblCompleted" styleClass="stat-value" text="0" style="-fx-text-fill: #7ec470;"/>
                         </VBox>
-                        <VBox styleClass="stat-card">
+                        <VBox styleClass="stat-card" HBox.hgrow="ALWAYS">
                             <Label styleClass="stat-label" text="CANCELLED"/>
                             <Label fx:id="lblCancelled" styleClass="stat-value" text="0" style="-fx-text-fill: #e07070;"/>
                         </VBox>
                     </HBox>
 
-                    <StackPane VBox.vgrow="ALWAYS" maxHeight="Infinity" styleClass="table-wrap">
+                    <StackPane VBox.vgrow="ALWAYS" maxHeight="Infinity" styleClass="table-wrap" maxWidth="Infinity">
                         <padding><Insets top="24" bottom="0"/></padding>
-                        <TableView fx:id="ordersTable" styleClass="inventory-table" maxHeight="Infinity" VBox.vgrow="ALWAYS" onMouseClicked="#onOrderClicked">
+                        <TableView fx:id="ordersTable" styleClass="inventory-table" maxHeight="Infinity" maxWidth="Infinity" VBox.vgrow="ALWAYS" onMouseClicked="#onOrderClicked">
                             <columns>
-                                <TableColumn fx:id="colOrderNumber" text="ORDER #" prefWidth="1" minWidth="80"/>
-                                <TableColumn fx:id="colItems" text="ITEMS SUMMARY" prefWidth="1" minWidth="200"/>
-                                <TableColumn fx:id="colType" text="TYPE" prefWidth="1" minWidth="80"/>
-                                <TableColumn fx:id="colTotal" text="TOTAL" prefWidth="1" minWidth="100"/>
-                                <TableColumn fx:id="colTime" text="TIME" prefWidth="1" minWidth="80"/>
-                                <TableColumn fx:id="colStatus" text="STATUS" prefWidth="1" minWidth="100"/>
+                                <TableColumn fx:id="colOrderNumber" text="ORDER #" prefWidth="100" minWidth="80"/>
+                                <TableColumn fx:id="colItems" text="ITEMS SUMMARY" prefWidth="400" minWidth="200"/>
+                                <TableColumn fx:id="colType" text="TYPE" prefWidth="100" minWidth="80"/>
+                                <TableColumn fx:id="colTotal" text="TOTAL" prefWidth="120" minWidth="100"/>
+                                <TableColumn fx:id="colTime" text="TIME" prefWidth="100" minWidth="80"/>
+                                <TableColumn fx:id="colStatus" text="STATUS" prefWidth="120" minWidth="100"/>
                             </columns>
                         </TableView>
                     </StackPane>
@@ -249,6 +249,7 @@
                     <padding><Insets top="16" right="24" bottom="16" left="24"/></padding>
                     <Label fx:id="detailsStatus" styleClass="badge badge-green" text="COMPLETED"/>
                     <Region HBox.hgrow="ALWAYS"/>
+                    <Button fx:id="btnCancelOrder" text="Cancel Order" styleClass="btn-modal-danger" onAction="#onCancelOrder"/>
                     <Button text="Close" styleClass="btn-modal-secondary" onAction="#onCloseDetails"/>
                     <Button fx:id="btnPrintOrder" text="Print Receipt" styleClass="btn-modal-primary"/>
                 </HBox>

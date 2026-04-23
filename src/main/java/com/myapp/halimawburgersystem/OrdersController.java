@@ -5,6 +5,7 @@ import com.myapp.dao.StaffDAO;
 import com.myapp.model.Order;
 import com.myapp.model.OrderItem;
 import com.myapp.model.Staff;
+import javafx.application.Platform;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 import javafx.event.ActionEvent;
@@ -23,6 +24,9 @@ import javafx.scene.layout.VBox;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.List;
+import java.util.concurrent.Executors;
+import java.util.concurrent.ScheduledExecutorService;
+import java.util.concurrent.TimeUnit;
 
 public class OrdersController {
 
@@ -78,11 +82,13 @@ public class OrdersController {
     @FXML private Label detailsTotal;
     @FXML private Label detailsStatus;
     @FXML private Button btnPrintOrder;
+    @FXML private Button btnCancelOrder;
 
     private OrderDAO orderDAO = new OrderDAO();
     private StaffDAO staffDAO = new StaffDAO();
     private ObservableList<Order> ordersList = FXCollections.observableArrayList();
     private Order selectedOrder;
+    private ScheduledExecutorService refreshService;
 
     @FXML
     public void initialize() {
@@ -90,7 +96,14 @@ public class OrdersController {
         setupFilters();
         setupTableColumns();
         loadOrders();
-        loadStats();
+        
+        // Dynamic Refresh
+        refreshService = Executors.newSingleThreadScheduledExecutor(r -> {
+            Thread t = new Thread(r);
+            t.setDaemon(true);
+            return t;
+        });
+        refreshService.scheduleAtFixedRate(() -> Platform.runLater(this::loadOrders), 10, 10, TimeUnit.SECONDS);
     }
 
     private void setupUserInfo() {
@@ -159,6 +172,18 @@ public class OrdersController {
         });
 
         colItems.setCellValueFactory(new PropertyValueFactory<>("itemsSummary"));
+        colItems.setCellFactory(column -> new TableCell<Order, String>() {
+            @Override
+            protected void updateItem(String item, boolean empty) {
+                super.updateItem(item, empty);
+                if (empty || item == null) {
+                    setText(null);
+                } else {
+                    setText(item);
+                    setWrapText(true);
+                }
+            }
+        });
 
         colStatus.setCellValueFactory(new PropertyValueFactory<>("status"));
         colStatus.setCellFactory(column -> new TableCell<Order, String>() {
@@ -187,10 +212,34 @@ public class OrdersController {
         });
 
         ordersTable.setItems(ordersList);
+        ordersTable.setColumnResizePolicy(TableView.CONSTRAINED_RESIZE_POLICY);
     }
 
-    private void loadOrders() {
-        ordersList.setAll(orderDAO.findAll());
+    public void loadOrders() {
+        String orderType = cmbOrderType.getValue();
+        if (orderType == null) orderType = "All Types";
+        
+        String dateFilter = cmbDateFilter.getValue();
+        LocalDateTime start = null;
+        LocalDateTime end = LocalDateTime.now();
+
+        if ("Today".equals(dateFilter)) {
+            start = LocalDateTime.now().withHour(0).withMinute(0).withSecond(0);
+        } else if ("Yesterday".equals(dateFilter)) {
+            start = LocalDateTime.now().minusDays(1).withHour(0).withMinute(0).withSecond(0);
+            end = LocalDateTime.now().minusDays(1).withHour(23).withMinute(59).withSecond(59);
+        } else if ("Last 7 Days".equals(dateFilter)) {
+            start = LocalDateTime.now().minusDays(7);
+        } else if ("This Month".equals(dateFilter)) {
+            start = LocalDateTime.now().withDayOfMonth(1).withHour(0).withMinute(0).withSecond(0);
+        } else if ("Custom".equals(dateFilter)) {
+            if (dateFrom.getValue() != null) start = dateFrom.getValue().atStartOfDay();
+            if (dateTo.getValue() != null) end = dateTo.getValue().atTime(23, 59, 59);
+        }
+
+        List<Order> results = orderDAO.findByFilters(orderType, start, end);
+        ordersList.setAll(results);
+        loadStats();
     }
 
     private void loadStats() {
@@ -246,6 +295,15 @@ public class OrdersController {
         detailsDiscount.setText("-₱" + String.format("%.2f", order.getDiscount()));
         detailsTotal.setText("₱" + String.format("%.2f", order.getTotal()));
         
+        // Hide cancel button if already cancelled or completed
+        if ("Cancelled".equals(order.getStatus()) || "Completed".equals(order.getStatus())) {
+            btnCancelOrder.setVisible(false);
+            btnCancelOrder.setManaged(false);
+        } else {
+            btnCancelOrder.setVisible(true);
+            btnCancelOrder.setManaged(true);
+        }
+        
         detailsStatus.setText(order.getStatus().toUpperCase());
         detailsStatus.getStyleClass().removeAll("badge-amber", "badge-blue", "badge-green", "badge-completed", "badge-red");
         switch (order.getStatus()) {
@@ -289,9 +347,26 @@ public class OrdersController {
     }
 
     @FXML
+    private void onCancelOrder() {
+        if (selectedOrder != null) {
+            Alert confirm = new Alert(Alert.AlertType.CONFIRMATION);
+            confirm.setTitle("Cancel Order");
+            confirm.setHeaderText("Cancel Order #" + String.format("%04d", selectedOrder.getOrderNumber()) + "?");
+            confirm.setContentText("This action cannot be undone.");
+            confirm.getDialogPane().setStyle("-fx-background-color: #2e2410; -fx-border-color: #4a3820; -fx-border-width: 1;");
+            
+            if (confirm.showAndWait().get() == ButtonType.OK) {
+                if (orderDAO.updateStatus(selectedOrder.getId(), "Cancelled")) {
+                    loadOrders();
+                    onCloseDetails();
+                }
+            }
+        }
+    }
+
+    @FXML
     private void onFilterChanged(ActionEvent event) {
         loadOrders();
-        loadStats();
     }
 
     @FXML
@@ -304,7 +379,6 @@ public class OrdersController {
             datePickerBox.setVisible(false);
             datePickerBox.setManaged(false);
             loadOrders();
-            loadStats();
         }
     }
 
@@ -328,6 +402,7 @@ public class OrdersController {
     @FXML
     private void onLogout(ActionEvent event) {
         try {
+            if (refreshService != null) refreshService.shutdown();
             Main.showLogin();
         } catch (Exception e) {
             e.printStackTrace();

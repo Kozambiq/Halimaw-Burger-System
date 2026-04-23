@@ -234,6 +234,7 @@ public class Main extends Application {
 
         if (ordersController != null) {
             ordersController.setActiveNav("Orders");
+            ordersController.loadOrders();
         }
     }
 
