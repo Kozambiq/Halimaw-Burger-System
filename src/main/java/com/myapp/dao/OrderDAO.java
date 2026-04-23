@@ -12,7 +12,7 @@ import java.util.List;
 public class OrderDAO {
 
     public int insert(Order order, List<OrderItem> items) {
-        String orderSql = "INSERT INTO orders (order_number, staff_id, order_type, subtotal, discount, total, payment_type, notes) VALUES (?, ?, ?, ?, ?, ?, ?, ?)";
+        String orderSql = "INSERT INTO orders (order_number, staff_id, order_type, subtotal, discount, total, payment_type, reference_number, notes) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)";
         String itemSql = "INSERT INTO order_items (order_id, item_type, item_id, item_name, quantity, unit_price, total_price) VALUES (?, ?, ?, ?, ?, ?, ?)";
 
         try (Connection conn = DatabaseConnection.getConnection()) {
@@ -26,7 +26,8 @@ public class OrderDAO {
                 orderStmt.setDouble(5, order.getDiscount());
                 orderStmt.setDouble(6, order.getTotal());
                 orderStmt.setString(7, order.getPaymentType());
-                orderStmt.setString(8, order.getNotes());
+                orderStmt.setString(8, order.getReferenceNumber());
+                orderStmt.setString(9, order.getNotes());
 
                 orderStmt.executeUpdate();
 
@@ -80,6 +81,7 @@ public class OrderDAO {
                         rs.getDouble("discount"),
                         rs.getDouble("total"),
                         rs.getString("payment_type"),
+                        rs.getString("reference_number"),
                         rs.getString("notes")
                     ));
                 }
@@ -112,5 +114,17 @@ public class OrderDAO {
             System.err.println("Error calculating total sales: " + e.getMessage());
         }
         return 0;
+    }
+
+    public int getNextOrderNumber() {
+        String sql = "SELECT COALESCE(MAX(order_number), 0) + 1 FROM orders";
+        try (Connection conn = DatabaseConnection.getConnection();
+             PreparedStatement stmt = conn.prepareStatement(sql);
+             ResultSet rs = stmt.executeQuery()) {
+            if (rs.next()) return rs.getInt(1);
+        } catch (SQLException e) {
+            System.err.println("Error getting next order number: " + e.getMessage());
+        }
+        return 1;
     }
 }

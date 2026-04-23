@@ -11,13 +11,14 @@ public class Order {
     private double discount;
     private double total;
     private String paymentType;
+    private String referenceNumber;
     private String notes;
     private LocalDateTime createdAt;
 
     public Order() {
     }
 
-    public Order(int orderNumber, int staffId, String orderType, double subtotal, double discount, double total, String paymentType, String notes) {
+    public Order(int orderNumber, int staffId, String orderType, double subtotal, double discount, double total, String paymentType, String referenceNumber, String notes) {
         this.orderNumber = orderNumber;
         this.staffId = staffId;
         this.orderType = orderType;
@@ -25,6 +26,7 @@ public class Order {
         this.discount = discount;
         this.total = total;
         this.paymentType = paymentType;
+        this.referenceNumber = referenceNumber;
         this.notes = notes;
     }
 
@@ -90,6 +92,14 @@ public class Order {
 
     public void setPaymentType(String paymentType) {
         this.paymentType = paymentType;
+    }
+
+    public String getReferenceNumber() {
+        return referenceNumber;
+    }
+
+    public void setReferenceNumber(String referenceNumber) {
+        this.referenceNumber = referenceNumber;
     }
 
     public String getNotes() {

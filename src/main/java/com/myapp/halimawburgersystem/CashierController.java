@@ -12,6 +12,7 @@ import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
 import javafx.geometry.Insets;
+import javafx.scene.Scene;
 import javafx.scene.control.Alert;
 import javafx.scene.control.Button;
 import javafx.scene.control.Label;
@@ -79,6 +80,7 @@ public class CashierController {
 
     @FXML
     public void initialize() {
+        orderNumber = orderDAO.getNextOrderNumber();
         updateOrderNumber();
         updateTotals();
         setActiveToggle(btnDineIn);
@@ -529,13 +531,21 @@ public class CashierController {
             return;
         }
 
+        String referenceNumber = null;
+        if ("GCash".equals(paymentType)) {
+            referenceNumber = showGCashDialog();
+            if (referenceNumber == null) {
+                return;
+            }
+        }
+
         Staff staff = Main.getCurrentStaff();
         int staffId = staff != null ? staff.getId() : 1;
 
         double discount = 0.0;
         String notes = txtOrderNotes.getText();
 
-        Order order = new Order(orderNumber, staffId, currentOrderType, subtotal, discount, subtotal, paymentType, notes);
+        Order order = new Order(orderNumber, staffId, currentOrderType, subtotal, discount, subtotal, paymentType, referenceNumber, notes);
 
         List<OrderItem> items = new ArrayList<>();
         for (Map.Entry<Integer, Integer> entry : orderItems.entrySet()) {
@@ -557,7 +567,7 @@ public class CashierController {
 
         int orderId = orderDAO.insert(order, items);
         if (orderId > 0) {
-            orderNumber++;
+            orderNumber = orderDAO.getNextOrderNumber();
             orderItems.clear();
             subtotal = 0.0;
             txtOrderNotes.clear();
@@ -593,6 +603,31 @@ public class CashierController {
         okButton.setStyle("-fx-background-color: #c8500a; -fx-text-fill: #f5ede0; -fx-border-radius: 6; -fx-padding: 8 16 8 16; -fx-font-size: 12px; -fx-font-weight: bold;");
 
         alert.showAndWait();
+    }
+
+    private String showGCashDialog() {
+        try {
+            FXMLLoader loader = new FXMLLoader(getClass().getResource("/fxml/gcash-dialog.fxml"));
+            javafx.scene.Parent root = loader.load();
+
+            Stage dialogStage = new Stage();
+            dialogStage.setTitle("GCash Payment");
+            dialogStage.initOwner(menuGrid.getScene().getWindow());
+            dialogStage.setResizable(false);
+
+            Scene scene = new Scene(root, 400, 300);
+            dialogStage.setScene(scene);
+
+            GCashDialogController controller = loader.getController();
+            dialogStage.showAndWait();
+
+            if (controller.isConfirmed()) {
+                return controller.getReferenceNumber();
+            }
+        } catch (Exception e) {
+            System.err.println("Error showing GCash dialog: " + e.getMessage());
+        }
+        return null;
     }
 
     public void setActiveNav(String navName) {

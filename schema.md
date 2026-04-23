@@ -103,6 +103,8 @@ CREATE TABLE IF NOT EXISTS orders (
     discount      DECIMAL(10,2) NOT NULL DEFAULT 0.00,
     total         DECIMAL(10,2) NOT NULL,
     payment_type  ENUM('Cash','GCash') NOT NULL,
+    reference_number VARCHAR(100),
+    status        ENUM('New','Preparing','Done','Cancelled') NOT NULL DEFAULT 'New',
     notes         VARCHAR(500),
     created_at    DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
     FOREIGN KEY (staff_id) REFERENCES staff(id)
