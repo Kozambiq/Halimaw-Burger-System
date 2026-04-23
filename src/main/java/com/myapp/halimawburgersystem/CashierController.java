@@ -5,6 +5,7 @@ import com.myapp.dao.MenuItemDAO;
 import com.myapp.model.Combo;
 import com.myapp.model.MenuItemModel;
 import com.myapp.model.Staff;
+import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
 import javafx.geometry.Insets;
@@ -25,6 +26,7 @@ import javafx.scene.layout.StackPane;
 import javafx.scene.layout.VBox;
 import javafx.scene.paint.Color;
 import javafx.scene.shape.Line;
+import javafx.scene.shape.SVGPath;
 import javafx.stage.Stage;
 import javafx.scene.Scene;
 import javafx.application.Platform;
@@ -48,6 +50,12 @@ public class CashierController {
     @FXML private Button btnLogout;
     @FXML private Label lblStaffName;
     @FXML private Label lblStaffInitials;
+    @FXML private Button btnCatAll;
+    @FXML private Button btnCatBurgers;
+    @FXML private Button btnCatChicken;
+    @FXML private Button btnCatSides;
+    @FXML private Button btnCatDrinks;
+    @FXML private Button btnCatOthers;
 
     private MenuItemDAO menuItemDAO = new MenuItemDAO();
     private ComboDAO comboDAO = new ComboDAO();
@@ -69,6 +77,7 @@ public class CashierController {
         updateOrderNumber();
         updateTotals();
         setActiveToggle(btnDineIn);
+        setActiveCategory(btnCatAll);
         updateStaffInfo();
 
         menuGrid.parentProperty().addListener((obs, oldParent, newParent) -> {
@@ -475,8 +484,20 @@ public class CashierController {
         btn.getStyleClass().add("toggle-btn-active");
     }
 
+    private void setActiveCategory(Button btn) {
+        btn.getStyleClass().add("cat-btn-active");
+    }
+
     @FXML
-    private void onFilterCategory() {
+    private void onFilterCategory(ActionEvent event) {
+        Button clickedBtn = (Button) event.getSource();
+        btnCatAll.getStyleClass().remove("cat-btn-active");
+        btnCatBurgers.getStyleClass().remove("cat-btn-active");
+        btnCatChicken.getStyleClass().remove("cat-btn-active");
+        btnCatSides.getStyleClass().remove("cat-btn-active");
+        btnCatDrinks.getStyleClass().remove("cat-btn-active");
+        btnCatOthers.getStyleClass().remove("cat-btn-active");
+        clickedBtn.getStyleClass().add("cat-btn-active");
     }
 
     @FXML
@@ -485,8 +506,6 @@ public class CashierController {
         subtotal = 0.0;
         updateOrderDisplay();
         updateTotals();
-        orderNumber++;
-        updateOrderNumber();
     }
 
     @FXML
