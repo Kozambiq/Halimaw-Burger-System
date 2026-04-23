@@ -1,6 +1,8 @@
 package com.myapp.halimawburgersystem;
 
+import com.myapp.dao.StaffDAO;
 import com.myapp.dao.UserDAO;
+import com.myapp.model.Staff;
 import com.myapp.model.User;
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
@@ -21,6 +23,7 @@ public class LoginController {
     @FXML private Label passwordError;
 
     private UserDAO userDAO = new UserDAO();
+    private StaffDAO staffDAO = new StaffDAO();
     private boolean passwordVisible = false;
 
     @FXML
@@ -142,6 +145,10 @@ public class LoginController {
         userDAO.authenticate(email, password).ifPresentOrElse(
             user -> {
                 try {
+                    Main.setCurrentUser(user);
+                    Staff staff = staffDAO.findById(user.getStaffId());
+                    Main.setCurrentStaff(staff);
+
                     if ("Cashier".equals(user.getRole())) {
                         Main.showCashier();
                     } else {

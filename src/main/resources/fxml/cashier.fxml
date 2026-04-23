@@ -27,9 +27,11 @@ stylesheets="@../css/cashier.css, @../css/common.css, @../css/login.css, @../css
                 <styleClass>cashier-logo-text</styleClass>
             </Label>
             <Region HBox.hgrow="ALWAYS"/>
-            <HBox styleClass="toggle-group" spacing="2">
-                <Button fx:id="btnDineIn" styleClass="toggle-btn" text="Dine-in" onAction="#onToggleDineIn"/>
-                <Button fx:id="btnTakeout" styleClass="toggle-btn" text="Takeout" onAction="#onToggleTakeout"/>
+            <HBox styleClass="user-info-group" spacing="12" alignment="CENTER">
+                <Label fx:id="lblStaffInitials" styleClass="user-info-avatar" text=""/>
+                <Label fx:id="lblStaffName" styleClass="user-info-name" text=""/>
+                <Region HBox.hgrow="ALWAYS"/>
+                <Button fx:id="btnLogout" styleClass="btn-logout" text="Logout" onAction="#onLogout"/>
             </HBox>
         </HBox>
 
@@ -40,6 +42,11 @@ stylesheets="@../css/cashier.css, @../css/common.css, @../css/login.css, @../css
             <Button fx:id="btnCatSides" styleClass="cat-btn" text="Sides" onAction="#onFilterCategory"/>
             <Button fx:id="btnCatDrinks" styleClass="cat-btn" text="Drinks" onAction="#onFilterCategory"/>
             <Button fx:id="btnCatOthers" styleClass="cat-btn" text="Others" onAction="#onFilterCategory"/>
+            <Region HBox.hgrow="ALWAYS"/>
+            <HBox styleClass="toggle-group" spacing="2">
+                <Button fx:id="btnDineIn" styleClass="toggle-btn" text="Dine-in" onAction="#onToggleDineIn"/>
+                <Button fx:id="btnTakeout" styleClass="toggle-btn" text="Takeout" onAction="#onToggleTakeout"/>
+            </HBox>
         </HBox>
 
         <ScrollPane styleClass="menu-grid-scroll" VBox.vgrow="ALWAYS" fitToWidth="true" fitToHeight="true">

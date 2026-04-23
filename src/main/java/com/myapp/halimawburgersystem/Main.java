@@ -1,5 +1,7 @@
 package com.myapp.halimawburgersystem;
 
+import com.myapp.model.Staff;
+import com.myapp.model.User;
 import com.myapp.util.DatabaseConnection;
 import javafx.application.Application;
 import javafx.fxml.FXMLLoader;
@@ -23,6 +25,9 @@ public class Main extends Application {
     private static CombosController combosController;
     private static StaffController staffController;
     private static CashierController cashierController;
+
+    private static User currentUser;
+    private static Staff currentStaff;
 
     @Override
     public void start(Stage stage) throws Exception {
@@ -211,10 +216,31 @@ public class Main extends Application {
         cashierRoot = null;
     }
 
-    @Override
+@Override
     public void stop() throws Exception {
         DatabaseConnection.close();
         super.stop();
+    }
+
+    public static User getCurrentUser() {
+        return currentUser;
+    }
+
+    public static void setCurrentUser(User user) {
+        currentUser = user;
+    }
+
+    public static Staff getCurrentStaff() {
+        return currentStaff;
+    }
+
+    public static void setCurrentStaff(Staff staff) {
+        currentStaff = staff;
+    }
+
+    public static void clearSession() {
+        currentUser = null;
+        currentStaff = null;
     }
 
     public static void main(String[] args) {

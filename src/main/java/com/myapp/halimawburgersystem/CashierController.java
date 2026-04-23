@@ -4,6 +4,7 @@ import com.myapp.dao.ComboDAO;
 import com.myapp.dao.MenuItemDAO;
 import com.myapp.model.Combo;
 import com.myapp.model.MenuItemModel;
+import com.myapp.model.Staff;
 import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
 import javafx.geometry.Insets;
@@ -44,6 +45,9 @@ public class CashierController {
     @FXML private Label lblTotal;
     @FXML private Button btnDineIn;
     @FXML private Button btnTakeout;
+    @FXML private Button btnLogout;
+    @FXML private Label lblStaffName;
+    @FXML private Label lblStaffInitials;
 
     private MenuItemDAO menuItemDAO = new MenuItemDAO();
     private ComboDAO comboDAO = new ComboDAO();
@@ -65,6 +69,7 @@ public class CashierController {
         updateOrderNumber();
         updateTotals();
         setActiveToggle(btnDineIn);
+        updateStaffInfo();
 
         menuGrid.parentProperty().addListener((obs, oldParent, newParent) -> {
             if (newParent != null) {
@@ -82,6 +87,14 @@ public class CashierController {
                     Platform.runLater(() -> reloadMenu()));
             }
         });
+    }
+
+    private void updateStaffInfo() {
+        Staff staff = Main.getCurrentStaff();
+        if (staff != null) {
+            lblStaffName.setText(staff.getName());
+            lblStaffInitials.setText(staff.getInitials());
+        }
     }
 
     private int calculateColumns() {
@@ -483,6 +496,7 @@ public class CashierController {
     @FXML
     private void onLogout() {
         try {
+            Main.clearSession();
             Main.showLogin();
         } catch (Exception e) {
             e.printStackTrace();

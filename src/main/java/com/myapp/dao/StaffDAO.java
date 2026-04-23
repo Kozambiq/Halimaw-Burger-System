@@ -14,6 +14,30 @@ import java.util.List;
 
 public class StaffDAO {
 
+    public Staff findById(int id) {
+        String sql = "SELECT id, name, email, role, shift_start, shift_end, status FROM staff WHERE id = ?";
+        try (Connection conn = DatabaseConnection.getConnection();
+             PreparedStatement stmt = conn.prepareStatement(sql)) {
+            stmt.setInt(1, id);
+            try (ResultSet rs = stmt.executeQuery()) {
+                if (rs.next()) {
+                    return new Staff(
+                        rs.getInt("id"),
+                        rs.getString("name"),
+                        rs.getString("email"),
+                        rs.getString("role"),
+                        rs.getTime("shift_start") != null ? rs.getTime("shift_start").toLocalTime() : null,
+                        rs.getTime("shift_end") != null ? rs.getTime("shift_end").toLocalTime() : null,
+                        rs.getString("status")
+                    );
+                }
+            }
+        } catch (SQLException e) {
+            System.err.println("Error finding staff by id: " + e.getMessage());
+        }
+        return null;
+    }
+
     public List<Staff> findAll() {
         List<Staff> staffList = new ArrayList<>();
         String sql = "SELECT id, name, email, role, shift_start, shift_end, status FROM staff ORDER BY id";
