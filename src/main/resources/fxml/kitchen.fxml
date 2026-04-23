@@ -123,7 +123,7 @@
             
             <HBox spacing="16" alignment="TOP_CENTER" styleClass="kanban-container">
                 <!-- NEW COLUMN -->
-                <VBox styleClass="kanban-col" HBox.hgrow="ALWAYS" spacing="12">
+                <VBox styleClass="kanban-col, col-new" HBox.hgrow="ALWAYS" spacing="0">
                     <HBox styleClass="kanban-col-header" alignment="CENTER_LEFT">
                         <Label styleClass="kanban-col-title" text="NEW"/>
                         <Region HBox.hgrow="ALWAYS"/>
@@ -135,7 +135,7 @@
                 </VBox>
 
                 <!-- PREPARING COLUMN -->
-                <VBox styleClass="kanban-col" HBox.hgrow="ALWAYS" spacing="12">
+                <VBox styleClass="kanban-col, col-preparing" HBox.hgrow="ALWAYS" spacing="0">
                     <HBox styleClass="kanban-col-header" alignment="CENTER_LEFT">
                         <Label styleClass="kanban-col-title" text="PREPARING"/>
                         <Region HBox.hgrow="ALWAYS"/>
@@ -147,7 +147,7 @@
                 </VBox>
 
                 <!-- READY COLUMN -->
-                <VBox styleClass="kanban-col" HBox.hgrow="ALWAYS" spacing="12">
+                <VBox styleClass="kanban-col, col-ready" HBox.hgrow="ALWAYS" spacing="0">
                     <HBox styleClass="kanban-col-header" alignment="CENTER_LEFT">
                         <Label styleClass="kanban-col-title" text="READY"/>
                         <Region HBox.hgrow="ALWAYS"/>

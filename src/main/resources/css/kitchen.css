@@ -12,12 +12,61 @@
     -fx-border-width: 1;
     -fx-border-radius: 12;
     -fx-background-radius: 12;
-    -fx-padding: 16;
+    -fx-padding: 0; /* Changed to 0 to allow header to stretch */
     -fx-min-width: 300;
 }
 
 .kanban-col-header {
-    -fx-padding: 0 0 12 0;
+    -fx-padding: 12 16 12 16;
+    -fx-border-width: 0 0 1 0;
+    -fx-border-color: #4a3820;
+}
+
+/* ── Status Specific Columns ────────────────────────── */
+
+/* NEW - Amber */
+.kanban-col.col-new {
+    -fx-border-color: rgba(232, 184, 75, 0.4);
+}
+.kanban-col.col-new .kanban-col-header {
+    -fx-background-color: rgba(232, 184, 75, 0.08);
+    -fx-border-color: rgba(232, 184, 75, 0.2);
+    -fx-background-radius: 12 12 0 0;
+}
+.kanban-col.col-new .kanban-col-title {
+    -fx-text-fill: #e8b84b;
+    -fx-font-size: 13px;
+    -fx-font-weight: 800;
+}
+
+/* PREPARING - Blue */
+.kanban-col.col-preparing {
+    -fx-border-color: rgba(112, 180, 224, 0.4);
+}
+.kanban-col.col-preparing .kanban-col-header {
+    -fx-background-color: rgba(112, 180, 224, 0.08);
+    -fx-border-color: rgba(112, 180, 224, 0.2);
+    -fx-background-radius: 12 12 0 0;
+}
+.kanban-col.col-preparing .kanban-col-title {
+    -fx-text-fill: #70b4e0;
+    -fx-font-size: 13px;
+    -fx-font-weight: 800;
+}
+
+/* READY - Green */
+.kanban-col.col-ready {
+    -fx-border-color: rgba(126, 196, 112, 0.4);
+}
+.kanban-col.col-ready .kanban-col-header {
+    -fx-background-color: rgba(126, 196, 112, 0.08);
+    -fx-border-color: rgba(126, 196, 112, 0.2);
+    -fx-background-radius: 12 12 0 0;
+}
+.kanban-col.col-ready .kanban-col-title {
+    -fx-text-fill: #7ec470;
+    -fx-font-size: 13px;
+    -fx-font-weight: 800;
 }
 
 .kanban-col-title {
@@ -29,20 +78,22 @@
 }
 
 .kanban-count {
-    -fx-background-color: #332615;
-    -fx-border-color: #4a3820;
+    -fx-background-color: rgba(0, 0, 0, 0.2);
+    -fx-border-color: rgba(255, 255, 255, 0.1);
     -fx-border-width: 1;
     -fx-padding: 2 10 2 10;
     -fx-background-radius: 12;
     -fx-border-radius: 12;
     -fx-font-size: 11px;
-    -fx-text-fill: #c4a882;
+    -fx-text-fill: #f5ede0;
     -fx-font-family: 'DM Mono', monospace;
+    -fx-font-weight: bold;
 }
 
 .kanban-scroll {
     -fx-background-color: transparent;
     -fx-background: transparent;
+    -fx-padding: 12 16 16 16;
 }
 
 .kanban-scroll .viewport {
