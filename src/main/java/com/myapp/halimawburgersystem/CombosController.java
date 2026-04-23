@@ -956,12 +956,20 @@ public class CombosController {
 
     @FXML
     private void onNavigateOrders() {
-        System.out.println("Orders - Coming soon");
+        try {
+            Main.showOrders();
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
     }
 
     @FXML
     private void onNavigateKitchen() {
-        System.out.println("Kitchen Queue - Coming soon");
+        try {
+            Main.showOrders();
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
     }
 
     @FXML

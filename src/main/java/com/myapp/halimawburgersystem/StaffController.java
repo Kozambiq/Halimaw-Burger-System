@@ -1025,10 +1025,20 @@ public class StaffController {
 
     @FXML
     private void onNavigateOrders(ActionEvent event) {
+        try {
+            Main.showOrders();
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
     }
 
     @FXML
     private void onNavigateKitchen(ActionEvent event) {
+        try {
+            Main.showOrders();
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
     }
 
     @FXML

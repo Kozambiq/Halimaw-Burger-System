@@ -2,6 +2,49 @@
     Inventory Tab Styles
     ============================================================ */
 
+/* ── Filter Styles ──────────────────────────────────── */
+.filter-combo {
+    -fx-background-color: #332615;
+    -fx-text-fill: #c4a882;
+    -fx-prompt-text-fill: #8a7055;
+    -fx-border-color: #4a3820;
+    -fx-border-width: 1;
+    -fx-border-radius: 6;
+    -fx-background-radius: 6;
+    -fx-padding: 8 12 8 12;
+    -fx-font-size: 13px;
+    -fx-font-family: 'DM Sans', sans-serif;
+}
+
+.filter-combo .list-cell {
+    -fx-text-fill: #c4a882;
+    -fx-background-color: #332615;
+}
+
+.filter-combo .list-view {
+    -fx-background-color: #2e2410;
+    -fx-border-color: #4a3820;
+}
+
+.filter-date {
+    -fx-background-color: #332615;
+    -fx-text-fill: #f5ede0;
+    -fx-border-color: #4a3820;
+    -fx-border-width: 1;
+    -fx-border-radius: 6;
+    -fx-background-radius: 6;
+    -fx-padding: 4 8 4 8;
+}
+
+.date-picker-box {
+    -fx-alignment: center-left;
+}
+
+.date-separator {
+    -fx-text-fill: #8a7055;
+    -fx-font-size: 12px;
+}
+
 /* ── Inventory Table ───────────────────────────────── */
 .inventory-table {
     -fx-background-color: transparent;

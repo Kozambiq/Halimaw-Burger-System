@@ -1,0 +1,170 @@
+.filter-bar {
+    -fx-padding: 0 0 8 0;
+}
+
+.filter-combo {
+    -fx-background-color: #332615;
+    -fx-text-fill: #c4a882;
+    -fx-prompt-text-fill: #8a7055;
+    -fx-border-color: #4a3820;
+    -fx-border-width: 1;
+    -fx-border-radius: 6;
+    -fx-background-radius: 6;
+    -fx-padding: 8 12 8 12;
+    -fx-font-size: 13px;
+    -fx-font-family: 'DM Sans', sans-serif;
+}
+
+.filter-combo .list-cell {
+    -fx-text-fill: #c4a882;
+    -fx-background-color: #332615;
+}
+
+.filter-combo .list-view {
+    -fx-background-color: #2e2410;
+    -fx-border-color: #4a3820;
+}
+
+.filter-date {
+    -fx-background-color: #332615;
+    -fx-text-fill: #f5ede0;
+    -fx-border-color: #4a3820;
+    -fx-border-width: 1;
+    -fx-border-radius: 6;
+    -fx-background-radius: 6;
+    -fx-padding: 4 8 4 8;
+}
+
+.date-picker-box {
+    -fx-alignment: center-left;
+}
+
+.date-separator {
+    -fx-text-fill: #8a7055;
+    -fx-font-size: 12px;
+}
+
+.stat-grid {
+    -fx-padding: 0 0 16 0;
+}
+
+.stat-card {
+    -fx-background-color: #332615;
+    -fx-border-color: #4a3820;
+    -fx-border-width: 1;
+    -fx-border-radius: 12;
+    -fx-background-radius: 12;
+    -fx-padding: 16 20 16 20;
+    -fx-pref-width: 150;
+}
+
+.stat-label {
+    -fx-font-family: 'DM Sans', sans-serif;
+    -fx-font-size: 11px;
+    -fx-font-weight: 600;
+    -fx-letter-spacing: 0.08em;
+    -fx-text-fill: #8a7055;
+    -fx-text-transform: uppercase;
+}
+
+.stat-value {
+    -fx-font-family: 'DM Mono', monospace;
+    -fx-font-size: 24px;
+    -fx-font-weight: 500;
+    -fx-text-fill: #f5ede0;
+}
+
+.stat-green {
+    -fx-text-fill: #7ec470;
+}
+
+.stat-blue {
+    -fx-text-fill: #70b4e0;
+}
+
+.stat-red {
+    -fx-text-fill: #e07070;
+}
+
+.table-scroll {
+    -fx-background-color: transparent;
+}
+
+.orders-table {
+    -fx-background-color: #332615;
+    -fx-border-color: #4a3820;
+    -fx-border-width: 1;
+    -fx-border-radius: 12;
+    -fx-background-radius: 12;
+    -fx-table-cell-border-color: #4a3820;
+}
+
+.orders-table .column-header {
+    -fx-background-color: #221a0e;
+    -fx-border-color: #4a3820;
+    -fx-border-width: 0 0 1 0;
+    -fx-padding: 10 14 10 14;
+}
+
+.orders-table .column-header .label {
+    -fx-font-family: 'DM Sans', sans-serif;
+    -fx-font-size: 11px;
+    -fx-font-weight: 600;
+    -fx-letter-spacing: 0.08em;
+    -fx-text-fill: #8a7055;
+    -fx-text-transform: uppercase;
+}
+
+.orders-table .table-cell {
+    -fx-text-fill: #c4a882;
+    -fx-font-size: 13px;
+    -fx-border-color: #4a3820;
+    -fx-border-width: 0 0 1 0;
+    -fx-padding: 10 14 10 14;
+}
+
+.orders-table .table-row-cell:hover {
+    -fx-background-color: #3d2e1a;
+}
+
+.orders-table .table-row-cell:selected {
+    -fx-background-color: rgba(212, 89, 30, 0.12);
+}
+
+.badge {
+    -fx-font-family: 'DM Sans', sans-serif;
+    -fx-font-size: 11px;
+    -fx-font-weight: 600;
+    -fx-letter-spacing: 0.04em;
+    -fx-padding: 3 10 3 10;
+    -fx-background-radius: 20;
+}
+
+.badge-green {
+    -fx-background-color: rgba(74, 140, 63, 0.15);
+    -fx-text-fill: #7ec470;
+}
+
+.badge-amber {
+    -fx-background-color: rgba(176, 122, 24, 0.15);
+    -fx-text-fill: #e8b84b;
+}
+
+.badge-red {
+    -fx-background-color: rgba(140, 48, 48, 0.15);
+    -fx-text-fill: #e07070;
+}
+
+.badge-blue {
+    -fx-background-color: rgba(30, 92, 140, 0.15);
+    -fx-text-fill: #70b4e0;
+}
+
+.order-number {
+    -fx-font-family: 'DM Mono', monospace;
+    -fx-text-fill: #d4591e;
+}
+
+.order-total {
+    -fx-font-family: 'DM Mono', monospace;
+}

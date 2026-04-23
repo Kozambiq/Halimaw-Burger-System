@@ -78,9 +78,11 @@
 .nav-item-active,
 .nav-item.active {
     -fx-background-color: rgba(212, 89, 30, 0.15);
-    -fx-background-insets: 0;
+    -fx-background-insets: 0 0 0 0;
     -fx-text-fill: #c8500a;
     -fx-font-weight: 500;
+    -fx-border-color: #c8500a;
+    -fx-border-width: 0 0 0 0;
 }
 
 /* SVG Icon */

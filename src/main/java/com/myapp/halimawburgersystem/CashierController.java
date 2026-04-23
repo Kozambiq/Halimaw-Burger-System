@@ -545,7 +545,7 @@ public class CashierController {
         double discount = 0.0;
         String notes = txtOrderNotes.getText();
 
-        Order order = new Order(orderNumber, staffId, currentOrderType, subtotal, discount, subtotal, paymentType, referenceNumber, notes);
+        Order order = new Order(orderNumber, staffId, currentOrderType, subtotal, discount, subtotal, paymentType, referenceNumber, "Preparing", notes);
 
         List<OrderItem> items = new ArrayList<>();
         for (Map.Entry<Integer, Integer> entry : orderItems.entrySet()) {

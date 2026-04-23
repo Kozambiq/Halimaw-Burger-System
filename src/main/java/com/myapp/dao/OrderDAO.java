@@ -12,7 +12,7 @@ import java.util.List;
 public class OrderDAO {
 
     public int insert(Order order, List<OrderItem> items) {
-        String orderSql = "INSERT INTO orders (order_number, staff_id, order_type, subtotal, discount, total, payment_type, reference_number, notes) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)";
+        String orderSql = "INSERT INTO orders (order_number, staff_id, order_type, subtotal, discount, total, payment_type, reference_number, status, notes) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)";
         String itemSql = "INSERT INTO order_items (order_id, item_type, item_id, item_name, quantity, unit_price, total_price) VALUES (?, ?, ?, ?, ?, ?, ?)";
 
         try (Connection conn = DatabaseConnection.getConnection()) {
@@ -27,7 +27,8 @@ public class OrderDAO {
                 orderStmt.setDouble(6, order.getTotal());
                 orderStmt.setString(7, order.getPaymentType());
                 orderStmt.setString(8, order.getReferenceNumber());
-                orderStmt.setString(9, order.getNotes());
+                orderStmt.setString(9, order.getStatus());
+                orderStmt.setString(10, order.getNotes());
 
                 orderStmt.executeUpdate();
 
@@ -82,6 +83,7 @@ public class OrderDAO {
                         rs.getDouble("total"),
                         rs.getString("payment_type"),
                         rs.getString("reference_number"),
+                        rs.getString("status"),
                         rs.getString("notes")
                     ));
                 }
@@ -126,5 +128,102 @@ public class OrderDAO {
             System.err.println("Error getting next order number: " + e.getMessage());
         }
         return 1;
+    }
+
+    public List<Order> findAll() {
+        List<Order> orders = new ArrayList<>();
+        String sql = "SELECT * FROM orders ORDER BY created_at DESC";
+        try (Connection conn = DatabaseConnection.getConnection();
+             PreparedStatement stmt = conn.prepareStatement(sql);
+             ResultSet rs = stmt.executeQuery()) {
+            while (rs.next()) {
+                orders.add(new Order(
+                    rs.getInt("order_number"),
+                    rs.getInt("staff_id"),
+                    rs.getString("order_type"),
+                    rs.getDouble("subtotal"),
+                    rs.getDouble("discount"),
+                    rs.getDouble("total"),
+                    rs.getString("payment_type"),
+                    rs.getString("reference_number"),
+                    rs.getString("status"),
+                    rs.getString("notes")
+                ));
+            }
+        } catch (SQLException e) {
+            System.err.println("Error fetching orders: " + e.getMessage());
+        }
+        return orders;
+    }
+
+    public List<Order> findByFilters(String orderType, LocalDateTime startDate, LocalDateTime endDate) {
+        List<Order> orders = new ArrayList<>();
+        StringBuilder sql = new StringBuilder("SELECT * FROM orders WHERE 1=1");
+
+        if (orderType != null && !orderType.isEmpty() && !orderType.equals("All Types")) {
+            sql.append(" AND order_type = ?");
+        }
+        if (startDate != null && endDate != null) {
+            sql.append(" AND DATE(created_at) BETWEEN DATE(?) AND DATE(?)");
+        }
+        sql.append(" ORDER BY created_at DESC");
+
+        try (Connection conn = DatabaseConnection.getConnection();
+             PreparedStatement stmt = conn.prepareStatement(sql.toString())) {
+            int paramIndex = 1;
+            if (orderType != null && !orderType.isEmpty() && !orderType.equals("All Types")) {
+                stmt.setString(paramIndex++, orderType);
+            }
+            if (startDate != null && endDate != null) {
+                stmt.setTimestamp(paramIndex++, Timestamp.valueOf(startDate));
+                stmt.setTimestamp(paramIndex++, Timestamp.valueOf(endDate));
+            }
+            try (ResultSet rs = stmt.executeQuery()) {
+                while (rs.next()) {
+                    orders.add(new Order(
+                        rs.getInt("order_number"),
+                        rs.getInt("staff_id"),
+                        rs.getString("order_type"),
+                        rs.getDouble("subtotal"),
+                        rs.getDouble("discount"),
+                        rs.getDouble("total"),
+                        rs.getString("payment_type"),
+                        rs.getString("reference_number"),
+                        rs.getString("status"),
+                        rs.getString("notes")
+                    ));
+                }
+            }
+        } catch (SQLException e) {
+            System.err.println("Error fetching filtered orders: " + e.getMessage());
+        }
+        return orders;
+    }
+
+    public boolean updateStatus(int id, String status) {
+        String sql = "UPDATE orders SET status = ? WHERE id = ?";
+        try (Connection conn = DatabaseConnection.getConnection();
+             PreparedStatement stmt = conn.prepareStatement(sql)) {
+            stmt.setString(1, status);
+            stmt.setInt(2, id);
+            return stmt.executeUpdate() > 0;
+        } catch (SQLException e) {
+            System.err.println("Error updating order status: " + e.getMessage());
+        }
+        return false;
+    }
+
+    public int getCountByStatus(String status) {
+        String sql = "SELECT COUNT(*) FROM orders WHERE status = ?";
+        try (Connection conn = DatabaseConnection.getConnection();
+             PreparedStatement stmt = conn.prepareStatement(sql)) {
+            stmt.setString(1, status);
+            try (ResultSet rs = stmt.executeQuery()) {
+                if (rs.next()) return rs.getInt(1);
+            }
+        } catch (SQLException e) {
+            System.err.println("Error counting orders by status: " + e.getMessage());
+        }
+        return 0;
     }
 }

@@ -20,11 +20,13 @@ public class Main extends Application {
     private static Parent combosRoot;
     private static Parent staffRoot;
     private static Parent cashierRoot;
+    private static Parent ordersRoot;
     private static DashboardController dashboardController;
     private static MenuItemsController menuItemsController;
     private static CombosController combosController;
     private static StaffController staffController;
     private static CashierController cashierController;
+    private static OrdersController ordersController;
 
     private static User currentUser;
     private static Staff currentStaff;
@@ -186,6 +188,32 @@ public class Main extends Application {
 
     public static void clearStaffCache() {
         staffRoot = null;
+    }
+
+    public static void showOrders() throws Exception {
+        if (ordersRoot == null) {
+            FXMLLoader fxmlLoader = new FXMLLoader(Main.class.getResource("/fxml/orders.fxml"));
+            ordersRoot = fxmlLoader.load();
+            ordersController = fxmlLoader.getController();
+        }
+
+        if (cachedScene == null) {
+            cachedScene = new Scene(ordersRoot, 1280, 800);
+            mainStage.setScene(cachedScene);
+        } else {
+            cachedScene.setRoot(ordersRoot);
+        }
+
+        mainStage.setTitle("BurgerHQ - Orders");
+        mainStage.show();
+
+        if (ordersController != null) {
+            ordersController.setActiveNav("Orders");
+        }
+    }
+
+    public static void clearOrdersCache() {
+        ordersRoot = null;
     }
 
     public static void showCashier() throws Exception {

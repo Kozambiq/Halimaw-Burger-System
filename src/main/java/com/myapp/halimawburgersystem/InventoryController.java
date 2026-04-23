@@ -1187,20 +1187,20 @@ private void setupTableColumns() {
 
     @FXML
     private void onNavigateOrders() {
-        Alert alert = new Alert(Alert.AlertType.INFORMATION);
-        alert.setTitle("Orders");
-        alert.setHeaderText(null);
-        alert.setContentText("Coming soon!");
-        alert.showAndWait();
+        try {
+            Main.showOrders();
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
     }
 
     @FXML
     private void onNavigateKitchen() {
-        Alert alert = new Alert(Alert.AlertType.INFORMATION);
-        alert.setTitle("Kitchen Queue");
-        alert.setHeaderText(null);
-        alert.setContentText("Coming soon!");
-        alert.showAndWait();
+        try {
+            Main.showOrders();
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
     }
 
     @FXML
