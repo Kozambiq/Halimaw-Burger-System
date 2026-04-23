@@ -966,7 +966,7 @@ public class CombosController {
     @FXML
     private void onNavigateKitchen() {
         try {
-            Main.showOrders();
+            Main.showKitchen();
         } catch (Exception e) {
             e.printStackTrace();
         }

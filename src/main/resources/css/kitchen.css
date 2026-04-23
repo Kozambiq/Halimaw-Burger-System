@@ -1,0 +1,117 @@
+/* ============================================================
+    Kitchen Queue Styles
+    ============================================================ */
+
+.kanban-container {
+    -fx-spacing: 16;
+}
+
+.kanban-col {
+    -fx-background-color: #221a0e;
+    -fx-border-color: #4a3820;
+    -fx-border-width: 1;
+    -fx-border-radius: 12;
+    -fx-background-radius: 12;
+    -fx-padding: 16;
+    -fx-min-width: 300;
+}
+
+.kanban-col-header {
+    -fx-padding: 0 0 12 0;
+}
+
+.kanban-col-title {
+    -fx-font-family: 'DM Sans', sans-serif;
+    -fx-font-size: 11px;
+    -fx-font-weight: 600;
+    -fx-letter-spacing: 0.12em;
+    -fx-text-fill: #8a7055;
+}
+
+.kanban-count {
+    -fx-background-color: #332615;
+    -fx-border-color: #4a3820;
+    -fx-border-width: 1;
+    -fx-padding: 2 10 2 10;
+    -fx-background-radius: 12;
+    -fx-border-radius: 12;
+    -fx-font-size: 11px;
+    -fx-text-fill: #c4a882;
+    -fx-font-family: 'DM Mono', monospace;
+}
+
+.kanban-scroll {
+    -fx-background-color: transparent;
+    -fx-background: transparent;
+}
+
+.kanban-scroll .viewport {
+    -fx-background-color: transparent;
+}
+
+.kanban-card-container {
+    -fx-padding: 4 0 4 0;
+}
+
+/* ── Order Card ───────────────────────────────────────── */
+.order-card {
+    -fx-background-color: #332615;
+    -fx-border-color: #4a3820;
+    -fx-border-width: 1;
+    -fx-border-radius: 8;
+    -fx-background-radius: 8;
+    -fx-padding: 12;
+    -fx-cursor: hand;
+}
+
+.order-card:hover {
+    -fx-border-color: #5c4828;
+}
+
+.order-card.urgent {
+    -fx-border-color: #b07a18;
+    -fx-background-color: rgba(176, 122, 24, 0.15);
+}
+
+.card-order {
+    -fx-font-family: 'DM Mono', monospace;
+    -fx-font-weight: 600;
+    -fx-font-size: 14px;
+    -fx-text-fill: #f5ede0;
+}
+
+.card-type {
+    -fx-font-size: 10px;
+    -fx-text-fill: #8a7055;
+}
+
+.card-items {
+    -fx-font-size: 12px;
+    -fx-text-fill: #c4a882;
+    -fx-line-spacing: 4;
+}
+
+.card-timer {
+    -fx-font-family: 'DM Mono', monospace;
+    -fx-font-size: 12px;
+    -fx-text-fill: #8a7055;
+}
+
+.urgent-text {
+    -fx-text-fill: #e8b84b;
+}
+
+.btn-card {
+    -fx-background-color: #d4591e;
+    -fx-text-fill: white;
+    -fx-font-family: 'DM Sans', sans-serif;
+    -fx-font-size: 11px;
+    -fx-font-weight: 500;
+    -fx-padding: 6 12 6 12;
+    -fx-background-radius: 6;
+    -fx-cursor: hand;
+}
+
+.btn-card:hover {
+    -fx-background-color: #e07040;
+}

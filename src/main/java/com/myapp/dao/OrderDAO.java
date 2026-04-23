@@ -74,7 +74,7 @@ public class OrderDAO {
 
             try (ResultSet rs = stmt.executeQuery()) {
                 while (rs.next()) {
-                    orders.add(new Order(
+                    Order order = new Order(
                         rs.getInt("order_number"),
                         rs.getInt("staff_id"),
                         rs.getString("order_type"),
@@ -85,7 +85,10 @@ public class OrderDAO {
                         rs.getString("reference_number"),
                         rs.getString("status"),
                         rs.getString("notes")
-                    ));
+                    );
+                    order.setId(rs.getInt("id"));
+                    order.setCreatedAt(rs.getTimestamp("created_at").toLocalDateTime());
+                    orders.add(order);
                 }
             }
         } catch (SQLException e) {
@@ -137,7 +140,7 @@ public class OrderDAO {
              PreparedStatement stmt = conn.prepareStatement(sql);
              ResultSet rs = stmt.executeQuery()) {
             while (rs.next()) {
-                orders.add(new Order(
+                Order order = new Order(
                     rs.getInt("order_number"),
                     rs.getInt("staff_id"),
                     rs.getString("order_type"),
@@ -148,7 +151,11 @@ public class OrderDAO {
                     rs.getString("reference_number"),
                     rs.getString("status"),
                     rs.getString("notes")
-                ));
+                );
+                order.setId(rs.getInt("id"));
+                order.setCreatedAt(rs.getTimestamp("created_at").toLocalDateTime());
+                order.setStatus(rs.getString("status"));
+                orders.add(order);
             }
         } catch (SQLException e) {
             System.err.println("Error fetching orders: " + e.getMessage());
@@ -158,7 +165,7 @@ public class OrderDAO {
 
     public List<Order> findByFilters(String orderType, LocalDateTime startDate, LocalDateTime endDate) {
         List<Order> orders = new ArrayList<>();
-        StringBuilder sql = new StringBuilder("SELECT * FROM orders WHERE 1=1");
+        StringBuilder sql = new StringBuilder("SELECT o.*, (SELECT GROUP_CONCAT(CONCAT(quantity, 'x ', item_name) SEPARATOR ', ') FROM order_items WHERE order_id = o.id) as summary FROM orders o WHERE 1=1");
 
         if (orderType != null && !orderType.isEmpty() && !orderType.equals("All Types")) {
             sql.append(" AND order_type = ?");
@@ -166,7 +173,7 @@ public class OrderDAO {
         if (startDate != null && endDate != null) {
             sql.append(" AND DATE(created_at) BETWEEN DATE(?) AND DATE(?)");
         }
-        sql.append(" ORDER BY created_at DESC");
+        sql.append(" ORDER BY o.created_at DESC");
 
         try (Connection conn = DatabaseConnection.getConnection();
              PreparedStatement stmt = conn.prepareStatement(sql.toString())) {
@@ -180,7 +187,7 @@ public class OrderDAO {
             }
             try (ResultSet rs = stmt.executeQuery()) {
                 while (rs.next()) {
-                    orders.add(new Order(
+                    Order order = new Order(
                         rs.getInt("order_number"),
                         rs.getInt("staff_id"),
                         rs.getString("order_type"),
@@ -191,7 +198,12 @@ public class OrderDAO {
                         rs.getString("reference_number"),
                         rs.getString("status"),
                         rs.getString("notes")
-                    ));
+                    );
+                    order.setId(rs.getInt("id"));
+                    order.setCreatedAt(rs.getTimestamp("created_at").toLocalDateTime());
+                    order.setStatus(rs.getString("status"));
+                    order.setItemsSummary(rs.getString("summary"));
+                    orders.add(order);
                 }
             }
         } catch (SQLException e) {
@@ -225,5 +237,31 @@ public class OrderDAO {
             System.err.println("Error counting orders by status: " + e.getMessage());
         }
         return 0;
+    }
+
+    public List<OrderItem> findItemsByOrderId(int orderId) {
+        List<OrderItem> items = new ArrayList<>();
+        String sql = "SELECT * FROM order_items WHERE order_id = ?";
+        try (Connection conn = DatabaseConnection.getConnection();
+             PreparedStatement stmt = conn.prepareStatement(sql)) {
+            stmt.setInt(1, orderId);
+            try (ResultSet rs = stmt.executeQuery()) {
+                while (rs.next()) {
+                    OrderItem item = new OrderItem(
+                        rs.getString("item_type"),
+                        rs.getInt("item_id"),
+                        rs.getString("item_name"),
+                        rs.getInt("quantity"),
+                        rs.getDouble("unit_price")
+                    );
+                    item.setId(rs.getInt("id"));
+                    item.setOrderId(rs.getInt("order_id"));
+                    items.add(item);
+                }
+            }
+        } catch (SQLException e) {
+            System.err.println("Error fetching order items: " + e.getMessage());
+        }
+        return items;
     }
 }

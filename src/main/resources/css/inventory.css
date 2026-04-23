@@ -94,6 +94,14 @@
     -fx-background-color: #3d2e1a;
 }
 
+.table-row-cell:selected {
+    -fx-background-color: rgba(212, 89, 30, 0.12);
+}
+
+.inventory-table .table-row-cell:selected {
+    -fx-background-color: rgba(212, 89, 30, 0.12);
+}
+
 .badge-cell {
     -fx-padding: 3 10 3 10;
     -fx-background-radius: 20;
@@ -119,9 +127,18 @@
     -fx-text-fill: #e8b84b;
 }
 
-.pill-out {
+.badge-out {
     -fx-background-color: rgba(140, 48, 48, 0.15);
     -fx-text-fill: #e07070;
+}
+
+.badge-completed {
+    -fx-background-color: rgba(74, 140, 63, 0.15);
+    -fx-text-fill: #7ec470;
+    -fx-font-size: 11px;
+    -fx-font-weight: 600;
+    -fx-padding: 3 10 3 10;
+    -fx-background-radius: 20;
 }
 
 .pill-off {

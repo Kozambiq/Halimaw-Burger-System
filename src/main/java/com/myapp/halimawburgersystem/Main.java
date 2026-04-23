@@ -21,12 +21,14 @@ public class Main extends Application {
     private static Parent staffRoot;
     private static Parent cashierRoot;
     private static Parent ordersRoot;
+    private static Parent kitchenRoot;
     private static DashboardController dashboardController;
     private static MenuItemsController menuItemsController;
     private static CombosController combosController;
     private static StaffController staffController;
     private static CashierController cashierController;
     private static OrdersController ordersController;
+    private static KitchenController kitchenController;
 
     private static User currentUser;
     private static Staff currentStaff;
@@ -76,6 +78,29 @@ public class Main extends Application {
         
         if (dashboardController != null) {
             dashboardController.setActiveNav("Dashboard");
+        }
+    }
+
+    public static void showKitchen() throws Exception {
+        if (kitchenRoot == null) {
+            FXMLLoader fxmlLoader = new FXMLLoader(Main.class.getResource("/fxml/kitchen.fxml"));
+            kitchenRoot = fxmlLoader.load();
+            kitchenController = fxmlLoader.getController();
+        }
+
+        if (cachedScene == null) {
+            cachedScene = new Scene(kitchenRoot, 1280, 800);
+            mainStage.setScene(cachedScene);
+        } else {
+            cachedScene.setRoot(kitchenRoot);
+        }
+
+        mainStage.setTitle("BurgerHQ - Kitchen Queue");
+        mainStage.show();
+
+        if (kitchenController != null) {
+            kitchenController.setActiveNav("Kitchen Queue");
+            kitchenController.loadQueue();
         }
     }
 

@@ -3,27 +3,32 @@ package com.myapp.halimawburgersystem;
 import com.myapp.dao.OrderDAO;
 import com.myapp.dao.StaffDAO;
 import com.myapp.model.Order;
+import com.myapp.model.OrderItem;
 import com.myapp.model.Staff;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
+import javafx.geometry.Insets;
+import javafx.geometry.Pos;
 import javafx.scene.control.*;
 import javafx.scene.control.cell.PropertyValueFactory;
 import javafx.scene.input.MouseEvent;
+import javafx.scene.layout.GridPane;
 import javafx.scene.layout.HBox;
+import javafx.scene.layout.Priority;
+import javafx.scene.layout.Region;
+import javafx.scene.layout.VBox;
 
-import java.time.LocalDate;
 import java.time.LocalDateTime;
-import java.time.LocalTime;
 import java.time.format.DateTimeFormatter;
+import java.util.List;
 
 public class OrdersController {
 
     @FXML private Label pageTitle;
     @FXML private Label userDisplayName;
     @FXML private Label userDisplayRole;
-
     @FXML private Label sidebarAvatarText;
     @FXML private Label sidebarUserName;
     @FXML private Label sidebarUserRole;
@@ -42,10 +47,12 @@ public class OrdersController {
     @FXML private HBox datePickerBox;
     @FXML private DatePicker dateFrom;
     @FXML private DatePicker dateTo;
+
     @FXML private Label lblTotalOrders;
     @FXML private Label lblPreparing;
     @FXML private Label lblCompleted;
     @FXML private Label lblCancelled;
+
     @FXML private TableView<Order> ordersTable;
     @FXML private TableColumn<Order, Integer> colOrderNumber;
     @FXML private TableColumn<Order, String> colItems;
@@ -54,6 +61,24 @@ public class OrdersController {
     @FXML private TableColumn<Order, LocalDateTime> colTime;
     @FXML private TableColumn<Order, String> colStatus;
 
+    // Order Details Modal Fields
+    @FXML private VBox detailsOverlay;
+    @FXML private Label detailsOrderNum;
+    @FXML private Label detailsDate;
+    @FXML private VBox detailsItemsContainer;
+    @FXML private Label detailsType;
+    @FXML private Label detailsPayment;
+    @FXML private Label detailsRef;
+    @FXML private Label detailsRefLabel;
+    @FXML private Label detailsStaff;
+    @FXML private VBox detailsNotesBox;
+    @FXML private Label detailsNotes;
+    @FXML private Label detailsSubtotal;
+    @FXML private Label detailsDiscount;
+    @FXML private Label detailsTotal;
+    @FXML private Label detailsStatus;
+    @FXML private Button btnPrintOrder;
+
     private OrderDAO orderDAO = new OrderDAO();
     private StaffDAO staffDAO = new StaffDAO();
     private ObservableList<Order> ordersList = FXCollections.observableArrayList();
@@ -61,35 +86,31 @@ public class OrdersController {
 
     @FXML
     public void initialize() {
-        loadUserInfo();
-        setActiveNav("Orders");
+        setupUserInfo();
         setupFilters();
         setupTableColumns();
         loadOrders();
         loadStats();
     }
 
-    private void loadUserInfo() {
+    private void setupUserInfo() {
         Staff staff = Main.getCurrentStaff();
         if (staff != null) {
             String initials = staff.getInitials();
-            String fullName = staff.getName();
-
-            if (userDisplayName != null) userDisplayName.setText(initials);
-            if (userDisplayRole != null) userDisplayRole.setText(staff.getRole());
-
-            if (sidebarAvatarText != null) sidebarAvatarText.setText(initials);
-            if (sidebarUserName != null) sidebarUserName.setText(fullName);
-            if (sidebarUserRole != null) sidebarUserRole.setText(staff.getRole());
+            userDisplayName.setText(initials);
+            userDisplayRole.setText(staff.getRole());
+            sidebarAvatarText.setText(initials);
+            sidebarUserName.setText(staff.getName());
+            sidebarUserRole.setText(staff.getRole());
         }
     }
 
     private void setupFilters() {
-        cmbOrderType.getItems().addAll("All Types", "Dine-in", "Takeout");
-        cmbOrderType.getSelectionModel().select(0);
+        cmbOrderType.setItems(FXCollections.observableArrayList("All Types", "Dine-in", "Takeout"));
+        cmbOrderType.setValue("All Types");
 
-        cmbDateFilter.getItems().addAll("Today", "Yesterday", "This Week", "Custom");
-        cmbDateFilter.getSelectionModel().select(0);
+        cmbDateFilter.setItems(FXCollections.observableArrayList("Today", "Yesterday", "Last 7 Days", "This Month", "Custom"));
+        cmbDateFilter.setValue("Today");
     }
 
     private void setupTableColumns() {
@@ -100,10 +121,9 @@ public class OrdersController {
                 super.updateItem(item, empty);
                 if (empty || item == null) {
                     setText(null);
-                    setStyle(null);
                 } else {
-                    setText("#" + item);
-                    getStyleClass().add("order-number");
+                    setText("#" + String.format("%04d", item));
+                    setStyle("-fx-font-family: 'DM Mono', monospace; -fx-text-fill: #d4591e; -fx-font-weight: bold;");
                 }
             }
         });
@@ -117,10 +137,9 @@ public class OrdersController {
                 super.updateItem(item, empty);
                 if (empty || item == null) {
                     setText(null);
-                    setStyle(null);
                 } else {
                     setText("₱" + String.format("%.2f", item));
-                    getStyleClass().add("order-total");
+                    setStyle("-fx-font-family: 'DM Mono', monospace; -fx-text-fill: #f5ede0;");
                 }
             }
         });
@@ -139,63 +158,134 @@ public class OrdersController {
             }
         });
 
-        colItems.setCellValueFactory(new PropertyValueFactory<>("notes"));
+        colItems.setCellValueFactory(new PropertyValueFactory<>("itemsSummary"));
+
+        colStatus.setCellValueFactory(new PropertyValueFactory<>("status"));
+        colStatus.setCellFactory(column -> new TableCell<Order, String>() {
+            @Override
+            protected void updateItem(String item, boolean empty) {
+                super.updateItem(item, empty);
+                if (empty || item == null) {
+                    setText(null);
+                    setGraphic(null);
+                } else {
+                    Label badge = new Label(item.toUpperCase());
+                    badge.getStyleClass().add("badge");
+                    
+                    switch (item) {
+                        case "New": badge.getStyleClass().add("badge-amber"); break;
+                        case "Preparing": badge.getStyleClass().add("badge-blue"); break;
+                        case "Done": badge.getStyleClass().add("badge-green"); break;
+                        case "Completed": badge.getStyleClass().add("badge-completed"); break;
+                        case "Cancelled": badge.getStyleClass().add("badge-red"); break;
+                        default: badge.getStyleClass().add("badge-green");
+                    }
+                    setGraphic(badge);
+                    setText(null);
+                }
+            }
+        });
 
         ordersTable.setItems(ordersList);
-        ordersTable.setColumnResizePolicy(TableView.CONSTRAINED_RESIZE_POLICY);
     }
 
     private void loadOrders() {
-        String orderType = cmbOrderType.getValue();
-        if (orderType == null) orderType = "All Types";
-
-        LocalDateTime startDate = null;
-        LocalDateTime endDate = null;
-
-        String dateFilter = cmbDateFilter.getValue();
-        if (dateFilter == null) dateFilter = "Today";
-
-        LocalDate today = LocalDate.now();
-        switch (dateFilter) {
-            case "Today":
-                startDate = today.atStartOfDay();
-                endDate = today.atTime(LocalTime.MAX);
-                break;
-            case "Yesterday":
-                startDate = today.minusDays(1).atStartOfDay();
-                endDate = today.minusDays(1).atTime(LocalTime.MAX);
-                break;
-            case "This Week":
-                startDate = today.with(java.time.DayOfWeek.MONDAY).atStartOfDay();
-                endDate = today.atTime(LocalTime.MAX);
-                break;
-            case "Custom":
-                if (dateFrom.getValue() != null && dateTo.getValue() != null) {
-                    startDate = dateFrom.getValue().atStartOfDay();
-                    endDate = dateTo.getValue().atTime(LocalTime.MAX);
-                }
-                break;
-        }
-
-        ordersList.clear();
-        if (startDate != null && endDate != null) {
-            ordersList.addAll(orderDAO.findByFilters(orderType, startDate, endDate));
-        } else {
-            ordersList.addAll(orderDAO.findAll());
-        }
-        ordersTable.setItems(ordersList);
+        ordersList.setAll(orderDAO.findAll());
     }
 
     private void loadStats() {
-        int total = orderDAO.getTotalCount();
-        int preparing = orderDAO.getCountByStatus("Preparing");
-        int completed = orderDAO.getCountByStatus("Done");
-        int cancelled = orderDAO.getCountByStatus("Cancelled");
+        lblTotalOrders.setText(String.valueOf(orderDAO.getTotalCount()));
+        lblPreparing.setText(String.valueOf(orderDAO.getCountByStatus("Preparing")));
+        lblCompleted.setText(String.valueOf(orderDAO.getCountByStatus("Completed")));
+        lblCancelled.setText(String.valueOf(orderDAO.getCountByStatus("Cancelled")));
+    }
 
-        lblTotalOrders.setText(String.valueOf(total));
-        lblPreparing.setText(String.valueOf(preparing));
-        lblCompleted.setText(String.valueOf(completed));
-        lblCancelled.setText(String.valueOf(cancelled));
+    @FXML
+    private void onOrderClicked(MouseEvent event) {
+        if (event.getClickCount() == 2) {
+            selectedOrder = ordersTable.getSelectionModel().getSelectedItem();
+            if (selectedOrder != null) {
+                showOrderDetails(selectedOrder);
+            }
+        }
+    }
+
+    private void showOrderDetails(Order order) {
+        detailsOrderNum.setText("#" + String.format("%04d", order.getOrderNumber()));
+        detailsDate.setText(order.getCreatedAt().format(DateTimeFormatter.ofPattern("MMMM d, yyyy · h:mm a")));
+        
+        detailsType.setText(order.getOrderType());
+        detailsPayment.setText(order.getPaymentType());
+        
+        if ("GCash".equals(order.getPaymentType())) {
+            detailsRefLabel.setVisible(true);
+            detailsRefLabel.setManaged(true);
+            detailsRef.setVisible(true);
+            detailsRef.setManaged(true);
+            detailsRef.setText(order.getReferenceNumber() != null ? order.getReferenceNumber() : "-");
+        } else {
+            detailsRefLabel.setVisible(false);
+            detailsRefLabel.setManaged(false);
+            detailsRef.setVisible(false);
+            detailsRef.setManaged(false);
+        }
+        
+        Staff staff = staffDAO.findById(order.getStaffId());
+        detailsStaff.setText(staff != null ? staff.getName() : "Unknown");
+        
+        if (order.getNotes() != null && !order.getNotes().isEmpty()) {
+            detailsNotesBox.setVisible(true);
+            detailsNotesBox.setManaged(true);
+            detailsNotes.setText(order.getNotes());
+        } else {
+            detailsNotesBox.setVisible(false);
+            detailsNotesBox.setManaged(false);
+        }
+        
+        detailsSubtotal.setText("₱" + String.format("%.2f", order.getSubtotal()));
+        detailsDiscount.setText("-₱" + String.format("%.2f", order.getDiscount()));
+        detailsTotal.setText("₱" + String.format("%.2f", order.getTotal()));
+        
+        detailsStatus.setText(order.getStatus().toUpperCase());
+        detailsStatus.getStyleClass().removeAll("badge-amber", "badge-blue", "badge-green", "badge-completed", "badge-red");
+        switch (order.getStatus()) {
+            case "New": detailsStatus.getStyleClass().add("badge-amber"); break;
+            case "Preparing": detailsStatus.getStyleClass().add("badge-blue"); break;
+            case "Done": detailsStatus.getStyleClass().add("badge-green"); break;
+            case "Completed": detailsStatus.getStyleClass().add("badge-completed"); break;
+            case "Cancelled": detailsStatus.getStyleClass().add("badge-red"); break;
+        }
+
+        // Load items
+        detailsItemsContainer.getChildren().clear();
+        List<OrderItem> items = orderDAO.findItemsByOrderId(order.getId());
+        for (OrderItem item : items) {
+            HBox row = new HBox();
+            row.setAlignment(Pos.CENTER_LEFT);
+            row.setSpacing(12);
+            
+            Label qty = new Label(item.getQuantity() + "x");
+            qty.setStyle("-fx-font-family: 'DM Mono', monospace; -fx-text-fill: #d4591e; -fx-font-weight: bold; -fx-min-width: 30;");
+            
+            Label name = new Label(item.getItemName());
+            name.setStyle("-fx-text-fill: #f5ede0; -fx-font-size: 13px;");
+            
+            Region spacer = new Region();
+            HBox.setHgrow(spacer, Priority.ALWAYS);
+            
+            Label price = new Label("₱" + String.format("%.2f", item.getTotalPrice()));
+            price.setStyle("-fx-font-family: 'DM Mono', monospace; -fx-text-fill: #c4a882;");
+            
+            row.getChildren().addAll(qty, name, spacer, price);
+            detailsItemsContainer.getChildren().add(row);
+        }
+
+        detailsOverlay.setVisible(true);
+    }
+
+    @FXML
+    private void onCloseDetails() {
+        detailsOverlay.setVisible(false);
     }
 
     @FXML
@@ -219,96 +309,19 @@ public class OrdersController {
     }
 
     @FXML
-    private void onOrderClicked(MouseEvent event) {
-        if (event.getClickCount() == 2) {
-            selectedOrder = ordersTable.getSelectionModel().getSelectedItem();
-            if (selectedOrder != null) {
-                showOrderDetailsDialog(selectedOrder);
-            }
-        }
-    }
-
-    private void showOrderDetailsDialog(Order order) {
-        Alert alert = new Alert(Alert.AlertType.INFORMATION);
-        alert.setTitle("Order Details - #" + order.getOrderNumber());
-        alert.setHeaderText("Order #" + order.getOrderNumber());
-        alert.setContentText(
-            "Type: " + order.getOrderType() + "\n" +
-            "Total: ₱" + String.format("%.2f", order.getTotal()) + "\n" +
-            "Payment: " + order.getPaymentType() + "\n" +
-            "Status: " + order.getStatus() + "\n" +
-            "Notes: " + (order.getNotes() != null ? order.getNotes() : "None")
-        );
-        alert.getDialogPane().setStyle("-fx-background-color: #2e2410; -fx-border-color: #4a3820; -fx-border-width: 1; -fx-border-radius: 12; -fx-background-radius: 12;");
-        alert.showAndWait();
-    }
-
-    @FXML
     private void onNavigate(ActionEvent event) {
         Button clicked = (Button) event.getSource();
         String text = clicked.getText().trim();
-
-        clearAllHighlights();
-        clicked.getStyleClass().add("nav-item-active");
-
         try {
-            if (text.contains("Dashboard")) {
-                Main.showDashboard();
-            } else if (text.contains("Orders") || text.contains("Kitchen")) {
-                return;
-            } else if (text.contains("Menu Items")) {
-                Main.showMenuItems();
-            } else if (text.contains("Combos")) {
-                Main.showCombos();
-            } else if (text.contains("Inventory")) {
-                Main.showInventory();
-            } else if (text.contains("Sales")) {
-                Main.showInventory();
-            } else if (text.contains("Staff")) {
-                Main.showStaff();
-            }
+            if (text.contains("Dashboard")) Main.showDashboard();
+            else if (text.contains("Orders")) return;
+            else if (text.contains("Kitchen")) Main.showKitchen();
+            else if (text.contains("Menu Items")) Main.showMenuItems();
+            else if (text.contains("Combos")) Main.showCombos();
+            else if (text.contains("Inventory")) Main.showInventory();
+            else if (text.contains("Staff")) Main.showStaff();
         } catch (Exception e) {
             e.printStackTrace();
-        }
-    }
-
-    public void setActiveNav(String navName) {
-        clearAllHighlights();
-        switch(navName) {
-            case "Dashboard":
-                if (btnDashboard != null) btnDashboard.getStyleClass().add("nav-item-active");
-                break;
-            case "Orders":
-                if (btnOrders != null) btnOrders.getStyleClass().add("nav-item-active");
-                break;
-            case "Kitchen Queue":
-                if (btnKitchen != null) btnKitchen.getStyleClass().add("nav-item-active");
-                break;
-            case "Menu Items":
-                if (btnMenuItems != null) btnMenuItems.getStyleClass().add("nav-item-active");
-                break;
-            case "Combos & Promos":
-                if (btnCombos != null) btnCombos.getStyleClass().add("nav-item-active");
-                break;
-            case "Inventory":
-                if (btnInventory != null) btnInventory.getStyleClass().add("nav-item-active");
-                break;
-            case "Sales Reports":
-                if (btnSales != null) btnSales.getStyleClass().add("nav-item-active");
-                break;
-            case "Staff":
-                if (btnStaff != null) btnStaff.getStyleClass().add("nav-item-active");
-                break;
-        }
-    }
-
-    private void clearAllHighlights() {
-        Button[] buttons = {btnDashboard, btnOrders, btnKitchen, btnMenuItems, btnCombos, btnInventory, btnSales, btnStaff};
-        if (buttons == null) return;
-        for (Button btn : buttons) {
-            if (btn != null) {
-                btn.getStyleClass().remove("nav-item-active");
-            }
         }
     }
 
@@ -319,5 +332,13 @@ public class OrdersController {
         } catch (Exception e) {
             e.printStackTrace();
         }
+    }
+
+    public void setActiveNav(String navName) {
+        Button[] buttons = {btnDashboard, btnOrders, btnKitchen, btnMenuItems, btnCombos, btnInventory, btnSales, btnStaff};
+        for (Button btn : buttons) {
+            if (btn != null) btn.getStyleClass().remove("nav-item-active");
+        }
+        if (btnOrders != null) btnOrders.getStyleClass().add("nav-item-active");
     }
 }

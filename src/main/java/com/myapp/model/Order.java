@@ -14,6 +14,7 @@ public class Order {
     private String referenceNumber;
     private String status;
     private String notes;
+    private String itemsSummary;
     private LocalDateTime createdAt;
 
     public Order() {
@@ -38,6 +39,14 @@ public class Order {
 
     public void setId(int id) {
         this.id = id;
+    }
+
+    public String getItemsSummary() {
+        return itemsSummary;
+    }
+
+    public void setItemsSummary(String itemsSummary) {
+        this.itemsSummary = itemsSummary;
     }
 
     public int getOrderNumber() {

@@ -1035,7 +1035,7 @@ public class StaffController {
     @FXML
     private void onNavigateKitchen(ActionEvent event) {
         try {
-            Main.showOrders();
+            Main.showKitchen();
         } catch (Exception e) {
             e.printStackTrace();
         }

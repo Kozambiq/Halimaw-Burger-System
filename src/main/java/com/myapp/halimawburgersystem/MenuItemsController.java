@@ -1195,7 +1195,7 @@ List<String> matches = allIngredientNames.stream()
     @FXML
     private void onNavigateKitchen() {
         try {
-            Main.showOrders();
+            Main.showKitchen();
         } catch (Exception e) {
             e.printStackTrace();
         }

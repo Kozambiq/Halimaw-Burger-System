@@ -7,16 +7,18 @@
 <?import javafx.scene.control.Label?>
 <?import javafx.scene.control.TableColumn?>
 <?import javafx.scene.control.TableView?>
+<?import javafx.scene.control.ScrollPane?>
 <?import javafx.scene.layout.HBox?>
 <?import javafx.scene.layout.Region?>
 <?import javafx.scene.layout.StackPane?>
 <?import javafx.scene.layout.VBox?>
+<?import javafx.scene.layout.GridPane?>
 <?import javafx.scene.shape.SVGPath?>
 
 <HBox xmlns="http://javafx.com/javafx/17"
       xmlns:fx="http://javafx.com/fxml/1"
       fx:controller="com.myapp.halimawburgersystem.OrdersController"
-      stylesheets="@../css/common.css, @../css/login.css, @../css/dashboard.css, @../css/inventory.css">
+      stylesheets="@../css/common.css, @../css/login.css, @../css/dashboard.css, @../css/inventory.css, @../css/orders.css">
 
     <VBox styleClass="sidebar" prefWidth="240" spacing="4">
         <padding><Insets top="16" right="8" bottom="16" left="8"/></padding>
@@ -36,21 +38,18 @@
             <graphic>
                 <SVGPath content="M3 13h8V3H3v10zm0 8h8v-6H3v6zm10 0h8V11h-8v10zm0-18v6h8V3h-8z" styleClass="nav-svg"/>
             </graphic>
-            <padding><Insets top="8" right="8" bottom="8" left="24"/></padding>
         </Button>
 
-        <Button fx:id="btnOrders" styleClass="nav-item nav-item-active" text="Orders" onAction="#onNavigate">
+        <Button fx:id="btnOrders" styleClass="nav-item" text="Orders" onAction="#onNavigate">
             <graphic>
                 <SVGPath content="M19 3H5c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2zm-5 14H7v-2h7v2zm3-4H7v-2h10v2zm0-4H7V7h10v2z" styleClass="nav-svg"/>
             </graphic>
-            <padding><Insets top="8" right="8" bottom="8" left="24"/></padding>
         </Button>
 
         <Button fx:id="btnKitchen" styleClass="nav-item" text="Kitchen Queue" onAction="#onNavigate">
             <graphic>
                 <SVGPath content="M18 3v2h-2V3H8v2H6V3H4v18h2v-2h2v2h8v-2h2v2h2V3h-2zM8 17H6v-2h2v2zm0-4H6v-2h2v2zm0-4H6V7h2v2zm10 8h-2v-2h2v2zm0-4h-2v-2h2v2zm0-4h-2V7h2v2z" styleClass="nav-svg"/>
             </graphic>
-            <padding><Insets top="8" right="8" bottom="8" left="24"/></padding>
         </Button>
 
         <Label styleClass="sidebar-section-label" text="MENU">
@@ -61,21 +60,18 @@
             <graphic>
                 <SVGPath content="M11 9H9V2H7v7H5V2H3v7c0 2.12 1.66 3.84 3.75 3.97V22h2.5v-9.03C11.34 12.84 13 11.12 13 9V2h-2v7zm5-3v8h2.5v8H21V2c-2.76 0-5 2.24-5 4z" styleClass="nav-svg"/>
             </graphic>
-            <padding><Insets top="8" right="8" bottom="8" left="24"/></padding>
         </Button>
 
         <Button fx:id="btnCombos" styleClass="nav-item" text="Combos &amp; Promos" onAction="#onNavigate">
             <graphic>
                 <SVGPath content="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-2 14.5v-9l6 4.5-6 4.5z" styleClass="nav-svg"/>
             </graphic>
-            <padding><Insets top="8" right="8" bottom="8" left="24"/></padding>
         </Button>
 
         <Button fx:id="btnInventory" styleClass="nav-item" text="Inventory" onAction="#onNavigate">
             <graphic>
                 <SVGPath content="M20 6h-2.18c.07-.44.18-.88.18-1.36C18 2.06 15.94 0 13.36 0c-1.46 0-2.68.75-3.48 1.88L12 4l2.12-2.12C14.5 1.32 14.9 1 15.5 1c.83 0 1.5.67 1.5 1.5S16.33 4 15.5 4H4C2.9 4 2 4.9 2 6v14c0 1.1.9 2 2 2h16c1.1 0 2-.9 2-2V8c0-1.1-.9-2-2-2zm-7.5 11.5h-3v-3h-3v-3h3v-3h3v3h3v3h-3v3z" styleClass="nav-svg"/>
             </graphic>
-            <padding><Insets top="8" right="8" bottom="8" left="24"/></padding>
         </Button>
 
         <Label styleClass="sidebar-section-label" text="BUSINESS">
@@ -86,14 +82,12 @@
             <graphic>
                 <SVGPath content="M16 6l2.29 2.29-4.88 4.88-4-4L2 16.59 3.41 18l6-6 4 4 6.3-6.29L22 12V6z" styleClass="nav-svg"/>
             </graphic>
-            <padding><Insets top="8" right="8" bottom="8" left="24"/></padding>
         </Button>
 
         <Button fx:id="btnStaff" styleClass="nav-item" text="Staff" onAction="#onNavigate">
             <graphic>
                 <SVGPath content="M16 11c1.66 0 2.99-1.34 2.99-3S17.66 5 16 5c-1.66 0-3 1.34-3 3s1.34 3 3 3zm-8 0c1.66 0 2.99-1.34 2.99-3S9.66 5 8 5C6.34 5 5 6.34 5 8s1.34 3 3 3zm0 2c-2.33 0-7 1.17-7 3.5V19h14v-2.5c0-2.33-4.67-3.5-7-3.5z" styleClass="nav-svg"/>
             </graphic>
-            <padding><Insets top="8" right="8" bottom="8" left="24"/></padding>
         </Button>
 
         <Region VBox.vgrow="ALWAYS"/>
@@ -118,66 +112,147 @@
         </VBox>
     </VBox>
 
-    <VBox styleClass="main-content" HBox.hgrow="ALWAYS">
-        <HBox styleClass="topbar" prefHeight="56">
-            <padding><Insets top="16" right="24" bottom="16" left="24"/></padding>
-            <Label fx:id="pageTitle" styleClass="topbar-title" text="Orders"/>
-            <Region HBox.hgrow="ALWAYS"/>
-            <Label fx:id="userDisplayName" styleClass="topbar-user" text="Maria G."/>
-            <Label styleClass="topbar-separator" text="·"/>
-            <Label fx:id="userDisplayRole" styleClass="topbar-role" text="Manager"/>
-            <Label styleClass="topbar-date" text="Sat, Apr 18 2026 · 1:32 PM"/>
-        </HBox>
+    <StackPane HBox.hgrow="ALWAYS">
+        <VBox styleClass="main-content">
+            <HBox styleClass="topbar" prefHeight="56">
+                <padding><Insets top="16" right="24" bottom="16" left="24"/></padding>
+                <Label fx:id="pageTitle" styleClass="topbar-title" text="Orders"/>
+                <Region HBox.hgrow="ALWAYS"/>
+                <Label fx:id="userDisplayName" styleClass="topbar-user" text="Maria G."/>
+                <Label styleClass="topbar-separator" text="·"/>
+                <Label fx:id="userDisplayRole" styleClass="topbar-role" text="Manager"/>
+                <Label styleClass="topbar-date" text="Sat, Apr 18 2026 · 1:32 PM"/>
+            </HBox>
 
-        <StackPane VBox.vgrow="ALWAYS" maxHeight="Infinity" styleClass="content-area">
-            <VBox spacing="16" VBox.vgrow="ALWAYS">
-                <padding><Insets top="24" right="32" bottom="24" left="32"/></padding>
+            <StackPane VBox.vgrow="ALWAYS" maxHeight="Infinity" styleClass="content-area">
+                <VBox spacing="16" VBox.vgrow="ALWAYS">
+                    <padding><Insets top="24" right="32" bottom="24" left="32"/></padding>
 
-                <HBox spacing="8" alignment="CENTER_LEFT">
-                    <ComboBox fx:id="cmbOrderType" styleClass="filter-combo" prefWidth="140" onAction="#onFilterChanged"/>
-                    <ComboBox fx:id="cmbDateFilter" styleClass="filter-combo" prefWidth="140" onAction="#onDateFilterChanged"/>
-                    <HBox fx:id="datePickerBox" styleClass="date-picker-box" spacing="8" visible="false" managed="false">
-                        <DatePicker fx:id="dateFrom" styleClass="filter-date" prefWidth="140" onAction="#onFilterChanged"/>
-                        <Label styleClass="date-separator" text="to"/>
-                        <DatePicker fx:id="dateTo" styleClass="filter-date" prefWidth="140" onAction="#onFilterChanged"/>
+                    <HBox spacing="8" alignment="CENTER_LEFT">
+                        <ComboBox fx:id="cmbOrderType" styleClass="filter-combo" prefWidth="140" onAction="#onFilterChanged"/>
+                        <ComboBox fx:id="cmbDateFilter" styleClass="filter-combo" prefWidth="140" onAction="#onDateFilterChanged"/>
+                        <HBox fx:id="datePickerBox" styleClass="date-picker-box" spacing="8" visible="false" managed="false">
+                            <DatePicker fx:id="dateFrom" styleClass="filter-date" prefWidth="140" onAction="#onFilterChanged"/>
+                            <Label styleClass="date-separator" text="to"/>
+                            <DatePicker fx:id="dateTo" styleClass="filter-date" prefWidth="140" onAction="#onFilterChanged"/>
+                        </HBox>
+                        <Region HBox.hgrow="ALWAYS"/>
                     </HBox>
+
+                    <HBox alignment="CENTER_LEFT" spacing="12">
+                        <VBox styleClass="stat-card">
+                            <Label styleClass="stat-label" text="TOTAL ORDERS"/>
+                            <Label fx:id="lblTotalOrders" styleClass="stat-value" text="0"/>
+                        </VBox>
+                        <VBox styleClass="stat-card">
+                            <Label styleClass="stat-label" text="PREPARING"/>
+                            <Label fx:id="lblPreparing" styleClass="stat-value" text="0" style="-fx-text-fill: #e8b84b;"/>
+                        </VBox>
+                        <VBox styleClass="stat-card">
+                            <Label styleClass="stat-label" text="COMPLETED"/>
+                            <Label fx:id="lblCompleted" styleClass="stat-value" text="0" style="-fx-text-fill: #7ec470;"/>
+                        </VBox>
+                        <VBox styleClass="stat-card">
+                            <Label styleClass="stat-label" text="CANCELLED"/>
+                            <Label fx:id="lblCancelled" styleClass="stat-value" text="0" style="-fx-text-fill: #e07070;"/>
+                        </VBox>
+                    </HBox>
+
+                    <StackPane VBox.vgrow="ALWAYS" maxHeight="Infinity" styleClass="table-wrap">
+                        <padding><Insets top="24" bottom="0"/></padding>
+                        <TableView fx:id="ordersTable" styleClass="inventory-table" maxHeight="Infinity" VBox.vgrow="ALWAYS" onMouseClicked="#onOrderClicked">
+                            <columns>
+                                <TableColumn fx:id="colOrderNumber" text="ORDER #" prefWidth="1" minWidth="80"/>
+                                <TableColumn fx:id="colItems" text="ITEMS SUMMARY" prefWidth="1" minWidth="200"/>
+                                <TableColumn fx:id="colType" text="TYPE" prefWidth="1" minWidth="80"/>
+                                <TableColumn fx:id="colTotal" text="TOTAL" prefWidth="1" minWidth="100"/>
+                                <TableColumn fx:id="colTime" text="TIME" prefWidth="1" minWidth="80"/>
+                                <TableColumn fx:id="colStatus" text="STATUS" prefWidth="1" minWidth="100"/>
+                            </columns>
+                        </TableView>
+                    </StackPane>
+                </VBox>
+            </StackPane>
+        </VBox>
+
+        <!-- Order Details Overlay -->
+        <VBox fx:id="detailsOverlay" styleClass="modal-overlay" visible="false" alignment="CENTER">
+            <VBox styleClass="modal-content" maxWidth="500" maxHeight="600" spacing="0">
+                <HBox styleClass="modal-header" alignment="CENTER_LEFT">
+                    <padding><Insets top="20" right="24" bottom="20" left="24"/></padding>
+                    <VBox spacing="4">
+                        <Label fx:id="detailsOrderNum" styleClass="modal-title" text="#0000"/>
+                        <Label fx:id="detailsDate" styleClass="modal-subtitle" text="April 23, 2026 · 1:32 PM"/>
+                    </VBox>
                     <Region HBox.hgrow="ALWAYS"/>
+                    <Button styleClass="btn-modal-close" onAction="#onCloseDetails">
+                        <graphic>
+                            <SVGPath content="M19 6.41L17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12z" fill="#8a7055"/>
+                        </graphic>
+                    </Button>
                 </HBox>
+                
+                <ScrollPane fitToWidth="true" hbarPolicy="NEVER" styleClass="modal-scroll" VBox.vgrow="ALWAYS">
+                    <VBox spacing="20">
+                        <padding><Insets top="20" right="24" bottom="24" left="24"/></padding>
+                        
+                        <VBox spacing="12">
+                            <Label styleClass="section-header" text="ORDER ITEMS"/>
+                            <VBox fx:id="detailsItemsContainer" spacing="8"/>
+                        </VBox>
+                        
+                        <VBox spacing="12">
+                            <Label styleClass="section-header" text="ORDER INFO"/>
+                            <GridPane hgap="32" vgap="12">
+                                <Label text="Type" styleClass="info-label" GridPane.columnIndex="0" GridPane.rowIndex="0"/>
+                                <Label fx:id="detailsType" styleClass="info-value" GridPane.columnIndex="1" GridPane.rowIndex="0" text="Dine-in"/>
+                                
+                                <Label text="Payment" styleClass="info-label" GridPane.columnIndex="0" GridPane.rowIndex="1"/>
+                                <Label fx:id="detailsPayment" styleClass="info-value" GridPane.columnIndex="1" GridPane.rowIndex="1" text="GCash"/>
+                                
+                                <Label text="Reference" styleClass="info-label" fx:id="detailsRefLabel" GridPane.columnIndex="0" GridPane.rowIndex="2"/>
+                                <Label fx:id="detailsRef" styleClass="info-value" GridPane.columnIndex="1" GridPane.rowIndex="2" text="-"/>
+                                
+                                <Label text="Staff" styleClass="info-label" GridPane.columnIndex="0" GridPane.rowIndex="3"/>
+                                <Label fx:id="detailsStaff" styleClass="info-value" GridPane.columnIndex="1" GridPane.rowIndex="3" text="Maria G."/>
+                            </GridPane>
+                        </VBox>
 
-                <HBox alignment="CENTER_LEFT" spacing="12">
-                    <VBox styleClass="stat-card">
-                        <Label styleClass="stat-label" text="TOTAL ORDERS"/>
-                        <Label fx:id="lblTotalOrders" styleClass="stat-value" text="0"/>
+                        <VBox spacing="12" fx:id="detailsNotesBox">
+                            <Label styleClass="section-header" text="NOTES"/>
+                            <Label fx:id="detailsNotes" styleClass="notes-text" wrapText="true" text="No notes provided."/>
+                        </VBox>
+
+                        <VBox spacing="4" styleClass="modal-total-box">
+                            <padding><Insets top="16"/></padding>
+                            <HBox alignment="CENTER_LEFT">
+                                <Label text="Subtotal" styleClass="total-label"/>
+                                <Region HBox.hgrow="ALWAYS"/>
+                                <Label fx:id="detailsSubtotal" styleClass="total-value-small" text="₱0.00"/>
+                            </HBox>
+                            <HBox alignment="CENTER_LEFT">
+                                <Label text="Discount" styleClass="total-label"/>
+                                <Region HBox.hgrow="ALWAYS"/>
+                                <Label fx:id="detailsDiscount" styleClass="total-value-small" text="₱0.00"/>
+                            </HBox>
+                            <HBox alignment="CENTER_LEFT">
+                                <padding><Insets top="8"/></padding>
+                                <Label text="TOTAL AMOUNT" styleClass="total-label-main"/>
+                                <Region HBox.hgrow="ALWAYS"/>
+                                <Label fx:id="detailsTotal" styleClass="total-value-main" text="₱0.00"/>
+                            </HBox>
+                        </VBox>
                     </VBox>
-                    <VBox styleClass="stat-card">
-                        <Label styleClass="stat-label" text="PREPARING"/>
-                        <Label fx:id="lblPreparing" styleClass="stat-value" text="0" style="-fx-text-fill: #e8b84b;"/>
-                    </VBox>
-                    <VBox styleClass="stat-card">
-                        <Label styleClass="stat-label" text="COMPLETED"/>
-                        <Label fx:id="lblCompleted" styleClass="stat-value" text="0" style="-fx-text-fill: #7ec470;"/>
-                    </VBox>
-                    <VBox styleClass="stat-card">
-                        <Label styleClass="stat-label" text="CANCELLED"/>
-                        <Label fx:id="lblCancelled" styleClass="stat-value" text="0" style="-fx-text-fill: #e07070;"/>
-                    </VBox>
+                </ScrollPane>
+                
+                <HBox alignment="CENTER_RIGHT" spacing="12" styleClass="modal-footer">
+                    <padding><Insets top="16" right="24" bottom="16" left="24"/></padding>
+                    <Label fx:id="detailsStatus" styleClass="badge badge-green" text="COMPLETED"/>
+                    <Region HBox.hgrow="ALWAYS"/>
+                    <Button text="Close" styleClass="btn-modal-secondary" onAction="#onCloseDetails"/>
+                    <Button fx:id="btnPrintOrder" text="Print Receipt" styleClass="btn-modal-primary"/>
                 </HBox>
-
-                <StackPane VBox.vgrow="ALWAYS" maxHeight="Infinity" styleClass="table-wrap">
-                    <padding><Insets top="24" bottom="0"/></padding>
-                    <TableView fx:id="ordersTable" styleClass="inventory-table" maxHeight="Infinity" VBox.vgrow="ALWAYS" onMouseClicked="#onOrderClicked">
-                        <columns>
-                            <TableColumn fx:id="colOrderNumber" text="ORDER #" prefWidth="1" minWidth="80"/>
-                            <TableColumn fx:id="colItems" text="ITEMS SUMMARY" prefWidth="1" minWidth="200"/>
-                            <TableColumn fx:id="colType" text="TYPE" prefWidth="1" minWidth="80"/>
-                            <TableColumn fx:id="colTotal" text="TOTAL" prefWidth="1" minWidth="100"/>
-                            <TableColumn fx:id="colTime" text="TIME" prefWidth="1" minWidth="80"/>
-                            <TableColumn fx:id="colStatus" text="STATUS" prefWidth="1" minWidth="100"/>
-                        </columns>
-                    </TableView>
-                </StackPane>
             </VBox>
-        </StackPane>
-    </VBox>
-
+        </VBox>
+    </StackPane>
 </HBox>

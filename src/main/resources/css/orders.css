@@ -140,7 +140,7 @@
     -fx-background-radius: 20;
 }
 
-.badge-green {
+.badge-green, .badge-completed {
     -fx-background-color: rgba(74, 140, 63, 0.15);
     -fx-text-fill: #7ec470;
 }
@@ -167,4 +167,160 @@
 
 .order-total {
     -fx-font-family: 'DM Mono', monospace;
+}
+
+/* ── Order Details Modal ────────────────────────────────── */
+.modal-overlay {
+    -fx-background-color: rgba(0, 0, 0, 0.7);
+}
+
+.modal-content {
+    -fx-background-color: #2e2410;
+    -fx-border-color: #4a3820;
+    -fx-border-width: 1;
+    -fx-border-radius: 16;
+    -fx-background-radius: 16;
+}
+
+.modal-header {
+    -fx-border-color: #4a3820;
+    -fx-border-width: 0 0 1 0;
+}
+
+.modal-title {
+    -fx-font-family: 'Playfair Display', serif;
+    -fx-font-size: 24px;
+    -fx-font-weight: bold;
+    -fx-text-fill: #f5ede0;
+}
+
+.modal-subtitle {
+    -fx-font-family: 'DM Sans', sans-serif;
+    -fx-font-size: 13px;
+    -fx-text-fill: #8a7055;
+}
+
+.btn-modal-close {
+    -fx-background-color: transparent;
+    -fx-cursor: hand;
+    -fx-padding: 8;
+    -fx-background-radius: 20;
+}
+
+.btn-modal-close:hover {
+    -fx-background-color: rgba(212, 89, 30, 0.1);
+}
+
+.modal-scroll {
+    -fx-background-color: transparent;
+    -fx-background: transparent;
+}
+
+.modal-scroll .viewport {
+    -fx-background-color: transparent;
+}
+
+.section-header {
+    -fx-font-family: 'DM Sans', sans-serif;
+    -fx-font-size: 11px;
+    -fx-font-weight: bold;
+    -fx-letter-spacing: 0.12em;
+    -fx-text-fill: #8a7055;
+    -fx-text-transform: uppercase;
+}
+
+.info-label {
+    -fx-font-family: 'DM Sans', sans-serif;
+    -fx-font-size: 13px;
+    -fx-text-fill: #8a7055;
+}
+
+.info-value {
+    -fx-font-family: 'DM Sans', sans-serif;
+    -fx-font-size: 13px;
+    -fx-font-weight: 500;
+    -fx-text-fill: #f5ede0;
+}
+
+.notes-text {
+    -fx-font-family: 'DM Sans', sans-serif;
+    -fx-font-size: 13px;
+    -fx-font-style: italic;
+    -fx-text-fill: #c4a882;
+    -fx-background-color: rgba(212, 89, 30, 0.05);
+    -fx-padding: 12;
+    -fx-background-radius: 8;
+}
+
+.modal-total-box {
+    -fx-border-color: #4a3820;
+    -fx-border-width: 1 0 0 0;
+}
+
+.total-label {
+    -fx-font-family: 'DM Sans', sans-serif;
+    -fx-font-size: 13px;
+    -fx-text-fill: #8a7055;
+}
+
+.total-label-main {
+    -fx-font-family: 'DM Sans', sans-serif;
+    -fx-font-size: 14px;
+    -fx-font-weight: bold;
+    -fx-text-fill: #f5ede0;
+}
+
+.total-value-small {
+    -fx-font-family: 'DM Mono', monospace;
+    -fx-font-size: 14px;
+    -fx-text-fill: #c4a882;
+}
+
+.total-value-main {
+    -fx-font-family: 'DM Mono', monospace;
+    -fx-font-size: 20px;
+    -fx-font-weight: bold;
+    -fx-text-fill: #d4591e;
+}
+
+.modal-footer {
+    -fx-border-color: #4a3820;
+    -fx-border-width: 1 0 0 0;
+    -fx-background-color: rgba(34, 26, 14, 0.5);
+    -fx-background-radius: 0 0 16 16;
+}
+
+.btn-modal-secondary {
+    -fx-background-color: transparent;
+    -fx-border-color: #4a3820;
+    -fx-border-width: 1;
+    -fx-border-radius: 6;
+    -fx-background-radius: 6;
+    -fx-text-fill: #c4a882;
+    -fx-font-family: 'DM Sans', sans-serif;
+    -fx-font-size: 13px;
+    -fx-font-weight: 600;
+    -fx-padding: 10 20 10 20;
+    -fx-cursor: hand;
+}
+
+.btn-modal-secondary:hover {
+    -fx-border-color: #8a7055;
+    -fx-text-fill: #f5ede0;
+}
+
+.btn-modal-primary {
+    -fx-background-color: #d4591e;
+    -fx-border-radius: 6;
+    -fx-background-radius: 6;
+    -fx-text-fill: white;
+    -fx-font-family: 'DM Sans', sans-serif;
+    -fx-font-size: 13px;
+    -fx-font-weight: 600;
+    -fx-padding: 10 20 10 20;
+    -fx-cursor: hand;
+}
+
+.btn-modal-primary:hover {
+    -fx-background-color: #e07040;
 }

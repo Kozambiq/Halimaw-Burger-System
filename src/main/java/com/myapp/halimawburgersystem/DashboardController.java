@@ -61,7 +61,13 @@ public class DashboardController {
             } catch (Exception e) {
                 e.printStackTrace();
             }
-        } else if (text.contains("Orders") || text.contains("Kitchen")) {
+        } else if (text.contains("Kitchen")) {
+            try {
+                Main.showKitchen();
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
+        } else if (text.contains("Orders")) {
             try {
                 Main.showOrders();
             } catch (Exception e) {

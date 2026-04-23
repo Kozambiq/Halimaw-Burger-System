@@ -3,9 +3,7 @@
 <?import javafx.geometry.Insets?>
 <?import javafx.scene.control.Button?>
 <?import javafx.scene.control.Label?>
-<?import javafx.scene.control.TableColumn?>
-<?import javafx.scene.control.TableView?>
-<?import javafx.scene.control.TextField?>
+<?import javafx.scene.control.ScrollPane?>
 <?import javafx.scene.layout.HBox?>
 <?import javafx.scene.layout.Region?>
 <?import javafx.scene.layout.StackPane?>
@@ -14,8 +12,8 @@
 
 <HBox xmlns="http://javafx.com/javafx/17"
       xmlns:fx="http://javafx.com/fxml/1"
-      fx:controller="com.myapp.halimawburgersystem.InventoryController"
-      stylesheets="@../css/common.css, @../css/login.css, @../css/dashboard.css, @../css/inventory.css">
+      fx:controller="com.myapp.halimawburgersystem.KitchenController"
+      stylesheets="@../css/common.css, @../css/login.css, @../css/dashboard.css, @../css/inventory.css, @../css/kitchen.css">
 
     <VBox styleClass="sidebar" prefWidth="240" spacing="4">
         <padding><Insets top="16" right="8" bottom="16" left="8"/></padding>
@@ -31,19 +29,19 @@
             <padding><Insets top="16" left="8"/></padding>
         </Label>
 
-        <Button fx:id="btnDashboard" styleClass="nav-item" text="Dashboard" onAction="#onNavigateDashboard">
+        <Button fx:id="btnDashboard" styleClass="nav-item" text="Dashboard" onAction="#onNavigate">
             <graphic>
                 <SVGPath content="M3 13h8V3H3v10zm0 8h8v-6H3v6zm10 0h8V11h-8v10zm0-18v6h8V3h-8z" styleClass="nav-svg"/>
             </graphic>
         </Button>
 
-        <Button fx:id="btnOrders" styleClass="nav-item" text="Orders" onAction="#onNavigateOrders">
+        <Button fx:id="btnOrders" styleClass="nav-item" text="Orders" onAction="#onNavigate">
             <graphic>
                 <SVGPath content="M19 3H5c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2zm-5 14H7v-2h7v2zm3-4H7v-2h10v2zm0-4H7V7h10v2z" styleClass="nav-svg"/>
             </graphic>
         </Button>
 
-        <Button fx:id="btnKitchen" styleClass="nav-item" text="Kitchen Queue" onAction="#onNavigateKitchen">
+        <Button fx:id="btnKitchen" styleClass="nav-item" text="Kitchen Queue" onAction="#onNavigate">
             <graphic>
                 <SVGPath content="M18 3v2h-2V3H8v2H6V3H4v18h2v-2h2v2h8v-2h2v2h2V3h-2zM8 17H6v-2h2v2zm0-4H6v-2h2v2zm0-4H6V7h2v2zm10 8h-2v-2h2v2zm0-4h-2v-2h2v2zm0-4h-2V7h2v2z" styleClass="nav-svg"/>
             </graphic>
@@ -53,19 +51,19 @@
             <padding><Insets top="16" left="8"/></padding>
         </Label>
 
-        <Button fx:id="btnMenuItems" styleClass="nav-item" text="Menu Items" onAction="#onNavigateMenuItems">
+        <Button fx:id="btnMenuItems" styleClass="nav-item" text="Menu Items" onAction="#onNavigate">
             <graphic>
                 <SVGPath content="M11 9H9V2H7v7H5V2H3v7c0 2.12 1.66 3.84 3.75 3.97V22h2.5v-9.03C11.34 12.84 13 11.12 13 9V2h-2v7zm5-3v8h2.5v8H21V2c-2.76 0-5 2.24-5 4z" styleClass="nav-svg"/>
             </graphic>
         </Button>
 
-        <Button fx:id="btnCombos" styleClass="nav-item" text="Combos &amp; Promos" onAction="#onNavigateCombos">
+        <Button fx:id="btnCombos" styleClass="nav-item" text="Combos &amp; Promos" onAction="#onNavigate">
             <graphic>
                 <SVGPath content="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-2 14.5v-9l6 4.5-6 4.5z" styleClass="nav-svg"/>
             </graphic>
         </Button>
 
-        <Button fx:id="btnInventory" styleClass="nav-item" text="Inventory" onAction="#onNavigateInventory">
+        <Button fx:id="btnInventory" styleClass="nav-item" text="Inventory" onAction="#onNavigate">
             <graphic>
                 <SVGPath content="M20 6h-2.18c.07-.44.18-.88.18-1.36C18 2.06 15.94 0 13.36 0c-1.46 0-2.68.75-3.48 1.88L12 4l2.12-2.12C14.5 1.32 14.9 1 15.5 1c.83 0 1.5.67 1.5 1.5S16.33 4 15.5 4H4C2.9 4 2 4.9 2 6v14c0 1.1.9 2 2 2h16c1.1 0 2-.9 2-2V8c0-1.1-.9-2-2-2zm-7.5 11.5h-3v-3h-3v-3h3v-3h3v3h3v3h-3v3z" styleClass="nav-svg"/>
             </graphic>
@@ -75,13 +73,13 @@
             <padding><Insets top="16" left="8"/></padding>
         </Label>
 
-        <Button fx:id="btnSales" styleClass="nav-item" text="Sales Reports" onAction="#onNavigateSales">
+        <Button fx:id="btnSales" styleClass="nav-item" text="Sales Reports" onAction="#onNavigate">
             <graphic>
                 <SVGPath content="M16 6l2.29 2.29-4.88 4.88-4-4L2 16.59 3.41 18l6-6 4 4 6.3-6.29L22 12V6z" styleClass="nav-svg"/>
             </graphic>
         </Button>
 
-        <Button fx:id="btnStaff" styleClass="nav-item" text="Staff" onAction="#onNavigateStaff">
+        <Button fx:id="btnStaff" styleClass="nav-item" text="Staff" onAction="#onNavigate">
             <graphic>
                 <SVGPath content="M16 11c1.66 0 2.99-1.34 2.99-3S17.66 5 16 5c-1.66 0-3 1.34-3 3s1.34 3 3 3zm-8 0c1.66 0 2.99-1.34 2.99-3S9.66 5 8 5C6.34 5 5 6.34 5 8s1.34 3 3 3zm0 2c-2.33 0-7 1.17-7 3.5V19h14v-2.5c0-2.33-4.67-3.5-7-3.5z" styleClass="nav-svg"/>
             </graphic>
@@ -93,11 +91,11 @@
             <padding><Insets top="12" right="8" bottom="8" left="8"/></padding>
             <HBox alignment="CENTER_LEFT" spacing="10">
                 <StackPane styleClass="sidebar-avatar" prefWidth="34" prefHeight="34">
-                    <Label styleClass="sidebar-avatar-text" text="MG"/>
+                    <Label fx:id="sidebarAvatarText" styleClass="sidebar-avatar-text" text="MG"/>
                 </StackPane>
                 <VBox>
-                    <Label styleClass="sidebar-user-name" text="Maria G."/>
-                    <Label styleClass="sidebar-user-role" text="Manager"/>
+                    <Label fx:id="sidebarUserName" styleClass="sidebar-user-name" text="Maria G."/>
+                    <Label fx:id="sidebarUserRole" styleClass="sidebar-user-role" text="Manager"/>
                 </VBox>
                 <Region HBox.hgrow="ALWAYS"/>
                 <Button styleClass="btn-logout" onAction="#onLogout">
@@ -112,48 +110,54 @@
     <VBox styleClass="main-content" HBox.hgrow="ALWAYS">
         <HBox styleClass="topbar" prefHeight="56">
             <padding><Insets top="16" right="24" bottom="16" left="24"/></padding>
-            <Label styleClass="topbar-title" text="Inventory"/>
+            <Label fx:id="pageTitle" styleClass="topbar-title" text="Kitchen Queue"/>
             <Region HBox.hgrow="ALWAYS"/>
+            <Label fx:id="userDisplayName" styleClass="topbar-user" text="MG"/>
+            <Label styleClass="topbar-separator" text="·"/>
+            <Label fx:id="userDisplayRole" styleClass="topbar-role" text="Manager"/>
             <Label styleClass="topbar-date" text="Sat, Apr 18 2026 · 1:32 PM"/>
         </HBox>
 
         <StackPane VBox.vgrow="ALWAYS" maxHeight="Infinity" styleClass="content-area">
-            <VBox spacing="16" VBox.vgrow="ALWAYS">
-                <padding><Insets top="24" right="32" bottom="24" left="32"/></padding>
+            <padding><Insets top="24" right="32" bottom="24" left="32"/></padding>
+            
+            <HBox spacing="16" alignment="TOP_CENTER" styleClass="kanban-container">
+                <!-- NEW COLUMN -->
+                <VBox styleClass="kanban-col" HBox.hgrow="ALWAYS" spacing="12">
+                    <HBox styleClass="kanban-col-header" alignment="CENTER_LEFT">
+                        <Label styleClass="kanban-col-title" text="NEW"/>
+                        <Region HBox.hgrow="ALWAYS"/>
+                        <Label fx:id="countNew" styleClass="kanban-count" text="0"/>
+                    </HBox>
+                    <ScrollPane fitToWidth="true" hbarPolicy="NEVER" styleClass="kanban-scroll" VBox.vgrow="ALWAYS">
+                        <VBox fx:id="colNew" spacing="8" styleClass="kanban-card-container"/>
+                    </ScrollPane>
+                </VBox>
 
-                <HBox spacing="16" alignment="CENTER_LEFT">
-                    <VBox styleClass="stat-card" prefWidth="180">
-                        <Label styleClass="stat-label" text="TOTAL INGREDIENTS"/>
-                        <Label fx:id="lblTotal" styleClass="stat-value" text="0"/>
-                    </VBox>
-                    <VBox styleClass="stat-card" prefWidth="180">
-                        <Label styleClass="stat-label" text="LOW STOCK"/>
-                        <Label fx:id="lblLowStock" styleClass="stat-value" text="0" style="-fx-text-fill: #e8b84b;"/>
-                    </VBox>
-                    <VBox styleClass="stat-card" prefWidth="180">
-                        <Label styleClass="stat-label" text="OUT OF STOCK"/>
-                        <Label fx:id="lblOutOfStock" styleClass="stat-value" text="0" style="-fx-text-fill: #e07070;"/>
-                    </VBox>
-                    <TextField fx:id="searchField" promptText="Search ingredients..." prefWidth="220" style="-fx-background-color: #221a0e; -fx-text-fill: #f5ede0; -fx-prompt-text-fill: #8a7055; -fx-border-color: #4a3820; -fx-border-width: 1; -fx-border-radius: 6; -fx-background-radius: 6; -fx-padding: 8 12 8 12;"/>
-                    <Button fx:id="btnSearch" text="Search" style="-fx-background-color: #c8500a; -fx-text-fill: #f5ede0; -fx-font-weight: bold; -fx-border-radius: 6; -fx-background-radius: 6; -fx-padding: 8 16 8 16; -fx-font-size: 12px; -fx-cursor: hand;" onAction="#onSearchIngredient"/>
-                    <Region HBox.hgrow="ALWAYS"/>
-                    <Button styleClass="btn-primary" text="+ Add Ingredient" onAction="#onAddIngredient" prefWidth="140"/>
-                </HBox>
+                <!-- PREPARING COLUMN -->
+                <VBox styleClass="kanban-col" HBox.hgrow="ALWAYS" spacing="12">
+                    <HBox styleClass="kanban-col-header" alignment="CENTER_LEFT">
+                        <Label styleClass="kanban-col-title" text="PREPARING"/>
+                        <Region HBox.hgrow="ALWAYS"/>
+                        <Label fx:id="countPreparing" styleClass="kanban-count" text="0"/>
+                    </HBox>
+                    <ScrollPane fitToWidth="true" hbarPolicy="NEVER" styleClass="kanban-scroll" VBox.vgrow="ALWAYS">
+                        <VBox fx:id="colPreparing" spacing="8" styleClass="kanban-card-container"/>
+                    </ScrollPane>
+                </VBox>
 
-<StackPane VBox.vgrow="ALWAYS" maxHeight="Infinity" styleClass="table-wrap">
-                    <padding><Insets top="24" bottom="0"/></padding>
-                    <TableView fx:id="inventoryTable" styleClass="inventory-table" maxHeight="Infinity" VBox.vgrow="ALWAYS">
-                        <columns>
-                            <TableColumn text="INGREDIENT" fx:id="colName" prefWidth="1" minWidth="140"/>
-                            <TableColumn text="STOCK LEVEL" fx:id="colStockLevel" prefWidth="1" minWidth="110"/>
-                            <TableColumn text="REMAINING" fx:id="colQuantity" prefWidth="1" minWidth="80"/>
-                            <TableColumn text="UNIT" fx:id="colUnit" prefWidth="1" minWidth="60"/>
-                            <TableColumn text="STATUS" fx:id="colStatus" prefWidth="1" minWidth="80"/>
-                            <TableColumn text="" fx:id="colActions" prefWidth="1" minWidth="100"/>
-                        </columns>
-                    </TableView>
-                </StackPane>
-            </VBox>
+                <!-- READY COLUMN -->
+                <VBox styleClass="kanban-col" HBox.hgrow="ALWAYS" spacing="12">
+                    <HBox styleClass="kanban-col-header" alignment="CENTER_LEFT">
+                        <Label styleClass="kanban-col-title" text="READY"/>
+                        <Region HBox.hgrow="ALWAYS"/>
+                        <Label fx:id="countReady" styleClass="kanban-count" text="0"/>
+                    </HBox>
+                    <ScrollPane fitToWidth="true" hbarPolicy="NEVER" styleClass="kanban-scroll" VBox.vgrow="ALWAYS">
+                        <VBox fx:id="colReady" spacing="8" styleClass="kanban-card-container"/>
+                    </ScrollPane>
+                </VBox>
+            </HBox>
         </StackPane>
     </VBox>
 
