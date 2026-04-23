@@ -2,13 +2,17 @@ package com.myapp.halimawburgersystem;
 
 import com.myapp.dao.ComboDAO;
 import com.myapp.dao.MenuItemDAO;
+import com.myapp.dao.OrderDAO;
 import com.myapp.model.Combo;
 import com.myapp.model.MenuItemModel;
+import com.myapp.model.Order;
+import com.myapp.model.OrderItem;
 import com.myapp.model.Staff;
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
 import javafx.geometry.Insets;
+import javafx.scene.control.Alert;
 import javafx.scene.control.Button;
 import javafx.scene.control.Label;
 import javafx.scene.control.ScrollPane;
@@ -59,6 +63,7 @@ public class CashierController {
 
     private MenuItemDAO menuItemDAO = new MenuItemDAO();
     private ComboDAO comboDAO = new ComboDAO();
+    private OrderDAO orderDAO = new OrderDAO();
     private Map<Integer, Integer> orderItems = new HashMap<>();
     private Map<Integer, Double> itemPrices = new HashMap<>();
     private Map<Integer, Double> comboPrices = new HashMap<>();
@@ -501,6 +506,16 @@ public class CashierController {
     }
 
     @FXML
+    private void onPayCash() {
+        processOrder("Cash");
+    }
+
+    @FXML
+    private void onPayCard() {
+        processOrder("GCash");
+    }
+
+    @FXML
     private void onClearOrder() {
         orderItems.clear();
         subtotal = 0.0;
@@ -508,12 +523,76 @@ public class CashierController {
         updateTotals();
     }
 
-    @FXML
-    private void onPayCash() {
+    private void processOrder(String paymentType) {
+        if (orderItems.isEmpty()) {
+            showErrorAlert("No items ordered", "Please add items to the order before proceeding with payment.");
+            return;
+        }
+
+        Staff staff = Main.getCurrentStaff();
+        int staffId = staff != null ? staff.getId() : 1;
+
+        double discount = 0.0;
+        String notes = txtOrderNotes.getText();
+
+        Order order = new Order(orderNumber, staffId, currentOrderType, subtotal, discount, subtotal, paymentType, notes);
+
+        List<OrderItem> items = new ArrayList<>();
+        for (Map.Entry<Integer, Integer> entry : orderItems.entrySet()) {
+            int id = entry.getKey();
+            int qty = entry.getValue();
+
+            if (id > 0) {
+                Combo combo = findComboById(id);
+                if (combo != null) {
+                    items.add(new OrderItem("Combo", id, combo.getName(), qty, combo.getPromoPrice()));
+                }
+            } else {
+                MenuItemModel item = findMenuItemById(-id);
+                if (item != null) {
+                    items.add(new OrderItem("MenuItem", -id, item.getName(), qty, item.getPrice()));
+                }
+            }
+        }
+
+        int orderId = orderDAO.insert(order, items);
+        if (orderId > 0) {
+            orderNumber++;
+            orderItems.clear();
+            subtotal = 0.0;
+            txtOrderNotes.clear();
+            updateOrderDisplay();
+            updateTotals();
+            updateOrderNumber();
+        } else {
+            showErrorAlert("Order Failed", "Failed to save the order. Please try again.");
+        }
     }
 
-    @FXML
-    private void onPayCard() {
+    private void showErrorAlert(String header, String content) {
+        Alert alert = new Alert(Alert.AlertType.WARNING);
+        alert.setTitle("Warning");
+        alert.setHeaderText(header);
+        alert.setContentText(content);
+        alert.getDialogPane().setStyle("-fx-background-color: #2e2410; -fx-border-color: #4a3820; -fx-border-width: 1; -fx-border-radius: 12; -fx-background-radius: 12;");
+
+        javafx.scene.control.Label headerText = (javafx.scene.control.Label) alert.getDialogPane().lookup(".header");
+        if (headerText != null) {
+            headerText.setStyle("-fx-text-fill: #e07070; -fx-font-size: 14px; -fx-font-weight: bold;");
+        }
+
+        javafx.scene.Node contentNode = alert.getDialogPane().lookup(".content");
+        if (contentNode != null) {
+            contentNode.setStyle("-fx-text-fill: #f5ede0; -fx-font-size: 13px;");
+        }
+
+        alert.getDialogPane().getButtonTypes().clear();
+        alert.getDialogPane().getButtonTypes().add(javafx.scene.control.ButtonType.OK);
+
+        javafx.scene.control.Button okButton = (javafx.scene.control.Button) alert.getDialogPane().lookupButton(javafx.scene.control.ButtonType.OK);
+        okButton.setStyle("-fx-background-color: #c8500a; -fx-text-fill: #f5ede0; -fx-border-radius: 6; -fx-padding: 8 16 8 16; -fx-font-size: 12px; -fx-font-weight: bold;");
+
+        alert.showAndWait();
     }
 
     public void setActiveNav(String navName) {

@@ -93,6 +93,32 @@ CREATE TABLE IF NOT EXISTS combos (
     created_at    DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
     updated_at    DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
 );
+
+CREATE TABLE IF NOT EXISTS orders (
+    id            INT AUTO_INCREMENT PRIMARY KEY,
+    order_number  INT NOT NULL,
+    staff_id      INT NOT NULL,
+    order_type    ENUM('Dine-in','Takeout') NOT NULL DEFAULT 'Dine-in',
+    subtotal      DECIMAL(10,2) NOT NULL,
+    discount      DECIMAL(10,2) NOT NULL DEFAULT 0.00,
+    total         DECIMAL(10,2) NOT NULL,
+    payment_type  ENUM('Cash','GCash') NOT NULL,
+    notes         VARCHAR(500),
+    created_at    DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    FOREIGN KEY (staff_id) REFERENCES staff(id)
+);
+
+CREATE TABLE IF NOT EXISTS order_items (
+    id             INT AUTO_INCREMENT PRIMARY KEY,
+    order_id       INT NOT NULL,
+    item_type      ENUM('MenuItem','Combo') NOT NULL,
+    item_id        INT NOT NULL,
+    item_name      VARCHAR(100) NOT NULL,
+    quantity       INT NOT NULL,
+    unit_price     DECIMAL(10,2) NOT NULL,
+    total_price    DECIMAL(10,2) NOT NULL,
+    FOREIGN KEY (order_id) REFERENCES orders(id) ON DELETE CASCADE
+);
 ```
 
 ## Seed Data

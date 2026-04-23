@@ -96,7 +96,7 @@ stylesheets="@../css/cashier.css, @../css/common.css, @../css/login.css, @../css
         <HBox styleClass="payment-btns" prefHeight="120" spacing="8">
             <padding><Insets top="12" right="12" bottom="12" left="12"/></padding>
             <Button fx:id="btnCash" styleClass="pay-btn" text="Cash" onAction="#onPayCash" HBox.hgrow="ALWAYS" maxWidth="9999"/>
-            <Button fx:id="btnCard" styleClass="pay-btn" text="Card" onAction="#onPayCard" HBox.hgrow="ALWAYS" maxWidth="9999"/>
+            <Button fx:id="btnCard" styleClass="pay-btn" text="GCash" onAction="#onPayCard" HBox.hgrow="ALWAYS" maxWidth="9999"/>
         </HBox>
     </VBox>
 
