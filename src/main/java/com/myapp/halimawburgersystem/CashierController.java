@@ -110,14 +110,14 @@ public class CashierController {
     private void reloadMenu() {
         try {
             menuGrid.getChildren().clear();
-            loadMenuItems();
-            loadCombos();
+            int lastRow = loadMenuItems();
+            loadCombos(lastRow);
         } catch (Exception e) {
             System.err.println("Error reloading menu: " + e.getMessage());
         }
     }
 
-    private void loadMenuItems() {
+    private int loadMenuItems() {
         try {
             allMenuItems = menuItemDAO.findAllWithIngredientStatus();
             menuGrid.getChildren().clear();
@@ -132,17 +132,25 @@ public class CashierController {
                 menuGrid.getColumnConstraints().add(col);
             }
 
-            Map<String, List<MenuItemModel>> byCategory = new HashMap<>();
+            Map<String, List<MenuItemModel>> byCategory = new java.util.LinkedHashMap<>();
+            String[] categoryOrder = {"Burgers", "Chicken", "Sides", "Drinks", "Others"};
+            for (String cat : categoryOrder) {
+                byCategory.put(cat, new ArrayList<>());
+            }
             for (MenuItemModel item : allMenuItems) {
                 byCategory.computeIfAbsent(item.getCategory(), k -> new ArrayList<>()).add(item);
             }
 
             int row = 0;
             for (String category : byCategory.keySet()) {
-                row = addCategorySection(category, byCategory.get(category), columns, row);
+                List<MenuItemModel> items = byCategory.get(category);
+                if (items == null || items.isEmpty()) continue;
+                row = addCategorySection(category, items, columns, row);
             }
+            return row;
         } catch (Exception e) {
             System.err.println("Error loading menu items: " + e.getMessage());
+            return 0;
         }
     }
 
@@ -175,14 +183,13 @@ public class CashierController {
         return row;
     }
 
-    private void loadCombos() {
+    private void loadCombos(int startRow) {
         try {
             allCombos = comboDAO.findAll();
 
             if (allCombos.isEmpty()) return;
 
             int columns = calculateColumns();
-            int startRow = menuGrid.getChildren().size() / columns + 1;
 
             Label dividerLabel = new Label("PROMOS & COMBOS  ─────────────────");
             dividerLabel.getStyleClass().add("menu-divider-label");
