@@ -116,7 +116,6 @@ public class InventoryController {
 
             List<String> matches = allIngredientNames.stream()
                     .filter(name -> name.toLowerCase().contains(query))
-                    .limit(10)
                     .collect(Collectors.toList());
 
             if (!matches.isEmpty()) {
@@ -387,7 +386,7 @@ private void setupTableColumns() {
         boolean valid = true;
 
         String name = nameField.getText().trim();
-        if (name.isEmpty() || !name.matches("^[a-zA-Z]+$")) {
+        if (name.isEmpty() || !name.matches("^[a-zA-Z\\s]+$")) {
             valid = false;
         } else if (ingredientDAO.existsByName(name)) {
             valid = false;
@@ -1034,8 +1033,8 @@ private void setupTableColumns() {
 
         javafx.beans.InvalidationListener nameValidator = obs -> {
             String name = nameField.getText().trim();
-            if (!name.isEmpty() && !name.matches("^[a-zA-Z]+$")) {
-                nameError.setText("Only letters allowed");
+            if (!name.isEmpty() && !name.matches("^[a-zA-Z\\s]+$")) {
+                nameError.setText("Only letters and spaces allowed");
                 nameError.setVisible(true);
                 nameField.setStyle(fieldStyle + "-fx-border-color: #e07070;");
             } else if (name.isEmpty()) {

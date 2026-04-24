@@ -123,7 +123,7 @@ public class ComboDAO {
 
     public List<String> searchMenuItems(String query) {
         List<String> items = new ArrayList<>();
-        String sql = "SELECT name FROM menu_items WHERE LOWER(name) LIKE LOWER(?) AND availability != 'Unavailable' ORDER BY name LIMIT 10";
+        String sql = "SELECT name FROM menu_items WHERE LOWER(name) LIKE LOWER(?)";
         try (Connection conn = DatabaseConnection.getConnection();
              PreparedStatement stmt = conn.prepareStatement(sql)) {
             stmt.setString(1, "%" + query + "%");
@@ -156,7 +156,7 @@ public class ComboDAO {
 
     public List<String> searchByName(String query) {
         List<String> items = new ArrayList<>();
-        String sql = "SELECT name FROM combos WHERE LOWER(name) LIKE LOWER(?) ORDER BY name LIMIT 10";
+        String sql = "SELECT name FROM combos WHERE LOWER(name) LIKE LOWER(?)";
         try (Connection conn = DatabaseConnection.getConnection();
              PreparedStatement stmt = conn.prepareStatement(sql)) {
             stmt.setString(1, "%" + query + "%");

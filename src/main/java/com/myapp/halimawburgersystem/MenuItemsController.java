@@ -116,7 +116,6 @@ public class MenuItemsController {
 
             List<String> matches = allMenuItemNames.stream()
                     .filter(name -> name.toLowerCase().contains(query))
-                    .limit(10)
                     .collect(Collectors.toList());
 
             if (!matches.isEmpty()) {
@@ -302,7 +301,7 @@ javafx.scene.control.ListView<String> suggestionList = new javafx.scene.control.
                 suggestionPopup.hide();
                 return;
             }
-            List<String> matches = allIngredientNames.stream().filter(name -> name.toLowerCase().contains(query)).limit(10).collect(Collectors.toList());
+            List<String> matches = allIngredientNames.stream().filter(name -> name.toLowerCase().contains(query)).collect(Collectors.toList());
             if (!matches.isEmpty()) {
                 int rowCount = Math.min(matches.size(), 5);
                 suggestionList.setItems(FXCollections.observableArrayList(matches));
@@ -786,9 +785,8 @@ javafx.scene.control.ListView<String> suggestionList = new javafx.scene.control.
                 return;
             }
 
-List<String> matches = allIngredientNames.stream()
+ List<String> matches = allIngredientNames.stream()
                     .filter(name -> name.toLowerCase().contains(query))
-                    .limit(10)
                     .collect(Collectors.toList());
             if (!matches.isEmpty()) {
                 int rowCount = Math.min(matches.size(), 5);

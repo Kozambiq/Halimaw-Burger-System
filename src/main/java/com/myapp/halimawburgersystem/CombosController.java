@@ -112,7 +112,6 @@ public class CombosController {
 
             List<String> matches = allComboNames.stream()
                     .filter(name -> name.toLowerCase().contains(query))
-                    .limit(10)
                     .collect(Collectors.toList());
 
             if (!matches.isEmpty()) {
@@ -401,9 +400,31 @@ public class CombosController {
 
         javafx.scene.control.ListView<String> includesSuggestionList = new javafx.scene.control.ListView<>();
         includesSuggestionList.getStyleClass().add("suggestion-list");
-        includesSuggestionList.setFixedCellSize(24);
-        includesSuggestionList.setMaxHeight(150);
-        includesSuggestionList.setPrefWidth(280);
+        includesSuggestionList.setFixedCellSize(32);
+        includesSuggestionList.setMaxHeight(200);
+        includesSuggestionList.setPrefWidth(300);
+        includesSuggestionList.setStyle(
+            "-fx-background-color: #2e2410;" +
+            "-fx-border-color: #4a3820;" +
+            "-fx-border-width: 1;" +
+            "-fx-border-radius: 6;" +
+            "-fx-background-radius: 6;" +
+            "-fx-padding: 4 0 4 0;"
+        );
+        includesSuggestionList.setCellFactory(list -> new javafx.scene.control.ListCell<String>() {
+            @Override
+            protected void updateItem(String item, boolean empty) {
+                super.updateItem(item, empty);
+                if (empty || item == null) {
+                    setText(null);
+                    setGraphic(null);
+                } else {
+                    setText(item);
+                    setTextFill(Color.valueOf("#f5ede0"));
+                    setStyle("-fx-background-color: transparent; -fx-text-fill: #f5ede0; -fx-font-size: 13px; -fx-padding: 8 16 8 16; -fx-cursor: hand;");
+                }
+            }
+        });
 
         javafx.stage.Popup includesSuggestionPopup = new javafx.stage.Popup();
         includesSuggestionPopup.setAutoHide(true);
@@ -423,13 +444,12 @@ public class CombosController {
 
             List<String> matches = allMenuItemNames.stream()
                     .filter(name -> name.toLowerCase().contains(query))
-                    .limit(10)
                     .collect(java.util.stream.Collectors.toList());
 
             if (!matches.isEmpty()) {
                 int rowCount = Math.min(matches.size(), 6);
                 includesSuggestionList.setItems(FXCollections.observableArrayList(matches));
-                includesSuggestionList.setPrefHeight(rowCount * 24 + 8);
+                includesSuggestionList.setPrefHeight(rowCount * 32 + 8);
                 javafx.geometry.Bounds bounds = includesField.localToScreen(includesField.getBoundsInLocal());
                 includesSuggestionPopup.show(includesField, bounds.getMinX(), bounds.getMaxY());
             } else {
@@ -705,9 +725,31 @@ public class CombosController {
 
         javafx.scene.control.ListView<String> includesSuggestionList = new javafx.scene.control.ListView<>();
         includesSuggestionList.getStyleClass().add("suggestion-list");
-        includesSuggestionList.setFixedCellSize(24);
-        includesSuggestionList.setMaxHeight(150);
-        includesSuggestionList.setPrefWidth(280);
+        includesSuggestionList.setFixedCellSize(32);
+        includesSuggestionList.setMaxHeight(200);
+        includesSuggestionList.setPrefWidth(300);
+        includesSuggestionList.setStyle(
+            "-fx-background-color: #2e2410;" +
+            "-fx-border-color: #4a3820;" +
+            "-fx-border-width: 1;" +
+            "-fx-border-radius: 6;" +
+            "-fx-background-radius: 6;" +
+            "-fx-padding: 4 0 4 0;"
+        );
+        includesSuggestionList.setCellFactory(list -> new javafx.scene.control.ListCell<String>() {
+            @Override
+            protected void updateItem(String item, boolean empty) {
+                super.updateItem(item, empty);
+                if (empty || item == null) {
+                    setText(null);
+                    setGraphic(null);
+                } else {
+                    setText(item);
+                    setTextFill(Color.valueOf("#f5ede0"));
+                    setStyle("-fx-background-color: transparent; -fx-text-fill: #f5ede0; -fx-font-size: 13px; -fx-padding: 8 16 8 16; -fx-cursor: hand;");
+                }
+            }
+        });
 
         javafx.stage.Popup includesSuggestionPopup = new javafx.stage.Popup();
         includesSuggestionPopup.setAutoHide(true);
@@ -727,13 +769,12 @@ public class CombosController {
 
             List<String> matches = allMenuItemNames.stream()
                     .filter(name -> name.toLowerCase().contains(query))
-                    .limit(10)
                     .collect(java.util.stream.Collectors.toList());
 
             if (!matches.isEmpty()) {
                 int rowCount = Math.min(matches.size(), 6);
                 includesSuggestionList.setItems(FXCollections.observableArrayList(matches));
-                includesSuggestionList.setPrefHeight(rowCount * 24 + 8);
+                includesSuggestionList.setPrefHeight(rowCount * 32 + 8);
                 javafx.geometry.Bounds bounds = includesField.localToScreen(includesField.getBoundsInLocal());
                 includesSuggestionPopup.show(includesField, bounds.getMinX(), bounds.getMaxY());
             } else {
