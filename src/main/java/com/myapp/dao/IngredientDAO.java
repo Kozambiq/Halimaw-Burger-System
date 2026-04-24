@@ -295,4 +295,50 @@ public class IngredientDAO {
         }
         return -1;
     }
+
+    public List<Ingredient> findLowStock() {
+        List<Ingredient> ingredients = new ArrayList<>();
+        String sql = "SELECT id, name, unit, quantity, min_threshold, max_stock, status FROM ingredients WHERE quantity > 0 AND quantity <= min_threshold ORDER BY (quantity / min_threshold) ASC";
+        try (Connection conn = DatabaseConnection.getConnection();
+             PreparedStatement stmt = conn.prepareStatement(sql);
+             ResultSet rs = stmt.executeQuery()) {
+            while (rs.next()) {
+                ingredients.add(new Ingredient(
+                    rs.getInt("id"),
+                    rs.getString("name"),
+                    rs.getString("unit"),
+                    rs.getDouble("quantity"),
+                    rs.getDouble("min_threshold"),
+                    rs.getDouble("max_stock"),
+                    rs.getString("status")
+                ));
+            }
+        } catch (SQLException e) {
+            System.err.println("Error loading low stock ingredients: " + e.getMessage());
+        }
+        return ingredients;
+    }
+
+    public List<Ingredient> findCriticalStock() {
+        List<Ingredient> ingredients = new ArrayList<>();
+        String sql = "SELECT id, name, unit, quantity, min_threshold, max_stock, status FROM ingredients WHERE quantity <= 0 ORDER BY name";
+        try (Connection conn = DatabaseConnection.getConnection();
+             PreparedStatement stmt = conn.prepareStatement(sql);
+             ResultSet rs = stmt.executeQuery()) {
+            while (rs.next()) {
+                ingredients.add(new Ingredient(
+                    rs.getInt("id"),
+                    rs.getString("name"),
+                    rs.getString("unit"),
+                    rs.getDouble("quantity"),
+                    rs.getDouble("min_threshold"),
+                    rs.getDouble("max_stock"),
+                    rs.getString("status")
+                ));
+            }
+        } catch (SQLException e) {
+            System.err.println("Error loading critical stock ingredients: " + e.getMessage());
+        }
+        return ingredients;
+    }
 }

@@ -353,4 +353,52 @@ public class OrderDAO {
         }
         return items;
     }
+
+    public double getTodayRevenue() {
+        String sql = "SELECT COALESCE(SUM(total), 0) FROM orders WHERE DATE(created_at) = CURDATE() AND status != 'Cancelled'";
+        try (Connection conn = DatabaseConnection.getConnection();
+             PreparedStatement stmt = conn.prepareStatement(sql);
+             ResultSet rs = stmt.executeQuery()) {
+            if (rs.next()) return rs.getDouble(1);
+        } catch (SQLException e) {
+            System.err.println("Error calculating today's revenue: " + e.getMessage());
+        }
+        return 0;
+    }
+
+    public double getYesterdayRevenue() {
+        String sql = "SELECT COALESCE(SUM(total), 0) FROM orders WHERE DATE(created_at) = DATE_SUB(CURDATE(), INTERVAL 1 DAY) AND status != 'Cancelled'";
+        try (Connection conn = DatabaseConnection.getConnection();
+             PreparedStatement stmt = conn.prepareStatement(sql);
+             ResultSet rs = stmt.executeQuery()) {
+            if (rs.next()) return rs.getDouble(1);
+        } catch (SQLException e) {
+            System.err.println("Error calculating yesterday's revenue: " + e.getMessage());
+        }
+        return 0;
+    }
+
+    public int getTodayOrderCount() {
+        String sql = "SELECT COUNT(*) FROM orders WHERE DATE(created_at) = CURDATE() AND status != 'Cancelled'";
+        try (Connection conn = DatabaseConnection.getConnection();
+             PreparedStatement stmt = conn.prepareStatement(sql);
+             ResultSet rs = stmt.executeQuery()) {
+            if (rs.next()) return rs.getInt(1);
+        } catch (SQLException e) {
+            System.err.println("Error counting today's orders: " + e.getMessage());
+        }
+        return 0;
+    }
+
+    public int getYesterdayOrderCount() {
+        String sql = "SELECT COUNT(*) FROM orders WHERE DATE(created_at) = DATE_SUB(CURDATE(), INTERVAL 1 DAY) AND status != 'Cancelled'";
+        try (Connection conn = DatabaseConnection.getConnection();
+             PreparedStatement stmt = conn.prepareStatement(sql);
+             ResultSet rs = stmt.executeQuery()) {
+            if (rs.next()) return rs.getInt(1);
+        } catch (SQLException e) {
+            System.err.println("Error counting yesterday's orders: " + e.getMessage());
+        }
+        return 0;
+    }
 }

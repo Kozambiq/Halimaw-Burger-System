@@ -206,6 +206,10 @@
     -fx-text-fill: #7ec470;
 }
 
+.delta-down {
+    -fx-text-fill: #e07070;
+}
+
 /* ── Widgets ────────────────────────────────────────────── */
 .widget {
     -fx-background-color: #332615;

@@ -227,6 +227,29 @@ public class StaffDAO {
         return 0;
     }
 
+    public List<Staff> findActiveStaff() {
+        List<Staff> staffList = new ArrayList<>();
+        String sql = "SELECT id, name, email, role, shift_start, shift_end, status FROM staff WHERE status = 'Active' ORDER BY name";
+        try (Connection conn = DatabaseConnection.getConnection();
+             PreparedStatement stmt = conn.prepareStatement(sql);
+             ResultSet rs = stmt.executeQuery()) {
+            while (rs.next()) {
+                staffList.add(new Staff(
+                    rs.getInt("id"),
+                    rs.getString("name"),
+                    rs.getString("email"),
+                    rs.getString("role"),
+                    rs.getTime("shift_start") != null ? rs.getTime("shift_start").toLocalTime() : null,
+                    rs.getTime("shift_end") != null ? rs.getTime("shift_end").toLocalTime() : null,
+                    rs.getString("status")
+                ));
+            }
+        } catch (SQLException e) {
+            System.err.println("Error loading active staff: " + e.getMessage());
+        }
+        return staffList;
+    }
+
     public int getOnBreakCount() {
         String sql = "SELECT COUNT(*) FROM staff WHERE status = 'Break'";
         try (Connection conn = DatabaseConnection.getConnection();

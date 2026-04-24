@@ -450,4 +450,44 @@ public class MenuItemDAO {
         }
         return menuItems;
     }
+
+    public static class TopSellingItem {
+        private String name;
+        private int totalSold;
+
+        public TopSellingItem(String name, int totalSold) {
+            this.name = name;
+            this.totalSold = totalSold;
+        }
+
+        public String getName() { return name; }
+        public int getTotalSold() { return totalSold; }
+    }
+
+    public List<TopSellingItem> getTopSellingItems(int limit) {
+        List<TopSellingItem> items = new ArrayList<>();
+        String sql = "SELECT item_name, SUM(quantity) as total_sold " +
+                     "FROM order_items " +
+                     "WHERE item_type = 'MenuItem' " +
+                     "AND item_name IS NOT NULL AND item_name != '' " +
+                     "AND order_id IN (SELECT id FROM orders WHERE DATE(created_at) = CURDATE() AND status != 'Cancelled') " +
+                     "GROUP BY item_name " +
+                     "ORDER BY total_sold DESC " +
+                     "LIMIT ?";
+        try (Connection conn = DatabaseConnection.getConnection();
+             PreparedStatement stmt = conn.prepareStatement(sql)) {
+            stmt.setInt(1, limit);
+            try (ResultSet rs = stmt.executeQuery()) {
+                while (rs.next()) {
+                    items.add(new TopSellingItem(
+                        rs.getString("item_name"),
+                        rs.getInt("total_sold")
+                    ));
+                }
+            }
+        } catch (SQLException e) {
+            System.err.println("Error getting top selling items: " + e.getMessage());
+        }
+        return items;
+    }
 }

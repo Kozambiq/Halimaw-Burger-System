@@ -3,6 +3,9 @@
 <?import javafx.geometry.Insets?>
 <?import javafx.scene.control.Button?>
 <?import javafx.scene.control.Label?>
+<?import javafx.scene.control.ScrollPane?>
+<?import javafx.scene.control.TableColumn?>
+<?import javafx.scene.control.TableView?>
 <?import javafx.scene.layout.HBox?>
 <?import javafx.scene.layout.Region?>
 <?import javafx.scene.layout.StackPane?>
@@ -12,7 +15,7 @@
 <HBox xmlns="http://javafx.com/javafx/17"
       xmlns:fx="http://javafx.com/fxml/1"
       fx:controller="com.myapp.halimawburgersystem.DashboardController"
-      stylesheets="@../css/common.css, @../css/dashboard.css">
+      stylesheets="@../css/common.css, @../css/dashboard.css, @../css/inventory.css, @../css/orders.css">
 
     <VBox styleClass="sidebar" prefWidth="240" spacing="4">
         <padding><Insets top="16" right="8" bottom="16" left="8"/></padding>
@@ -98,11 +101,11 @@
             <padding><Insets top="12" right="8" bottom="8" left="8"/></padding>
             <HBox alignment="CENTER_LEFT" spacing="10">
                 <StackPane styleClass="sidebar-avatar" prefWidth="34" prefHeight="34">
-                    <Label styleClass="sidebar-avatar-text" text="MG"/>
+                    <Label fx:id="sidebarAvatarText" styleClass="sidebar-avatar-text" text="MG"/>
                 </StackPane>
                 <VBox>
-                    <Label styleClass="sidebar-user-name" text="Maria G."/>
-                    <Label styleClass="sidebar-user-role" text="Manager"/>
+                    <Label fx:id="sidebarUserName" styleClass="sidebar-user-name" text="Maria G."/>
+                    <Label fx:id="sidebarUserRole" styleClass="sidebar-user-role" text="Manager"/>
                 </VBox>
                 <Region HBox.hgrow="ALWAYS"/>
                 <Button styleClass="btn-logout" onAction="#onLogout">
@@ -122,44 +125,62 @@
             <Label styleClass="topbar-date" text="Sat, Apr 18 2026 · 1:32 PM"/>
         </HBox>
 
-        <StackPane styleClass="content-area" VBox.vgrow="ALWAYS">
-            <VBox spacing="24" styleClass="dashboard-content">
+        <ScrollPane styleClass="content-area" VBox.vgrow="ALWAYS" hbarPolicy="NEVER" fitToWidth="true">
+            <VBox spacing="20" styleClass="dashboard-content">
                 <padding><Insets top="24" right="32" bottom="24" left="32"/></padding>
 
-                <HBox spacing="16">
-                    <VBox styleClass="stat-card" prefWidth="200">
+                <HBox spacing="12">
+                    <VBox styleClass="stat-card" HBox.hgrow="ALWAYS">
                         <Label styleClass="stat-label" text="REVENUE TODAY"/>
-                        <Label styleClass="stat-value" text="₱18,450"/>
-                        <Label styleClass="stat-delta delta-up" text="↑ +12% vs yesterday"/>
+                        <Label fx:id="lblRevenue" styleClass="stat-value" text="₱0"/>
+                        <Label fx:id="lblRevenueDelta" styleClass="stat-delta delta-up" text=""/>
                     </VBox>
-                    <VBox styleClass="stat-card" prefWidth="200">
+                    <VBox styleClass="stat-card" HBox.hgrow="ALWAYS">
                         <Label styleClass="stat-label" text="ORDERS TODAY"/>
-                        <Label styleClass="stat-value" text="142"/>
-                        <Label styleClass="stat-delta delta-up" text="↑ +8% vs yesterday"/>
+                        <Label fx:id="lblOrders" styleClass="stat-value" text="0"/>
+                        <Label fx:id="lblOrdersDelta" styleClass="stat-delta delta-up" text=""/>
                     </VBox>
                 </HBox>
 
-                <VBox styleClass="widget widget-full">
-                    <Label text="RECENT ORDERS" styleClass="widget-title">
-                        <padding><Insets bottom="12"/></padding>
-                    </Label>
+                <VBox styleClass="widget" VBox.vgrow="ALWAYS">
+                    <Label text="RECENT ORDERS" styleClass="widget-title"/>
+                    <StackPane VBox.vgrow="ALWAYS" styleClass="table-wrap">
+                        <TableView fx:id="recentOrdersTable" styleClass="inventory-table" VBox.vgrow="ALWAYS">
+                            <columns>
+                                <TableColumn fx:id="colOrderNumber" text="ORDER #" prefWidth="100" minWidth="80"/>
+                                <TableColumn fx:id="colItems" text="ITEMS" prefWidth="300" minWidth="150"/>
+                                <TableColumn fx:id="colType" text="TYPE" prefWidth="80" minWidth="60"/>
+                                <TableColumn fx:id="colStatus" text="STATUS" prefWidth="100" minWidth="80"/>
+                            </columns>
+                        </TableView>
+                    </StackPane>
                 </VBox>
 
-                <HBox spacing="16">
-                    <VBox styleClass="widget" prefWidth="300">
+                <HBox spacing="12" VBox.vgrow="ALWAYS">
+                    <VBox styleClass="widget" HBox.hgrow="ALWAYS">
                         <Label text="TOP MENU ITEMS TODAY" styleClass="widget-title"/>
+                        <StackPane VBox.vgrow="ALWAYS" styleClass="table-wrap">
+                            <TableView fx:id="topItemsTable" styleClass="inventory-table" VBox.vgrow="ALWAYS">
+                                <columns>
+                                    <TableColumn fx:id="colItemName" text="ITEM" prefWidth="200" minWidth="100"/>
+                                    <TableColumn fx:id="colItemSold" text="SOLD" prefWidth="80" minWidth="60"/>
+                                </columns>
+                            </TableView>
+                        </StackPane>
                     </VBox>
-                    <VBox spacing="16" prefWidth="300">
-                        <VBox styleClass="widget" prefHeight="150">
+                    <VBox spacing="12" prefWidth="300">
+                        <VBox styleClass="widget">
                             <Label text="LOW STOCK ALERTS" styleClass="widget-title"/>
+                            <VBox fx:id="lowStockContainer" spacing="8"/>
                         </VBox>
-                        <VBox styleClass="widget" prefHeight="150">
+                        <VBox styleClass="widget">
                             <Label text="ACTIVE STAFF" styleClass="widget-title"/>
+                            <VBox fx:id="activeStaffContainer" spacing="8"/>
                         </VBox>
                     </VBox>
                 </HBox>
             </VBox>
-        </StackPane>
+        </ScrollPane>
     </VBox>
 
 </HBox>
