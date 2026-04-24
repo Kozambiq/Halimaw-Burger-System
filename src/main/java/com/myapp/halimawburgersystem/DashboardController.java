@@ -297,10 +297,13 @@ public class DashboardController {
         HBox row = new HBox();
         row.setAlignment(Pos.CENTER_LEFT);
         row.setSpacing(8);
+        row.setStyle("-fx-border-color: transparent transparent #5c4828 transparent; -fx-border-width: 0 0 1 0;");
 
         Label nameLabel = new Label(name);
         nameLabel.setStyle("-fx-text-fill: #c4a882; -fx-font-size: 12px;");
-        HBox.setHgrow(nameLabel, javafx.scene.layout.Priority.ALWAYS);
+
+        Region spacer = new Region();
+        HBox.setHgrow(spacer, javafx.scene.layout.Priority.ALWAYS);
 
         Label qtyLabel = new Label(qty);
         qtyLabel.setStyle("-fx-font-family: 'DM Mono', monospace; -fx-font-size: 11px;");
@@ -313,7 +316,7 @@ public class DashboardController {
             qtyLabel.setStyle("-fx-font-family: 'DM Mono', monospace; -fx-font-size: 11px; -fx-text-fill: #e8b84b;");
         }
 
-        row.getChildren().addAll(nameLabel, qtyLabel);
+        row.getChildren().addAll(nameLabel, spacer, qtyLabel);
         return row;
     }
 
