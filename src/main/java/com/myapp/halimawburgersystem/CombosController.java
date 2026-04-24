@@ -613,6 +613,8 @@ public class CombosController {
             }
             originalPriceInput.setText(String.format("%.2f", totalPrice));
 
+            validateForm.run();
+
             HBox itemRow = new HBox(5);
             itemRow.setAlignment(Pos.CENTER_LEFT);
 

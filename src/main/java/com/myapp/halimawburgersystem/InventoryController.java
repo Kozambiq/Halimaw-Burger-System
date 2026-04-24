@@ -31,6 +31,9 @@ import javafx.scene.paint.Color;
 
 import java.util.List;
 import java.util.stream.Collectors;
+import java.util.concurrent.Executors;
+import java.util.concurrent.ScheduledExecutorService;
+import java.util.concurrent.TimeUnit;
 
 public class InventoryController {
 
@@ -60,6 +63,7 @@ public class InventoryController {
     private IngredientDAO ingredientDAO = new IngredientDAO();
     private boolean alreadyLoaded = false;
     private List<Ingredient> allIngredients;
+    private ScheduledExecutorService timerService;
 
     @FXML
     public void initialize() {
@@ -70,6 +74,13 @@ public class InventoryController {
         setupTableColumns();
         setupSearchAutocomplete();
         loadInventory();
+        
+        timerService = Executors.newSingleThreadScheduledExecutor(r -> {
+            Thread t = new Thread(r);
+            t.setDaemon(true);
+            return t;
+        });
+        timerService.scheduleAtFixedRate(() -> Platform.runLater(this::loadInventory), 5, 5, TimeUnit.SECONDS);
     }
 
     private void setupSearchAutocomplete() {
@@ -1169,6 +1180,7 @@ private void setupTableColumns() {
     @FXML
     private void onLogout() {
         try {
+            if (timerService != null) timerService.shutdown();
             Main.showLogin();
         } catch (Exception e) {
             e.printStackTrace();

@@ -100,13 +100,14 @@ CREATE TABLE IF NOT EXISTS orders (
     staff_id      INT NOT NULL,
     order_type    ENUM('Dine-in','Takeout') NOT NULL DEFAULT 'Dine-in',
     subtotal      DECIMAL(10,2) NOT NULL,
-    discount      DECIMAL(10,2) NOT NULL DEFAULT 0.00,
+    discount     DECIMAL(10,2) NOT NULL DEFAULT 0.00,
     total         DECIMAL(10,2) NOT NULL,
     payment_type  ENUM('Cash','GCash') NOT NULL,
     reference_number VARCHAR(100),
     status        ENUM('New','Preparing','Done','Completed','Cancelled') NOT NULL DEFAULT 'New',
     notes         VARCHAR(500),
     cancelled_at  DATETIME,
+    ingredients_deducted TINYINT(1) NOT NULL DEFAULT 0,
     created_at    DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
     FOREIGN KEY (staff_id) REFERENCES staff(id)
 );

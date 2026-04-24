@@ -248,4 +248,51 @@ public class IngredientDAO {
         }
         return false;
     }
+
+    public boolean canDeduct(int ingredientId, double quantityNeeded) {
+        String sql = "SELECT quantity, min_threshold FROM ingredients WHERE id = ?";
+        try (Connection conn = DatabaseConnection.getConnection();
+             PreparedStatement stmt = conn.prepareStatement(sql)) {
+            stmt.setInt(1, ingredientId);
+            try (ResultSet rs = stmt.executeQuery()) {
+                if (rs.next()) {
+                    double currentQty = rs.getDouble("quantity");
+                    double minThreshold = rs.getDouble("min_threshold");
+                    return (currentQty - quantityNeeded) >= minThreshold;
+                }
+            }
+        } catch (SQLException e) {
+            System.err.println("Error checking ingredient stock: " + e.getMessage());
+        }
+        return false;
+    }
+
+    public boolean deduct(int ingredientId, double quantityToDeduct) {
+        String sql = "UPDATE ingredients SET quantity = quantity - ? WHERE id = ?";
+        try (Connection conn = DatabaseConnection.getConnection();
+             PreparedStatement stmt = conn.prepareStatement(sql)) {
+            stmt.setDouble(1, quantityToDeduct);
+            stmt.setInt(2, ingredientId);
+            return stmt.executeUpdate() > 0;
+        } catch (SQLException e) {
+            System.err.println("Error deducting ingredient: " + e.getMessage());
+        }
+        return false;
+    }
+
+    public int findIdByName(String name) {
+        String sql = "SELECT id FROM ingredients WHERE LOWER(name) = LOWER(?)";
+        try (Connection conn = DatabaseConnection.getConnection();
+             PreparedStatement stmt = conn.prepareStatement(sql)) {
+            stmt.setString(1, name);
+            try (ResultSet rs = stmt.executeQuery()) {
+                if (rs.next()) {
+                    return rs.getInt("id");
+                }
+            }
+        } catch (SQLException e) {
+            System.err.println("Error finding ingredient by name: " + e.getMessage());
+        }
+        return -1;
+    }
 }

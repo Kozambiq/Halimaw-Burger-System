@@ -3,6 +3,7 @@ package com.myapp.dao;
 import com.myapp.model.Order;
 import com.myapp.model.OrderItem;
 import com.myapp.util.DatabaseConnection;
+import com.myapp.dao.MenuItemDAO.MenuItemIngredient;
 
 import java.sql.*;
 import java.time.LocalDateTime;
@@ -233,6 +234,84 @@ public class OrderDAO {
             System.err.println("Error updating order status: " + e.getMessage());
         }
         return false;
+    }
+
+    public String deductIngredientsForOrder(int orderId) {
+        String checkSql = "SELECT ingredients_deducted FROM orders WHERE id = ?";
+        try (Connection conn = DatabaseConnection.getConnection();
+             PreparedStatement checkStmt = conn.prepareStatement(checkSql)) {
+            checkStmt.setInt(1, orderId);
+            try (ResultSet rs = checkStmt.executeQuery()) {
+                if (rs.next() && rs.getInt("ingredients_deducted") == 1) {
+                    return null;
+                }
+            }
+        } catch (SQLException e) {
+            return "Error checking order: " + e.getMessage();
+        }
+
+        List<OrderItem> items = findItemsByOrderId(orderId);
+        IngredientDAO ingredientDAO = new IngredientDAO();
+        MenuItemDAO menuItemDAO = new MenuItemDAO();
+
+        for (OrderItem item : items) {
+            if ("MenuItem".equals(item.getItemType())) {
+                int menuItemId = item.getItemId();
+                int orderQty = item.getQuantity();
+                List<MenuItemIngredient> menuItemIngredients = menuItemDAO.getIngredientsForMenuItem(menuItemId);
+                for (MenuItemIngredient mi : menuItemIngredients) {
+                    double totalNeeded = mi.getQuantity() * orderQty;
+                    int ingId = ingredientDAO.findIdByName(mi.getIngredientName());
+                    if (ingId > 0 && !ingredientDAO.canDeduct(ingId, totalNeeded)) {
+                        return "Not enough stock for: " + mi.getIngredientName();
+                    }
+                }
+                for (MenuItemIngredient mi : menuItemIngredients) {
+                    double totalNeeded = mi.getQuantity() * orderQty;
+                    int ingId = ingredientDAO.findIdByName(mi.getIngredientName());
+                    if (ingId > 0) {
+                        ingredientDAO.deduct(ingId, totalNeeded);
+                    }
+                }
+            } else if ("Combo".equals(item.getItemType())) {
+                String includes = item.getItemName();
+                String[] itemNames = includes.split(" \\+ ");
+                int orderQty = item.getQuantity();
+                for (String itemName : itemNames) {
+                    itemName = itemName.trim();
+                    List<MenuItemIngredient> menuItemIngredients = menuItemDAO.getIngredientsForMenuItemByName(itemName);
+                    for (MenuItemIngredient mi : menuItemIngredients) {
+                        double totalNeeded = mi.getQuantity() * orderQty;
+                        int ingId = ingredientDAO.findIdByName(mi.getIngredientName());
+                        if (ingId > 0 && !ingredientDAO.canDeduct(ingId, totalNeeded)) {
+                            return "Not enough stock for: " + mi.getIngredientName();
+                        }
+                    }
+                }
+                for (String itemName : itemNames) {
+                    itemName = itemName.trim();
+                    List<MenuItemIngredient> menuItemIngredients = menuItemDAO.getIngredientsForMenuItemByName(itemName);
+                    for (MenuItemIngredient mi : menuItemIngredients) {
+                        double totalNeeded = mi.getQuantity() * orderQty;
+                        int ingId = ingredientDAO.findIdByName(mi.getIngredientName());
+                        if (ingId > 0) {
+                            ingredientDAO.deduct(ingId, totalNeeded);
+                        }
+                    }
+                }
+            }
+        }
+
+        String updateSql = "UPDATE orders SET ingredients_deducted = 1 WHERE id = ?";
+        try (Connection conn = DatabaseConnection.getConnection();
+             PreparedStatement stmt = conn.prepareStatement(updateSql)) {
+            stmt.setInt(1, orderId);
+            stmt.executeUpdate();
+        } catch (SQLException e) {
+            System.err.println("Error marking ingredients as deducted: " + e.getMessage());
+        }
+
+        return null;
     }
 
     public int getCountByStatus(String status) {

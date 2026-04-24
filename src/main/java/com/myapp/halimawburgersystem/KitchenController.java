@@ -223,6 +223,17 @@ public class KitchenController {
     }
 
     private void updateStatus(Order order, String newStatus) {
+        if ("Completed".equals(newStatus)) {
+            String error = orderDAO.deductIngredientsForOrder(order.getId());
+            if (error != null) {
+                Alert alert = new Alert(Alert.AlertType.WARNING);
+                alert.setTitle("Low Stock Warning");
+                alert.setHeaderText(error);
+                alert.setContentText("Cannot complete order until ingredients are restocked.");
+                alert.showAndWait();
+                return;
+            }
+        }
         if (orderDAO.updateStatus(order.getId(), newStatus)) {
             loadQueue();
         }

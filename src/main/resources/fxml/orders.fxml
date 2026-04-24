@@ -251,7 +251,6 @@
                     <Region HBox.hgrow="ALWAYS"/>
                     <Button fx:id="btnCancelOrder" text="Cancel Order" styleClass="btn-modal-danger" onAction="#onCancelOrder"/>
                     <Button text="Close" styleClass="btn-modal-secondary" onAction="#onCloseDetails"/>
-                    <Button fx:id="btnPrintOrder" text="Print Receipt" styleClass="btn-modal-primary"/>
                 </HBox>
             </VBox>
         </VBox>

@@ -209,6 +209,32 @@ public class MenuItemDAO {
         return ingredients;
     }
 
+    public List<MenuItemIngredient> getIngredientsForMenuItemByName(String menuItemName) {
+        List<MenuItemIngredient> ingredients = new ArrayList<>();
+        String sql = "SELECT i.id, i.name, i.unit, mmi.quantity_used " +
+                     "FROM menu_item_ingredients mmi " +
+                     "JOIN ingredients i ON mmi.ingredient_id = i.id " +
+                     "JOIN menu_items m ON mmi.menu_item_id = m.id " +
+                     "WHERE LOWER(m.name) = LOWER(?)";
+        try (Connection conn = DatabaseConnection.getConnection();
+             PreparedStatement stmt = conn.prepareStatement(sql)) {
+            stmt.setString(1, menuItemName);
+            try (ResultSet rs = stmt.executeQuery()) {
+                while (rs.next()) {
+                    ingredients.add(new MenuItemIngredient(
+                        rs.getInt("id"),
+                        rs.getString("name"),
+                        rs.getString("unit"),
+                        rs.getDouble("quantity_used")
+                    ));
+                }
+            }
+        } catch (SQLException e) {
+            System.err.println("Error getting ingredients by name: " + e.getMessage());
+        }
+        return ingredients;
+    }
+
     public List<String> getAllCategories() {
         List<String> categories = new ArrayList<>();
         String sql = "SELECT DISTINCT category FROM menu_items ORDER BY category";
