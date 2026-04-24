@@ -156,11 +156,11 @@
                     </StackPane>
                 </VBox>
 
-                <HBox spacing="12" VBox.vgrow="ALWAYS">
+                <HBox spacing="12">
                     <VBox styleClass="widget" HBox.hgrow="ALWAYS">
                         <Label text="TOP MENU ITEMS TODAY" styleClass="widget-title"/>
-                        <StackPane VBox.vgrow="ALWAYS" styleClass="table-wrap">
-                            <TableView fx:id="topItemsTable" styleClass="inventory-table" VBox.vgrow="ALWAYS">
+                        <StackPane styleClass="table-wrap">
+                            <TableView fx:id="topItemsTable" styleClass="inventory-table" maxHeight="220">
                                 <columns>
                                     <TableColumn fx:id="colItemName" text="ITEM" prefWidth="200" minWidth="100"/>
                                     <TableColumn fx:id="colItemSold" text="SOLD" prefWidth="80" minWidth="60"/>
@@ -168,15 +168,13 @@
                             </TableView>
                         </StackPane>
                     </VBox>
-                    <VBox spacing="12" prefWidth="300">
-                        <VBox styleClass="widget">
-                            <Label text="LOW STOCK ALERTS" styleClass="widget-title"/>
-                            <VBox fx:id="lowStockContainer" spacing="8"/>
-                        </VBox>
-                        <VBox styleClass="widget">
-                            <Label text="ACTIVE STAFF" styleClass="widget-title"/>
-                            <VBox fx:id="activeStaffContainer" spacing="8"/>
-                        </VBox>
+                    <VBox styleClass="widget" HBox.hgrow="ALWAYS">
+                        <Label text="ACTIVE STAFF" styleClass="widget-title"/>
+                        <VBox fx:id="activeStaffContainer" spacing="8"/>
+                    </VBox>
+                    <VBox styleClass="widget" HBox.hgrow="ALWAYS">
+                        <Label text="LOW STOCK ALERTS" styleClass="widget-title"/>
+                        <VBox fx:id="lowStockContainer" spacing="8"/>
                     </VBox>
                 </HBox>
             </VBox>
