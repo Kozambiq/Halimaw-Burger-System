@@ -602,14 +602,6 @@ public class CombosController {
                 return;
             }
 
-            if (selectedItems.contains(item)) {
-                includesError.setText(item + " already added");
-                includesError.setVisible(true);
-                includesField.setStyle(errorFieldStyle);
-                includesSuggestionPopup.hide();
-                return;
-            }
-
             selectedItems.add(item);
             includesField.clear();
             includesError.setVisible(false);
@@ -809,14 +801,6 @@ public class CombosController {
         addItemBtn.setOnAction(e -> {
             String item = includesField.getText().trim();
             if (item.isEmpty()) {
-                return;
-            }
-
-            if (selectedItems.contains(item)) {
-                includesError.setText(item + " already added");
-                includesError.setVisible(true);
-                includesField.setStyle(errorFieldStyle);
-                includesSuggestionPopup.hide();
                 return;
             }
 
