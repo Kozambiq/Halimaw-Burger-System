@@ -244,6 +244,14 @@
     -fx-background-color: transparent;
 }
 
+.table-wrap .table-view .viewport {
+    -fx-background-color: transparent;
+}
+
+.table-wrap .table-view .corner {
+    -fx-background-color: #332615;
+}
+
 .table-column {
     -fx-background-color: #221a0e;
     -fx-text-fill: #8a7055;
