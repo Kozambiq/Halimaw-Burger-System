@@ -57,16 +57,16 @@
 }
 
 .inventory-table .column-header-background {
-    -fx-background-color: #221a0e;
+    -fx-background-color: #2a1e10;
 }
 
 .inventory-table .filler {
-    -fx-background-color: #221a0e;
+    -fx-background-color: #2a1e10;
 }
 
 .inventory-table .column-header {
-    -fx-background-color: #221a0e;
-    -fx-background: #221a0e;
+    -fx-background-color: #2a1e10;
+    -fx-background: #2a1e10;
     -fx-text-fill: #8a7055;
     -fx-font-size: 11px;
     -fx-font-weight: bold;
