@@ -170,6 +170,36 @@
 .content-area {
     -fx-padding: 24 32 24 32;
     -fx-background-color: #1a1208;
+    -fx-background: #1a1208;
+}
+
+.content-area > .viewport {
+    -fx-background-color: #1a1208;
+}
+
+.content-area > .scroll-bar:vertical {
+    -fx-background-color: #1a1208;
+}
+
+.content-area > .scroll-bar:horizontal {
+    -fx-background-color: #1a1208;
+}
+
+.content-area > .corner {
+    -fx-background-color: #1a1208;
+}
+
+.scroll-pane {
+    -fx-background-color: #1a1208;
+    -fx-background: #1a1208;
+}
+
+.scroll-pane > .viewport {
+    -fx-background-color: #1a1208;
+}
+
+.dashboard-content {
+    -fx-background-color: #1a1208;
 }
 
 /* ── Stat Cards ─────────────────────────────────────────── */
