@@ -155,6 +155,10 @@ public class OrderDAO {
                 );
                 order.setId(rs.getInt("id"));
                 order.setCreatedAt(rs.getTimestamp("created_at").toLocalDateTime());
+                Timestamp cancelledTs = rs.getTimestamp("cancelled_at");
+                if (cancelledTs != null) {
+                    order.setCancelledAt(cancelledTs.toLocalDateTime());
+                }
                 order.setStatus(rs.getString("status"));
                 order.setItemsSummary(rs.getString("summary"));
                 orders.add(order);
@@ -215,7 +219,11 @@ public class OrderDAO {
     }
 
     public boolean updateStatus(int id, String status) {
-        String sql = "UPDATE orders SET status = ? WHERE id = ?";
+        String sql = "UPDATE orders SET status = ?";
+        if ("Cancelled".equals(status)) {
+            sql += ", cancelled_at = NOW()";
+        }
+        sql += " WHERE id = ?";
         try (Connection conn = DatabaseConnection.getConnection();
              PreparedStatement stmt = conn.prepareStatement(sql)) {
             stmt.setString(1, status);

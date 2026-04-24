@@ -20,9 +20,7 @@ import javafx.scene.layout.VBox;
 
 import java.time.Duration;
 import java.time.LocalDateTime;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
@@ -55,7 +53,6 @@ public class KitchenController {
 
     private OrderDAO orderDAO = new OrderDAO();
     private ScheduledExecutorService timerService;
-    private Map<Integer, LocalDateTime> cancelledOrdersTime = new HashMap<>();
 
     @FXML
     public void initialize() {
@@ -98,11 +95,12 @@ public class KitchenController {
             String status = order.getStatus();
             
             if ("Cancelled".equals(status)) {
-                if (!cancelledOrdersTime.containsKey(order.getId())) {
-                    cancelledOrdersTime.put(order.getId(), now);
+                LocalDateTime cancelledAt = order.getCancelledAt();
+                if (cancelledAt == null) {
+                    cancelledAt = now;
                 }
                 
-                long secsSinceCancel = Duration.between(cancelledOrdersTime.get(order.getId()), now).getSeconds();
+                long secsSinceCancel = Duration.between(cancelledAt, now).getSeconds();
                 if (secsSinceCancel > 60) continue; 
 
                 // Show cancelled at top of New column with red highlight
@@ -217,7 +215,6 @@ public class KitchenController {
                 
                 if (confirm.showAndWait().get() == ButtonType.OK) {
                     updateStatus(order, "Cancelled");
-                    cancelledOrdersTime.put(order.getId(), LocalDateTime.now());
                 }
             }
         });

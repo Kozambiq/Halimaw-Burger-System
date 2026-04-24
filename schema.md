@@ -106,6 +106,7 @@ CREATE TABLE IF NOT EXISTS orders (
     reference_number VARCHAR(100),
     status        ENUM('New','Preparing','Done','Completed','Cancelled') NOT NULL DEFAULT 'New',
     notes         VARCHAR(500),
+    cancelled_at  DATETIME,
     created_at    DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
     FOREIGN KEY (staff_id) REFERENCES staff(id)
 );

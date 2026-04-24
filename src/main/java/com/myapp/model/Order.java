@@ -15,6 +15,7 @@ public class Order {
     private String status;
     private String notes;
     private String itemsSummary;
+    private LocalDateTime cancelledAt;
     private LocalDateTime createdAt;
 
     public Order() {
@@ -127,6 +128,14 @@ public class Order {
 
     public void setNotes(String notes) {
         this.notes = notes;
+    }
+
+    public LocalDateTime getCancelledAt() {
+        return cancelledAt;
+    }
+
+    public void setCancelledAt(LocalDateTime cancelledAt) {
+        this.cancelledAt = cancelledAt;
     }
 
     public LocalDateTime getCreatedAt() {
