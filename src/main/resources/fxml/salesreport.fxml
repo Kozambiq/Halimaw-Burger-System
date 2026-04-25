@@ -134,7 +134,7 @@
                 <!-- Hourly Revenue Chart -->
                 <VBox styleClass="widget">
                     <Label styleClass="widget-title" text="HOURLY REVENUE TODAY"/>
-                    <WebView fx:id="chartWebView" prefHeight="240"/>
+                    <WebView fx:id="chartWebView" prefHeight="180"/>
                 </VBox>
 
                 <!-- AI Analysis + Recommendations side by side -->
