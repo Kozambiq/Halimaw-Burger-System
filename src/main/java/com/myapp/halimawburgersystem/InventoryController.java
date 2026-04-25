@@ -1243,11 +1243,11 @@ private void setupTableColumns() {
 
     @FXML
     private void onNavigateSales() {
-        Alert alert = new Alert(Alert.AlertType.INFORMATION);
-        alert.setTitle("Sales Reports");
-        alert.setHeaderText(null);
-        alert.setContentText("Coming soon!");
-        alert.showAndWait();
+        try {
+            Main.showSalesReport();
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
     }
 
     @FXML

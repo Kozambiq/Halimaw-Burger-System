@@ -1228,11 +1228,19 @@ javafx.scene.control.ListView<String> suggestionList = new javafx.scene.control.
 
     @FXML
     private void onNavigateSales() {
-        System.out.println("Sales Reports - Coming soon");
+        try {
+            Main.showSalesReport();
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
     }
 
     @FXML
     private void onNavigateStaff() {
-        System.out.println("Staff - Coming soon");
+        try {
+            Main.showStaff();
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
     }
 }

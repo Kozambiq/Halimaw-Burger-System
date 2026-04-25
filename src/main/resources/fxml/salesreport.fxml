@@ -149,7 +149,7 @@
                         </HBox>
                         <Label fx:id="lblAnalysisText"
                                wrapText="true"
-                               style="-fx-font-size: 13px; -fx-text-fill: -fx-text-secondary;"
+                               style="-fx-font-size: 13px; -fx-text-fill: #8a7055;"
                                text=""/>
                     </VBox>
 
@@ -162,7 +162,7 @@
                         </HBox>
                         <Label fx:id="lblRecommendationText"
                                wrapText="true"
-                               style="-fx-font-size: 13px; -fx-text-fill: -fx-text-secondary;"
+                               style="-fx-font-size: 13px; -fx-text-fill: #8a7055;"
                                text=""/>
                     </VBox>
 

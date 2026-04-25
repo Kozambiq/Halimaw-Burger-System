@@ -300,6 +300,7 @@ public class KitchenController {
             else if (text.contains("Menu Items")) Main.showMenuItems();
             else if (text.contains("Combos")) Main.showCombos();
             else if (text.contains("Inventory")) Main.showInventory();
+            else if (text.contains("Sales")) Main.showSalesReport();
             else if (text.contains("Staff")) Main.showStaff();
         } catch (Exception e) {
             e.printStackTrace();

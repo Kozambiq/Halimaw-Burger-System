@@ -1070,6 +1070,11 @@ public class StaffController {
 
     @FXML
     private void onNavigateSales(ActionEvent event) {
+        try {
+            Main.showSalesReport();
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
     }
 
     @FXML
