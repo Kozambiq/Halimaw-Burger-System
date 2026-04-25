@@ -3,6 +3,9 @@ module com.myapp.halimawburgersystem {
     requires javafx.fxml;
     requires java.sql;
     requires jbcrypt;
+    requires javafx.web;
+    requires java.net.http;
+
 
     opens com.myapp.halimawburgersystem to javafx.fxml;
     exports com.myapp.halimawburgersystem;

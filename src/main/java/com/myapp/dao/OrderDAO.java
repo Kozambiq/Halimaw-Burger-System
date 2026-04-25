@@ -314,6 +314,45 @@ public class OrderDAO {
         return null;
     }
 
+    public String checkThresholdWarnings(int orderId) {
+        List<OrderItem> items = findItemsByOrderId(orderId);
+        IngredientDAO ingredientDAO = new IngredientDAO();
+        MenuItemDAO menuItemDAO = new MenuItemDAO();
+        List<String> warnings = new ArrayList<>();
+
+        for (OrderItem item : items) {
+            if ("MenuItem".equals(item.getItemType())) {
+                int menuItemId = item.getItemId();
+                int orderQty = item.getQuantity();
+                List<MenuItemIngredient> menuItemIngredients = menuItemDAO.getIngredientsForMenuItem(menuItemId);
+                for (MenuItemIngredient mi : menuItemIngredients) {
+                    double totalNeeded = mi.getQuantity() * orderQty;
+                    int ingId = ingredientDAO.findIdByName(mi.getIngredientName());
+                    if (ingId > 0 && ingredientDAO.wouldGoBelowThreshold(ingId, totalNeeded)) {
+                        warnings.add(mi.getIngredientName() + " will be low");
+                    }
+                }
+            } else if ("Combo".equals(item.getItemType())) {
+                String includes = item.getItemName();
+                String[] itemNames = includes.split(" \\+ ");
+                int orderQty = item.getQuantity();
+                for (String itemName : itemNames) {
+                    itemName = itemName.trim();
+                    List<MenuItemIngredient> menuItemIngredients = menuItemDAO.getIngredientsForMenuItemByName(itemName);
+                    for (MenuItemIngredient mi : menuItemIngredients) {
+                        double totalNeeded = mi.getQuantity() * orderQty;
+                        int ingId = ingredientDAO.findIdByName(mi.getIngredientName());
+                        if (ingId > 0 && ingredientDAO.wouldGoBelowThreshold(ingId, totalNeeded)) {
+                            warnings.add(mi.getIngredientName() + " will be low");
+                        }
+                    }
+                }
+            }
+        }
+
+        return warnings.isEmpty() ? null : String.join(", ", warnings);
+    }
+
     public int getCountByStatus(String status) {
         String sql = "SELECT COUNT(*) FROM orders WHERE status = ?";
         try (Connection conn = DatabaseConnection.getConnection();

@@ -250,6 +250,23 @@ public class IngredientDAO {
     }
 
     public boolean canDeduct(int ingredientId, double quantityNeeded) {
+        String sql = "SELECT quantity FROM ingredients WHERE id = ?";
+        try (Connection conn = DatabaseConnection.getConnection();
+             PreparedStatement stmt = conn.prepareStatement(sql)) {
+            stmt.setInt(1, ingredientId);
+            try (ResultSet rs = stmt.executeQuery()) {
+                if (rs.next()) {
+                    double currentQty = rs.getDouble("quantity");
+                    return (currentQty - quantityNeeded) > 0;
+                }
+            }
+        } catch (SQLException e) {
+            System.err.println("Error checking ingredient stock: " + e.getMessage());
+        }
+        return false;
+    }
+
+    public boolean wouldGoBelowThreshold(int ingredientId, double quantityNeeded) {
         String sql = "SELECT quantity, min_threshold FROM ingredients WHERE id = ?";
         try (Connection conn = DatabaseConnection.getConnection();
              PreparedStatement stmt = conn.prepareStatement(sql)) {
@@ -258,11 +275,11 @@ public class IngredientDAO {
                 if (rs.next()) {
                     double currentQty = rs.getDouble("quantity");
                     double minThreshold = rs.getDouble("min_threshold");
-                    return (currentQty - quantityNeeded) >= minThreshold;
+                    return (currentQty - quantityNeeded) < minThreshold;
                 }
             }
         } catch (SQLException e) {
-            System.err.println("Error checking ingredient stock: " + e.getMessage());
+            System.err.println("Error checking threshold: " + e.getMessage());
         }
         return false;
     }

@@ -416,6 +416,12 @@ public class DashboardController {
             } catch (Exception e) {
                 e.printStackTrace();
             }
+        } else if (text.contains("Sales")) {
+            try {
+                Main.showSalesReport();
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
         }
     }
 

@@ -3,6 +3,7 @@ package com.myapp.halimawburgersystem;
 import com.myapp.model.Staff;
 import com.myapp.model.User;
 import com.myapp.util.DatabaseConnection;
+import com.myapp.util.EnvLoader;
 import javafx.application.Application;
 import javafx.fxml.FXMLLoader;
 import javafx.scene.Parent;
@@ -29,6 +30,8 @@ public class Main extends Application {
     private static CashierController cashierController;
     private static OrdersController ordersController;
     private static KitchenController kitchenController;
+    private static Parent salesReportRoot;
+    private static SalesReportController salesReportController;
 
     private static User currentUser;
     private static Staff currentStaff;
@@ -36,6 +39,7 @@ public class Main extends Application {
     @Override
     public void start(Stage stage) throws Exception {
         mainStage = stage;
+        EnvLoader.load();
         DatabaseConnection.initialize();
         showLogin();
     }
@@ -268,6 +272,33 @@ public class Main extends Application {
 
     public static void clearCashierCache() {
         cashierRoot = null;
+    }
+
+    public static void showSalesReport() throws Exception {
+        if (salesReportRoot == null) {
+            FXMLLoader fxmlLoader = new FXMLLoader(Main.class.getResource("/fxml/salesreport.fxml"));
+            salesReportRoot = fxmlLoader.load();
+            salesReportController = fxmlLoader.getController();
+        }
+
+        if (cachedScene == null) {
+            cachedScene = new Scene(salesReportRoot, 1280, 800);
+            mainStage.setScene(cachedScene);
+        } else {
+            cachedScene.setRoot(salesReportRoot);
+        }
+
+        mainStage.setTitle("BurgerHQ - Sales Reports");
+        mainStage.show();
+
+        if (salesReportController != null) {
+            salesReportController.setActiveNav("Sales Reports");
+        }
+    }
+
+    public static void clearSalesReportCache() {
+        salesReportRoot = null;
+        salesReportController = null;
     }
 
 @Override

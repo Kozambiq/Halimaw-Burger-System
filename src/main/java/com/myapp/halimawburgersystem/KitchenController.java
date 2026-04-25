@@ -1,7 +1,10 @@
 package com.myapp.halimawburgersystem;
 
+import com.myapp.dao.IngredientDAO;
+import com.myapp.dao.MenuItemDAO;
 import com.myapp.dao.OrderDAO;
 import com.myapp.model.Order;
+import com.myapp.model.OrderItem;
 import com.myapp.model.Staff;
 import javafx.application.Platform;
 import javafx.event.ActionEvent;
@@ -189,7 +192,22 @@ public class KitchenController {
         
         if ("New".equals(order.getStatus())) {
             actionBtn.setText("Start");
-            actionBtn.setOnAction(e -> updateStatus(order, "Preparing"));
+            String warning = orderDAO.checkThresholdWarnings(order.getId());
+            if (warning != null) {
+                actionBtn.setStyle("-fx-background-color: #b8860b;");
+            }
+            final String finalWarning = warning;
+            actionBtn.setOnAction(e -> {
+                if (finalWarning != null) {
+                    Alert warn = new Alert(Alert.AlertType.WARNING);
+                    warn.setTitle("Low Stock Warning");
+                    warn.setHeaderText("Starting this order will cause low stock for:");
+                    warn.setContentText(finalWarning);
+                    warn.getDialogPane().setStyle("-fx-background-color: #2e2410; -fx-border-color: #4a3820; -fx-border-width: 1;");
+                    warn.showAndWait();
+                }
+                updateStatus(order, "Preparing");
+            });
         } else if ("Preparing".equals(order.getStatus())) {
             actionBtn.setText("Mark Ready");
             actionBtn.setOnAction(e -> updateStatus(order, "Done"));
@@ -224,16 +242,48 @@ public class KitchenController {
 
     private void updateStatus(Order order, String newStatus) {
         if ("Completed".equals(newStatus)) {
-            String error = orderDAO.deductIngredientsForOrder(order.getId());
-            if (error != null) {
-                Alert alert = new Alert(Alert.AlertType.WARNING);
-                alert.setTitle("Low Stock Warning");
-                alert.setHeaderText(error);
-                alert.setContentText("Cannot complete order until ingredients are restocked.");
-                alert.showAndWait();
-                return;
+            IngredientDAO ingredientDAO = new IngredientDAO();
+            MenuItemDAO menuItemDAO = new MenuItemDAO();
+            List<OrderItem> items = orderDAO.findItemsByOrderId(order.getId());
+            
+            for (OrderItem item : items) {
+                if ("MenuItem".equals(item.getItemType())) {
+                    List<MenuItemDAO.MenuItemIngredient> menuItemIngredients = menuItemDAO.getIngredientsForMenuItem(item.getItemId());
+                    for (MenuItemDAO.MenuItemIngredient mi : menuItemIngredients) {
+                        double totalNeeded = mi.getQuantity() * item.getQuantity();
+                        int ingId = ingredientDAO.findIdByName(mi.getIngredientName());
+                        if (ingId > 0 && !ingredientDAO.canDeduct(ingId, totalNeeded)) {
+                            Alert alert = new Alert(Alert.AlertType.WARNING);
+                            alert.setTitle("Out of Stock");
+                            alert.setHeaderText("Not enough stock for: " + mi.getIngredientName());
+                            alert.setContentText("Cannot complete order until restocked.");
+                            alert.showAndWait();
+                            return;
+                        }
+                    }
+                } else if ("Combo".equals(item.getItemType())) {
+                    String[] itemNames = item.getItemName().split(" \\+ ");
+                    for (String itemName : itemNames) {
+                        List<MenuItemDAO.MenuItemIngredient> menuItemIngredients = menuItemDAO.getIngredientsForMenuItemByName(itemName.trim());
+                        for (MenuItemDAO.MenuItemIngredient mi : menuItemIngredients) {
+                            double totalNeeded = mi.getQuantity() * item.getQuantity();
+                            int ingId = ingredientDAO.findIdByName(mi.getIngredientName());
+                            if (ingId > 0 && !ingredientDAO.canDeduct(ingId, totalNeeded)) {
+                                Alert alert = new Alert(Alert.AlertType.WARNING);
+                                alert.setTitle("Out of Stock");
+                                alert.setHeaderText("Not enough stock for: " + mi.getIngredientName());
+                                alert.setContentText("Cannot complete order until restocked.");
+                                alert.showAndWait();
+                                return;
+                            }
+                        }
+                    }
+                }
             }
+            
+            orderDAO.deductIngredientsForOrder(order.getId());
         }
+        
         if (orderDAO.updateStatus(order.getId(), newStatus)) {
             loadQueue();
         }
