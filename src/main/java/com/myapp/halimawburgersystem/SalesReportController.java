@@ -189,7 +189,7 @@ public class SalesReportController {
             + "<script src='https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.js'></script>"
             + "<style>"
             + "body{margin:0;padding:0;background:#1a1208;font-family:'Segoe UI',sans-serif;}"
-            + "canvas{max-height:180px;}"
+            + "canvas{max-height:250px;}"
             + "</style></head><body>"
             + "<canvas id='chart'></canvas>"
             + "<script>"
