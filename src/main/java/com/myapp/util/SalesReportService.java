@@ -28,7 +28,7 @@ public class SalesReportService {
         try (Connection conn = DatabaseConnection.getConnection()) {
 
             String revenueSQL = "SELECT COALESCE(SUM(total),0), COUNT(*) FROM orders "
-                    + "WHERE DATE(created_at) = ? AND status != 'Completed'";
+                    + "WHERE DATE(created_at) = ? AND status = 'Completed'";
             try (PreparedStatement ps = conn.prepareStatement(revenueSQL)) {
                 ps.setDate(1, Date.valueOf(today));
                 ResultSet rs = ps.executeQuery();
@@ -51,7 +51,7 @@ public class SalesReportService {
                     + "SUM(oi.total_price) AS revenue "
                     + "FROM order_items oi "
                     + "JOIN orders o ON oi.order_id = o.id "
-                    + "WHERE DATE(o.created_at) = ? AND o.status != 'Cancelled' "
+                    + "WHERE DATE(o.created_at) = ? AND o.status = 'Completed' "
                     + "GROUP BY oi.item_name ORDER BY qty DESC LIMIT 8";
             s.topItems = new ArrayList<>();
             try (PreparedStatement ps = conn.prepareStatement(topSQL)) {
@@ -82,7 +82,7 @@ public class SalesReportService {
             }
 
             String hourlySQL = "SELECT HOUR(created_at) AS hr, COALESCE(SUM(total),0) AS rev "
-                    + "FROM orders WHERE DATE(created_at) = ? AND status != 'Completed' "
+                    + "FROM orders WHERE DATE(created_at) = ? AND status = 'Completed' "
                     + "GROUP BY hr ORDER BY hr";
             s.hourlyRevenue = new ArrayList<>();
             try (PreparedStatement ps = conn.prepareStatement(hourlySQL)) {
@@ -99,7 +99,7 @@ public class SalesReportService {
                     + "FROM order_items oi "
                     + "JOIN orders o ON oi.order_id = o.id "
                     + "LEFT JOIN menu_items mi ON oi.item_id = mi.id AND oi.item_type = 'MenuItem' "
-                    + "WHERE DATE(o.created_at) = ? AND o.status != 'Cancelled' "
+                    + "WHERE DATE(o.created_at) = ? AND o.status = 'Completed' "
                     + "GROUP BY mi.category ORDER BY revenue DESC";
             s.categoryBreakdown = new ArrayList<>();
             try (PreparedStatement ps = conn.prepareStatement(catSQL)) {
@@ -126,7 +126,7 @@ public class SalesReportService {
 
         try (Connection conn = DatabaseConnection.getConnection()) {
             String dailySQL = "SELECT DATE(created_at) AS sale_date, COALESCE(SUM(total),0) AS rev "
-                    + "FROM orders WHERE DATE(created_at) BETWEEN ? AND ? AND status != 'Completed' "
+                    + "FROM orders WHERE DATE(created_at) BETWEEN ? AND ? AND status = 'Completed' "
                     + "GROUP BY sale_date ORDER BY sale_date";
             try (PreparedStatement ps = conn.prepareStatement(dailySQL)) {
                 ps.setDate(1, Date.valueOf(startDate));
