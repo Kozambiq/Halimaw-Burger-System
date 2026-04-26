@@ -3,11 +3,13 @@ package com.myapp.halimawburgersystem;
 import com.myapp.dao.ComboDAO;
 import com.myapp.dao.MenuItemDAO;
 import com.myapp.dao.OrderDAO;
+import com.myapp.dao.IngredientDAO;
 import com.myapp.model.Combo;
 import com.myapp.model.MenuItemModel;
 import com.myapp.model.Order;
 import com.myapp.model.OrderItem;
 import com.myapp.model.Staff;
+import com.myapp.model.Ingredient;
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
@@ -65,6 +67,7 @@ public class CashierController {
     private MenuItemDAO menuItemDAO = new MenuItemDAO();
     private ComboDAO comboDAO = new ComboDAO();
     private OrderDAO orderDAO = new OrderDAO();
+    private IngredientDAO ingredientDAO = new IngredientDAO();
     private Map<Integer, Integer> orderItems = new HashMap<>();
     private Map<Integer, Double> itemPrices = new HashMap<>();
     private Map<Integer, Double> comboPrices = new HashMap<>();
@@ -532,6 +535,12 @@ public class CashierController {
             return;
         }
 
+        List<String> outOfStockItems = checkOutOfStockIngredients();
+        if (!outOfStockItems.isEmpty()) {
+            showOutOfStockWarning(outOfStockItems);
+            return;
+        }
+
         String referenceNumber = null;
         if ("GCash".equals(paymentType)) {
             referenceNumber = showGCashDialog();
@@ -602,6 +611,121 @@ public class CashierController {
 
         javafx.scene.control.Button okButton = (javafx.scene.control.Button) alert.getDialogPane().lookupButton(javafx.scene.control.ButtonType.OK);
         okButton.setStyle("-fx-background-color: #c8500a; -fx-text-fill: #f5ede0; -fx-border-radius: 6; -fx-padding: 8 16 8 16; -fx-font-size: 12px; -fx-font-weight: bold;");
+
+        alert.showAndWait();
+    }
+
+    private List<String> checkOutOfStockIngredients() {
+        List<String> outOfStockItems = new ArrayList<>();
+
+        for (Map.Entry<Integer, Integer> entry : orderItems.entrySet()) {
+            int id = entry.getKey();
+            int orderQty = entry.getValue();
+
+            if (id > 0) {
+                Combo combo = findComboById(id);
+                if (combo != null) {
+                    List<String> comboOutItems = checkComboIngredients(combo.getIncludes(), orderQty);
+                    for (String item : comboOutItems) {
+                        if (!outOfStockItems.contains(item)) {
+                            outOfStockItems.add(item);
+                        }
+                    }
+                }
+            } else {
+                MenuItemModel item = findMenuItemById(-id);
+                if (item != null) {
+                    List<MenuItemDAO.MenuItemIngredient> ingredients = menuItemDAO.getIngredientsForMenuItem(item.getId());
+                    for (MenuItemDAO.MenuItemIngredient ing : ingredients) {
+                        double totalNeeded = ing.getQuantity() * orderQty;
+                        Ingredient ingredient = ingredientDAO.findByName(ing.getIngredientName()).stream().findFirst().orElse(null);
+                        if (ingredient != null) {
+                            double remainingStock = ingredient.getQuantity() - totalNeeded;
+                            if (remainingStock <= 0 || ingredient.getStatus().equals("Out")) {
+                                String display = item.getName() + " - " + ing.getIngredientName() +
+                                    " (need " + String.format("%.1f", totalNeeded) + ", have " + String.format("%.1f", ingredient.getQuantity()) + ")";
+                                if (!outOfStockItems.contains(display)) {
+                                    outOfStockItems.add(display);
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        }
+
+        return outOfStockItems;
+    }
+
+    private List<String> checkComboIngredients(String includes, int orderQty) {
+        List<String> outOfStockItems = new ArrayList<>();
+        if (includes == null || includes.isEmpty()) return outOfStockItems;
+
+        String[] items = includes.split(",");
+        for (String itemName : items) {
+            itemName = itemName.trim();
+            List<MenuItemDAO.MenuItemIngredient> ingredients = menuItemDAO.getIngredientsForMenuItemByName(itemName);
+            for (MenuItemDAO.MenuItemIngredient ing : ingredients) {
+                double totalNeeded = ing.getQuantity() * orderQty;
+                Ingredient ingredient = ingredientDAO.findByName(ing.getIngredientName()).stream().findFirst().orElse(null);
+                if (ingredient != null) {
+                    double remainingStock = ingredient.getQuantity() - totalNeeded;
+                    if (remainingStock <= 0 || ingredient.getStatus().equals("Out")) {
+                        String display = itemName + " - " + ing.getIngredientName() +
+                            " (need " + String.format("%.1f", totalNeeded) + ", have " + String.format("%.1f", ingredient.getQuantity()) + ")";
+                        if (!outOfStockItems.contains(display)) {
+                            outOfStockItems.add(display);
+                        }
+                    }
+                }
+            }
+        }
+
+        return outOfStockItems;
+    }
+
+    private void showOutOfStockWarning(List<String> outOfStockItems) {
+        Alert alert = new Alert(Alert.AlertType.WARNING);
+        alert.setTitle("Out of Stock Warning");
+        alert.setHeaderText("Some ingredients are out of stock");
+
+        StringBuilder content = new StringBuilder("The following items cannot be prepared:\n\n");
+        for (String item : outOfStockItems) {
+            content.append("• ").append(item).append("\n");
+        }
+        content.append("\nPlease remove these items from the order or notify the kitchen.");
+        alert.setContentText(content.toString());
+
+        alert.getDialogPane().setStyle(
+            "-fx-background-color: #2e2410; " +
+            "-fx-border-color: #e07070; " +
+            "-fx-border-width: 2; " +
+            "-fx-border-radius: 12; " +
+            "-fx-background-radius: 12;"
+        );
+
+        javafx.scene.control.Label headerText = (javafx.scene.control.Label) alert.getDialogPane().lookup(".header");
+        if (headerText != null) {
+            headerText.setStyle("-fx-text-fill: #e07070; -fx-font-size: 16px; -fx-font-weight: bold;");
+        }
+
+        javafx.scene.Node contentNode = alert.getDialogPane().lookup(".content");
+        if (contentNode != null) {
+            contentNode.setStyle("-fx-text-fill: #f5ede0; -fx-font-size: 13px;");
+        }
+
+        alert.getDialogPane().getButtonTypes().clear();
+        alert.getDialogPane().getButtonTypes().add(javafx.scene.control.ButtonType.OK);
+
+        javafx.scene.control.Button okButton = (javafx.scene.control.Button) alert.getDialogPane().lookupButton(javafx.scene.control.ButtonType.OK);
+        okButton.setStyle(
+            "-fx-background-color: #c8500a; " +
+            "-fx-text-fill: #f5ede0; " +
+            "-fx-border-radius: 6; " +
+            "-fx-padding: 8 24 8 24; " +
+            "-fx-font-size: 13px; " +
+            "-fx-font-weight: bold;"
+        );
 
         alert.showAndWait();
     }
