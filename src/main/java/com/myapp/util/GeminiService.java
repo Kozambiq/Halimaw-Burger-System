@@ -7,7 +7,14 @@ import java.net.http.HttpResponse;
 
 public class GeminiService {
 
-    private static final String API_KEY = "REMOVED_API_KEY";
+    private static String getApiKey() {
+        String key = EnvLoader.get("GEMINI_API_KEY");
+        if (key == null || key.isEmpty()) {
+            throw new RuntimeException("GEMINI_API_KEY not found in .env file");
+        }
+        return key;
+    }
+
     private static final String API_URL = "https://api.groq.com/openai/v1/chat/completions";
 
     public static String analyze(String prompt) throws Exception {
@@ -25,7 +32,7 @@ public class GeminiService {
         HttpRequest request = HttpRequest.newBuilder()
                 .uri(URI.create(API_URL))
                 .header("Content-Type", "application/json")
-                .header("Authorization", "Bearer " + API_KEY)
+                .header("Authorization", "Bearer " + getApiKey())
                 .POST(HttpRequest.BodyPublishers.ofString(body))
                 .build();
 

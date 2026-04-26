@@ -646,14 +646,13 @@ public class CashierController {
                 if (item != null) {
                     List<MenuItemDAO.MenuItemIngredient> ingredients = menuItemDAO.getIngredientsForMenuItem(item.getId());
                     for (MenuItemDAO.MenuItemIngredient ing : ingredients) {
-                        double totalNeeded = ing.getQuantity() * orderQty;
-                        Ingredient ingredient = ingredientDAO.findByName(ing.getIngredientName()).stream().findFirst().orElse(null);
-                        if (ingredient != null) {
-                            double availableStock = ingredient.getQuantity() - ingredient.getReserved();
-                            double remainingStock = availableStock - totalNeeded;
-                            if (remainingStock < 0 || ingredient.getStatus().equals("Out")) {
+                        int ingId = ingredientDAO.findIdByName(ing.getIngredientName());
+                        if (ingId > 0) {
+                            double availableStock = ingredientDAO.getAvailableStock(ingId);
+                            double needed = ing.getQuantity() * orderQty;
+                            if (availableStock < needed) {
                                 String display = item.getName() + " - " + ing.getIngredientName() +
-                                    " (need " + String.format("%.1f", totalNeeded) + ", available " + String.format("%.1f", availableStock) + ")";
+                                    " (need " + String.format("%.1f", needed) + ", available " + String.format("%.1f", availableStock) + ")";
                                 if (!outOfStockItems.contains(display)) {
                                     outOfStockItems.add(display);
                                 }
@@ -676,14 +675,13 @@ public class CashierController {
             itemName = itemName.trim();
             List<MenuItemDAO.MenuItemIngredient> ingredients = menuItemDAO.getIngredientsForMenuItemByName(itemName);
             for (MenuItemDAO.MenuItemIngredient ing : ingredients) {
-                double totalNeeded = ing.getQuantity() * orderQty;
-                Ingredient ingredient = ingredientDAO.findByName(ing.getIngredientName()).stream().findFirst().orElse(null);
-                if (ingredient != null) {
-                    double availableStock = ingredient.getQuantity() - ingredient.getReserved();
-                    double remainingStock = availableStock - totalNeeded;
-                    if (remainingStock < 0 || ingredient.getStatus().equals("Out")) {
+                int ingId = ingredientDAO.findIdByName(ing.getIngredientName());
+                if (ingId > 0) {
+                    double availableStock = ingredientDAO.getAvailableStock(ingId);
+                    double needed = ing.getQuantity() * orderQty;
+                    if (availableStock < needed) {
                         String display = itemName + " - " + ing.getIngredientName() +
-                            " (need " + String.format("%.1f", totalNeeded) + ", available " + String.format("%.1f", availableStock) + ")";
+                            " (need " + String.format("%.1f", needed) + ", available " + String.format("%.1f", availableStock) + ")";
                         if (!outOfStockItems.contains(display)) {
                             outOfStockItems.add(display);
                         }

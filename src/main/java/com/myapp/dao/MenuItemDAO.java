@@ -85,9 +85,7 @@ public class MenuItemDAO {
                 double quantity = rs.getDouble("quantity");
                 double minThreshold = rs.getDouble("min_threshold");
 
-                double criticalThreshold = minThreshold * 0.5;
-
-                if (quantity <= 0 || quantity <= criticalThreshold) {
+                if (quantity <= 0) {
                     return STATUS_OUT;
                 } else if (quantity <= minThreshold) {
                     worstStatus = STATUS_LOW;
