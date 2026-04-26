@@ -241,6 +241,10 @@ public class KitchenController {
     }
 
     private void updateStatus(Order order, String newStatus) {
+        if ("Cancelled".equals(newStatus) && "New".equals(order.getStatus())) {
+            orderDAO.releaseReservationsForOrder(order.getId());
+        }
+
         if ("Preparing".equals(newStatus) && "New".equals(order.getStatus())) {
             IngredientDAO ingredientDAO = new IngredientDAO();
             MenuItemDAO menuItemDAO = new MenuItemDAO();

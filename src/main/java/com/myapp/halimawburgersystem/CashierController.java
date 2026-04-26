@@ -577,6 +577,13 @@ public class CashierController {
 
         int orderId = orderDAO.insert(order, items);
         if (orderId > 0) {
+            String reserveError = orderDAO.reserveIngredientsForOrder(orderId);
+            if (reserveError != null) {
+                showErrorAlert("Insufficient Stock", reserveError);
+                orderDAO.updateStatus(orderId, "Cancelled");
+                return;
+            }
+
             orderNumber = orderDAO.getNextOrderNumber();
             orderItems.clear();
             subtotal = 0.0;
@@ -584,6 +591,7 @@ public class CashierController {
             updateOrderDisplay();
             updateTotals();
             updateOrderNumber();
+            reloadMenu();
         } else {
             showErrorAlert("Order Failed", "Failed to save the order. Please try again.");
         }
@@ -640,10 +648,11 @@ public class CashierController {
                         double totalNeeded = ing.getQuantity() * orderQty;
                         Ingredient ingredient = ingredientDAO.findByName(ing.getIngredientName()).stream().findFirst().orElse(null);
                         if (ingredient != null) {
-                            double remainingStock = ingredient.getQuantity() - totalNeeded;
-                            if (remainingStock <= 0 || ingredient.getStatus().equals("Out")) {
+                            double availableStock = ingredient.getQuantity() - ingredient.getReserved();
+                            double remainingStock = availableStock - totalNeeded;
+                            if (remainingStock < 0 || ingredient.getStatus().equals("Out")) {
                                 String display = item.getName() + " - " + ing.getIngredientName() +
-                                    " (need " + String.format("%.1f", totalNeeded) + ", have " + String.format("%.1f", ingredient.getQuantity()) + ")";
+                                    " (need " + String.format("%.1f", totalNeeded) + ", available " + String.format("%.1f", availableStock) + ")";
                                 if (!outOfStockItems.contains(display)) {
                                     outOfStockItems.add(display);
                                 }
@@ -669,10 +678,11 @@ public class CashierController {
                 double totalNeeded = ing.getQuantity() * orderQty;
                 Ingredient ingredient = ingredientDAO.findByName(ing.getIngredientName()).stream().findFirst().orElse(null);
                 if (ingredient != null) {
-                    double remainingStock = ingredient.getQuantity() - totalNeeded;
-                    if (remainingStock <= 0 || ingredient.getStatus().equals("Out")) {
+                    double availableStock = ingredient.getQuantity() - ingredient.getReserved();
+                    double remainingStock = availableStock - totalNeeded;
+                    if (remainingStock < 0 || ingredient.getStatus().equals("Out")) {
                         String display = itemName + " - " + ing.getIngredientName() +
-                            " (need " + String.format("%.1f", totalNeeded) + ", have " + String.format("%.1f", ingredient.getQuantity()) + ")";
+                            " (need " + String.format("%.1f", totalNeeded) + ", available " + String.format("%.1f", availableStock) + ")";
                         if (!outOfStockItems.contains(display)) {
                             outOfStockItems.add(display);
                         }

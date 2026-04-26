@@ -14,14 +14,14 @@ public class IngredientDAO {
 
     public List<Ingredient> findAll() {
         List<Ingredient> ingredients = new ArrayList<>();
-        String sql = "SELECT id, name, unit, quantity, min_threshold, max_stock, status FROM ingredients ORDER BY id";
+        String sql = "SELECT id, name, unit, quantity, min_threshold, max_stock, status, reserved FROM ingredients ORDER BY id";
 
         try (Connection conn = DatabaseConnection.getConnection();
              PreparedStatement stmt = conn.prepareStatement(sql);
              ResultSet rs = stmt.executeQuery()) {
 
             while (rs.next()) {
-                ingredients.add(new Ingredient(
+                Ingredient ing = new Ingredient(
                     rs.getInt("id"),
                     rs.getString("name"),
                     rs.getString("unit"),
@@ -29,7 +29,9 @@ public class IngredientDAO {
                     rs.getDouble("min_threshold"),
                     rs.getDouble("max_stock"),
                     rs.getString("status")
-                ));
+                );
+                ing.setReserved(rs.getDouble("reserved"));
+                ingredients.add(ing);
             }
         } catch (SQLException e) {
             System.err.println("Error loading ingredients: " + e.getMessage());
@@ -250,14 +252,15 @@ public class IngredientDAO {
     }
 
     public boolean canDeduct(int ingredientId, double quantityNeeded) {
-        String sql = "SELECT quantity FROM ingredients WHERE id = ?";
+        String sql = "SELECT quantity, COALESCE(reserved, 0) as reserved FROM ingredients WHERE id = ?";
         try (Connection conn = DatabaseConnection.getConnection();
              PreparedStatement stmt = conn.prepareStatement(sql)) {
             stmt.setInt(1, ingredientId);
             try (ResultSet rs = stmt.executeQuery()) {
                 if (rs.next()) {
                     double currentQty = rs.getDouble("quantity");
-                    return (currentQty - quantityNeeded) > 0;
+                    double reserved = rs.getDouble("reserved");
+                    return (currentQty - reserved - quantityNeeded) > 0;
                 }
             }
         } catch (SQLException e) {
@@ -295,6 +298,49 @@ public class IngredientDAO {
             System.err.println("Error deducting ingredient: " + e.getMessage());
         }
         return false;
+    }
+
+    public boolean reserve(int ingredientId, double quantityToReserve) {
+        String sql = "UPDATE ingredients SET reserved = reserved + ? WHERE id = ? AND (quantity - reserved) >= ?";
+        try (Connection conn = DatabaseConnection.getConnection();
+             PreparedStatement stmt = conn.prepareStatement(sql)) {
+            stmt.setDouble(1, quantityToReserve);
+            stmt.setInt(2, ingredientId);
+            stmt.setDouble(3, quantityToReserve);
+            return stmt.executeUpdate() > 0;
+        } catch (SQLException e) {
+            System.err.println("Error reserving ingredient: " + e.getMessage());
+        }
+        return false;
+    }
+
+    public boolean releaseReservation(int ingredientId, double quantityToRelease) {
+        String sql = "UPDATE ingredients SET reserved = GREATEST(0, reserved - ?) WHERE id = ?";
+        try (Connection conn = DatabaseConnection.getConnection();
+             PreparedStatement stmt = conn.prepareStatement(sql)) {
+            stmt.setDouble(1, quantityToRelease);
+            stmt.setInt(2, ingredientId);
+            return stmt.executeUpdate() > 0;
+        } catch (SQLException e) {
+            System.err.println("Error releasing reservation: " + e.getMessage());
+        }
+        return false;
+    }
+
+    public double getAvailableStock(int ingredientId) {
+        String sql = "SELECT quantity - COALESCE(reserved, 0) AS available FROM ingredients WHERE id = ?";
+        try (Connection conn = DatabaseConnection.getConnection();
+             PreparedStatement stmt = conn.prepareStatement(sql)) {
+            stmt.setInt(1, ingredientId);
+            try (ResultSet rs = stmt.executeQuery()) {
+                if (rs.next()) {
+                    return rs.getDouble("available");
+                }
+            }
+        } catch (SQLException e) {
+            System.err.println("Error getting available stock: " + e.getMessage());
+        }
+        return 0;
     }
 
     public int findIdByName(String name) {

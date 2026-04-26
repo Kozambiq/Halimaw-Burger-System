@@ -9,6 +9,7 @@ public class Ingredient {
     private double maxStock;
     private String status;
     private String availabilityStatus;
+    private double reserved;
 
     public Ingredient(int id, String name, String unit, double quantity, double minThreshold, double maxStock) {
         this.id = id;
@@ -19,6 +20,7 @@ public class Ingredient {
         this.maxStock = maxStock;
         this.status = calculateStatus();
         this.availabilityStatus = "Available";
+        this.reserved = 0;
     }
 
     public Ingredient(int id, String name, String unit, double quantity, double minThreshold, double maxStock, String availabilityStatus) {
@@ -30,6 +32,7 @@ public class Ingredient {
         this.maxStock = maxStock;
         this.status = calculateStatus();
         this.availabilityStatus = availabilityStatus != null ? availabilityStatus : "Available";
+        this.reserved = 0;
     }
 
     private String calculateStatus() {
@@ -56,6 +59,12 @@ public class Ingredient {
     public String getStatus() { return status; }
     public String getAvailabilityStatus() { return availabilityStatus; }
     public void setAvailabilityStatus(String availabilityStatus) { this.availabilityStatus = availabilityStatus; }
+    public double getReserved() { return reserved; }
+    public void setReserved(double reserved) { this.reserved = reserved; }
+
+    public double getAvailableStock() {
+        return quantity - reserved;
+    }
 
     public void setQuantity(double quantity) {
         this.quantity = quantity;

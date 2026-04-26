@@ -236,6 +236,102 @@ public class OrderDAO {
         return false;
     }
 
+    public String reserveIngredientsForOrder(int orderId) {
+        String checkSql = "SELECT ingredients_reserved FROM orders WHERE id = ?";
+        try (Connection conn = DatabaseConnection.getConnection();
+             PreparedStatement checkStmt = conn.prepareStatement(checkSql)) {
+            checkStmt.setInt(1, orderId);
+            try (ResultSet rs = checkStmt.executeQuery()) {
+                if (rs.next() && rs.getInt("ingredients_reserved") == 1) {
+                    return null;
+                }
+            }
+        } catch (SQLException e) {
+            return "Error checking order: " + e.getMessage();
+        }
+
+        List<OrderItem> items = findItemsByOrderId(orderId);
+        IngredientDAO ingredientDAO = new IngredientDAO();
+        MenuItemDAO menuItemDAO = new MenuItemDAO();
+
+        for (OrderItem item : items) {
+            if ("MenuItem".equals(item.getItemType())) {
+                int menuItemId = item.getItemId();
+                int orderQty = item.getQuantity();
+                List<MenuItemIngredient> menuItemIngredients = menuItemDAO.getIngredientsForMenuItem(menuItemId);
+                for (MenuItemIngredient mi : menuItemIngredients) {
+                    double totalNeeded = mi.getQuantity() * orderQty;
+                    int ingId = ingredientDAO.findIdByName(mi.getIngredientName());
+                    if (ingId > 0 && !ingredientDAO.reserve(ingId, totalNeeded)) {
+                        return "Not enough available stock for: " + mi.getIngredientName();
+                    }
+                }
+            } else if ("Combo".equals(item.getItemType())) {
+                String includes = item.getItemName();
+                String[] itemNames = includes.split(" \\+ ");
+                int orderQty = item.getQuantity();
+                for (String itemName : itemNames) {
+                    itemName = itemName.trim();
+                    List<MenuItemIngredient> menuItemIngredients = menuItemDAO.getIngredientsForMenuItemByName(itemName);
+                    for (MenuItemIngredient mi : menuItemIngredients) {
+                        double totalNeeded = mi.getQuantity() * orderQty;
+                        int ingId = ingredientDAO.findIdByName(mi.getIngredientName());
+                        if (ingId > 0 && !ingredientDAO.reserve(ingId, totalNeeded)) {
+                            return "Not enough available stock for: " + mi.getIngredientName();
+                        }
+                    }
+                }
+            }
+        }
+
+        String updateSql = "UPDATE orders SET ingredients_reserved = 1 WHERE id = ?";
+        try (Connection conn = DatabaseConnection.getConnection();
+             PreparedStatement stmt = conn.prepareStatement(updateSql)) {
+            stmt.setInt(1, orderId);
+            stmt.executeUpdate();
+        } catch (SQLException e) {
+            System.err.println("Error marking ingredients as reserved: " + e.getMessage());
+        }
+
+        return null;
+    }
+
+    public void releaseReservationsForOrder(int orderId) {
+        List<OrderItem> items = findItemsByOrderId(orderId);
+        IngredientDAO ingredientDAO = new IngredientDAO();
+        MenuItemDAO menuItemDAO = new MenuItemDAO();
+
+        for (OrderItem item : items) {
+            if ("MenuItem".equals(item.getItemType())) {
+                int menuItemId = item.getItemId();
+                int orderQty = item.getQuantity();
+                List<MenuItemIngredient> menuItemIngredients = menuItemDAO.getIngredientsForMenuItem(menuItemId);
+                for (MenuItemIngredient mi : menuItemIngredients) {
+                    double totalNeeded = mi.getQuantity() * orderQty;
+                    int ingId = ingredientDAO.findIdByName(mi.getIngredientName());
+                    if (ingId > 0) {
+                        ingredientDAO.releaseReservation(ingId, totalNeeded);
+                    }
+                }
+            } else if ("Combo".equals(item.getItemType())) {
+                String includes = item.getItemName();
+                String[] itemNames = includes.split(" \\+ ");
+                int orderQty = item.getQuantity();
+                for (String itemName : itemNames) {
+                    itemName = itemName.trim();
+                    List<MenuItemIngredient> menuItemIngredients = menuItemDAO.getIngredientsForMenuItemByName(itemName);
+                    for (MenuItemIngredient mi : menuItemIngredients) {
+                        double totalNeeded = mi.getQuantity() * orderQty;
+                        int ingId = ingredientDAO.findIdByName(mi.getIngredientName());
+                        if (ingId > 0) {
+                            ingredientDAO.releaseReservation(ingId, totalNeeded);
+                        }
+                    }
+                }
+            }
+        }
+    }
+
     public String deductIngredientsForOrder(int orderId) {
         String checkSql = "SELECT ingredients_deducted FROM orders WHERE id = ?";
         try (Connection conn = DatabaseConnection.getConnection();
@@ -270,6 +366,7 @@ public class OrderDAO {
                     double totalNeeded = mi.getQuantity() * orderQty;
                     int ingId = ingredientDAO.findIdByName(mi.getIngredientName());
                     if (ingId > 0) {
+                        ingredientDAO.releaseReservation(ingId, totalNeeded);
                         ingredientDAO.deduct(ingId, totalNeeded);
                     }
                 }
@@ -295,6 +392,7 @@ public class OrderDAO {
                         double totalNeeded = mi.getQuantity() * orderQty;
                         int ingId = ingredientDAO.findIdByName(mi.getIngredientName());
                         if (ingId > 0) {
+                            ingredientDAO.releaseReservation(ingId, totalNeeded);
                             ingredientDAO.deduct(ingId, totalNeeded);
                         }
                     }
