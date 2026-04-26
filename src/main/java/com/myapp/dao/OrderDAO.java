@@ -268,7 +268,7 @@ public class OrderDAO {
                 }
             } else if ("Combo".equals(item.getItemType())) {
                 String includes = item.getItemName();
-                String[] itemNames = includes.split(" \\+ ");
+                String[] itemNames = includes.split(",");
                 int orderQty = item.getQuantity();
                 for (String itemName : itemNames) {
                     itemName = itemName.trim();
@@ -315,7 +315,7 @@ public class OrderDAO {
                 }
             } else if ("Combo".equals(item.getItemType())) {
                 String includes = item.getItemName();
-                String[] itemNames = includes.split(" \\+ ");
+                String[] itemNames = includes.split(",");
                 int orderQty = item.getQuantity();
                 for (String itemName : itemNames) {
                     itemName = itemName.trim();
@@ -358,13 +358,6 @@ public class OrderDAO {
                 for (MenuItemIngredient mi : menuItemIngredients) {
                     double totalNeeded = mi.getQuantity() * orderQty;
                     int ingId = ingredientDAO.findIdByName(mi.getIngredientName());
-                    if (ingId > 0 && !ingredientDAO.canDeduct(ingId, totalNeeded)) {
-                        return "Not enough stock for: " + mi.getIngredientName();
-                    }
-                }
-                for (MenuItemIngredient mi : menuItemIngredients) {
-                    double totalNeeded = mi.getQuantity() * orderQty;
-                    int ingId = ingredientDAO.findIdByName(mi.getIngredientName());
                     if (ingId > 0) {
                         ingredientDAO.releaseReservation(ingId, totalNeeded);
                         ingredientDAO.deduct(ingId, totalNeeded);
@@ -372,19 +365,8 @@ public class OrderDAO {
                 }
             } else if ("Combo".equals(item.getItemType())) {
                 String includes = item.getItemName();
-                String[] itemNames = includes.split(" \\+ ");
+                String[] itemNames = includes.split(",");
                 int orderQty = item.getQuantity();
-                for (String itemName : itemNames) {
-                    itemName = itemName.trim();
-                    List<MenuItemIngredient> menuItemIngredients = menuItemDAO.getIngredientsForMenuItemByName(itemName);
-                    for (MenuItemIngredient mi : menuItemIngredients) {
-                        double totalNeeded = mi.getQuantity() * orderQty;
-                        int ingId = ingredientDAO.findIdByName(mi.getIngredientName());
-                        if (ingId > 0 && !ingredientDAO.canDeduct(ingId, totalNeeded)) {
-                            return "Not enough stock for: " + mi.getIngredientName();
-                        }
-                    }
-                }
                 for (String itemName : itemNames) {
                     itemName = itemName.trim();
                     List<MenuItemIngredient> menuItemIngredients = menuItemDAO.getIngredientsForMenuItemByName(itemName);

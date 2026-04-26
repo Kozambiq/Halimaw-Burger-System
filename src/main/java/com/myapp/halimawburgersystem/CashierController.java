@@ -580,6 +580,7 @@ public class CashierController {
             String reserveError = orderDAO.reserveIngredientsForOrder(orderId);
             if (reserveError != null) {
                 showErrorAlert("Insufficient Stock", reserveError);
+                orderDAO.releaseReservationsForOrder(orderId);
                 orderDAO.updateStatus(orderId, "Cancelled");
                 return;
             }

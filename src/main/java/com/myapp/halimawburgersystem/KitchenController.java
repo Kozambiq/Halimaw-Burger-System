@@ -246,45 +246,6 @@ public class KitchenController {
         }
 
         if ("Preparing".equals(newStatus) && "New".equals(order.getStatus())) {
-            IngredientDAO ingredientDAO = new IngredientDAO();
-            MenuItemDAO menuItemDAO = new MenuItemDAO();
-            List<OrderItem> items = orderDAO.findItemsByOrderId(order.getId());
-            
-            for (OrderItem item : items) {
-                if ("MenuItem".equals(item.getItemType())) {
-                    List<MenuItemDAO.MenuItemIngredient> menuItemIngredients = menuItemDAO.getIngredientsForMenuItem(item.getItemId());
-                    for (MenuItemDAO.MenuItemIngredient mi : menuItemIngredients) {
-                        double totalNeeded = mi.getQuantity() * item.getQuantity();
-                        int ingId = ingredientDAO.findIdByName(mi.getIngredientName());
-                        if (ingId > 0 && !ingredientDAO.canDeduct(ingId, totalNeeded)) {
-                            Alert alert = new Alert(Alert.AlertType.WARNING);
-                            alert.setTitle("Out of Stock");
-                            alert.setHeaderText("Not enough stock for: " + mi.getIngredientName());
-                            alert.setContentText("Cannot complete order until restocked.");
-                            alert.showAndWait();
-                            return;
-                        }
-                    }
-                } else if ("Combo".equals(item.getItemType())) {
-                    String[] itemNames = item.getItemName().split(" \\+ ");
-                    for (String itemName : itemNames) {
-                        List<MenuItemDAO.MenuItemIngredient> menuItemIngredients = menuItemDAO.getIngredientsForMenuItemByName(itemName.trim());
-                        for (MenuItemDAO.MenuItemIngredient mi : menuItemIngredients) {
-                            double totalNeeded = mi.getQuantity() * item.getQuantity();
-                            int ingId = ingredientDAO.findIdByName(mi.getIngredientName());
-                            if (ingId > 0 && !ingredientDAO.canDeduct(ingId, totalNeeded)) {
-                                Alert alert = new Alert(Alert.AlertType.WARNING);
-                                alert.setTitle("Out of Stock");
-                                alert.setHeaderText("Not enough stock for: " + mi.getIngredientName());
-                                alert.setContentText("Cannot complete order until restocked.");
-                                alert.showAndWait();
-                                return;
-                            }
-                        }
-                    }
-                }
-            }
-            
             orderDAO.deductIngredientsForOrder(order.getId());
         }
         

@@ -260,7 +260,7 @@ public class IngredientDAO {
                 if (rs.next()) {
                     double currentQty = rs.getDouble("quantity");
                     double reserved = rs.getDouble("reserved");
-                    return (currentQty - reserved - quantityNeeded) > 0;
+                    return (currentQty - reserved - quantityNeeded) >= 0;
                 }
             }
         } catch (SQLException e) {
@@ -301,7 +301,7 @@ public class IngredientDAO {
     }
 
     public boolean reserve(int ingredientId, double quantityToReserve) {
-        String sql = "UPDATE ingredients SET reserved = reserved + ? WHERE id = ? AND (quantity - reserved) >= ?";
+        String sql = "UPDATE ingredients SET reserved = COALESCE(reserved, 0) + ? WHERE id = ? AND quantity > 0 AND (quantity - COALESCE(reserved, 0)) >= ?";
         try (Connection conn = DatabaseConnection.getConnection();
              PreparedStatement stmt = conn.prepareStatement(sql)) {
             stmt.setDouble(1, quantityToReserve);
@@ -315,11 +315,12 @@ public class IngredientDAO {
     }
 
     public boolean releaseReservation(int ingredientId, double quantityToRelease) {
-        String sql = "UPDATE ingredients SET reserved = GREATEST(0, reserved - ?) WHERE id = ?";
+        String sql = "UPDATE ingredients SET reserved = CASE WHEN COALESCE(reserved, 0) - ? < 0 THEN 0 ELSE COALESCE(reserved, 0) - ? END WHERE id = ?";
         try (Connection conn = DatabaseConnection.getConnection();
              PreparedStatement stmt = conn.prepareStatement(sql)) {
             stmt.setDouble(1, quantityToRelease);
-            stmt.setInt(2, ingredientId);
+            stmt.setDouble(2, quantityToRelease);
+            stmt.setInt(3, ingredientId);
             return stmt.executeUpdate() > 0;
         } catch (SQLException e) {
             System.err.println("Error releasing reservation: " + e.getMessage());
