@@ -318,8 +318,7 @@ public class OrderDAO {
         List<OrderItem> items = findItemsByOrderId(orderId);
         IngredientDAO ingredientDAO = new IngredientDAO();
         MenuItemDAO menuItemDAO = new MenuItemDAO();
-        List<String> lowWarnings = new ArrayList<>();
-        List<String> criticalWarnings = new ArrayList<>();
+        List<String> warnings = new ArrayList<>();
 
         for (OrderItem item : items) {
             if ("MenuItem".equals(item.getItemType())) {
@@ -329,17 +328,8 @@ public class OrderDAO {
                 for (MenuItemIngredient mi : menuItemIngredients) {
                     double totalNeeded = mi.getQuantity() * orderQty;
                     int ingId = ingredientDAO.findIdByName(mi.getIngredientName());
-                    if (ingId > 0) {
-                        boolean currentlyCritical = ingredientDAO.isAtOrBelowCritical(ingId);
-                        boolean wouldBeCritical = ingredientDAO.wouldGoBelowCritical(ingId, totalNeeded);
-                        boolean currentlyLow = ingredientDAO.isAtOrBelowThreshold(ingId);
-                        boolean wouldBeLow = ingredientDAO.wouldGoBelowThreshold(ingId, totalNeeded);
-
-                        if (currentlyCritical || wouldBeCritical) {
-                            criticalWarnings.add(mi.getIngredientName());
-                        } else if (currentlyLow || wouldBeLow) {
-                            lowWarnings.add(mi.getIngredientName());
-                        }
+                    if (ingId > 0 && ingredientDAO.wouldGoBelowThreshold(ingId, totalNeeded)) {
+                        warnings.add(mi.getIngredientName() + " will be low");
                     }
                 }
             } else if ("Combo".equals(item.getItemType())) {
@@ -352,33 +342,15 @@ public class OrderDAO {
                     for (MenuItemIngredient mi : menuItemIngredients) {
                         double totalNeeded = mi.getQuantity() * orderQty;
                         int ingId = ingredientDAO.findIdByName(mi.getIngredientName());
-                        if (ingId > 0) {
-                            boolean currentlyCritical = ingredientDAO.isAtOrBelowCritical(ingId);
-                            boolean wouldBeCritical = ingredientDAO.wouldGoBelowCritical(ingId, totalNeeded);
-                            boolean currentlyLow = ingredientDAO.isAtOrBelowThreshold(ingId);
-                            boolean wouldBeLow = ingredientDAO.wouldGoBelowThreshold(ingId, totalNeeded);
-
-                            if (currentlyCritical || wouldBeCritical) {
-                                criticalWarnings.add(mi.getIngredientName());
-                            } else if (currentlyLow || wouldBeLow) {
-                                lowWarnings.add(mi.getIngredientName());
-                            }
+                        if (ingId > 0 && ingredientDAO.wouldGoBelowThreshold(ingId, totalNeeded)) {
+                            warnings.add(mi.getIngredientName() + " will be low");
                         }
                     }
                 }
             }
         }
 
-        StringBuilder result = new StringBuilder();
-        if (!criticalWarnings.isEmpty()) {
-            result.append("CRITICAL: ").append(String.join(", ", criticalWarnings));
-        }
-        if (!lowWarnings.isEmpty()) {
-            if (result.length() > 0) result.append("\n");
-            result.append("LOW: ").append(String.join(", ", lowWarnings));
-        }
-
-        return result.length() > 0 ? result.toString() : null;
+        return warnings.isEmpty() ? null : String.join(", ", warnings);
     }
 
     public int getCountByStatus(String status) {

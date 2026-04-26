@@ -12,34 +12,6 @@ import java.util.List;
 
 public class IngredientDAO {
 
-    public static final String STOCK_OK = "OK";
-    public static final String STOCK_LOW = "LOW";
-    public static final String STOCK_CRITICAL = "CRITICAL";
-    public static final String STOCK_EMPTY = "EMPTY";
-
-    public String getStockStatus(int ingredientId) {
-        String sql = "SELECT quantity, min_threshold FROM ingredients WHERE id = ?";
-        try (Connection conn = DatabaseConnection.getConnection();
-             PreparedStatement stmt = conn.prepareStatement(sql)) {
-            stmt.setInt(1, ingredientId);
-            try (ResultSet rs = stmt.executeQuery()) {
-                if (rs.next()) {
-                    double qty = rs.getDouble("quantity");
-                    double minThreshold = rs.getDouble("min_threshold");
-                    double criticalThreshold = minThreshold * 0.5;
-
-                    if (qty <= 0) return STOCK_EMPTY;
-                    if (qty <= criticalThreshold) return STOCK_CRITICAL;
-                    if (qty <= minThreshold) return STOCK_LOW;
-                    return STOCK_OK;
-                }
-            }
-        } catch (SQLException e) {
-            System.err.println("Error getting stock status: " + e.getMessage());
-        }
-        return STOCK_OK;
-    }
-
     public List<Ingredient> findAll() {
         List<Ingredient> ingredients = new ArrayList<>();
         String sql = "SELECT id, name, unit, quantity, min_threshold, max_stock, status FROM ingredients ORDER BY id";
@@ -303,67 +275,11 @@ public class IngredientDAO {
                 if (rs.next()) {
                     double currentQty = rs.getDouble("quantity");
                     double minThreshold = rs.getDouble("min_threshold");
-                    return (currentQty - quantityNeeded) <= minThreshold;
+                    return (currentQty - quantityNeeded) < minThreshold;
                 }
             }
         } catch (SQLException e) {
             System.err.println("Error checking threshold: " + e.getMessage());
-        }
-        return false;
-    }
-
-    public boolean wouldGoBelowCritical(int ingredientId, double quantityNeeded) {
-        String sql = "SELECT quantity, min_threshold FROM ingredients WHERE id = ?";
-        try (Connection conn = DatabaseConnection.getConnection();
-             PreparedStatement stmt = conn.prepareStatement(sql)) {
-            stmt.setInt(1, ingredientId);
-            try (ResultSet rs = stmt.executeQuery()) {
-                if (rs.next()) {
-                    double currentQty = rs.getDouble("quantity");
-                    double minThreshold = rs.getDouble("min_threshold");
-                    double criticalLevel = minThreshold * 0.5;
-                    return (currentQty - quantityNeeded) <= criticalLevel;
-                }
-            }
-        } catch (SQLException e) {
-            System.err.println("Error checking critical threshold: " + e.getMessage());
-        }
-        return false;
-    }
-
-public boolean isAtOrBelowThreshold(int ingredientId) {
-        String sql = "SELECT quantity, min_threshold FROM ingredients WHERE id = ?";
-        try (Connection conn = DatabaseConnection.getConnection();
-             PreparedStatement stmt = conn.prepareStatement(sql)) {
-            stmt.setInt(1, ingredientId);
-            try (ResultSet rs = stmt.executeQuery()) {
-                if (rs.next()) {
-                    double currentQty = rs.getDouble("quantity");
-                    double minThreshold = rs.getDouble("min_threshold");
-                    return currentQty <= minThreshold;
-                }
-            }
-        } catch (SQLException e) {
-            System.err.println("Error checking threshold: " + e.getMessage());
-        }
-        return false;
-    }
-
-    public boolean isAtOrBelowCritical(int ingredientId) {
-        String sql = "SELECT quantity, min_threshold FROM ingredients WHERE id = ?";
-        try (Connection conn = DatabaseConnection.getConnection();
-             PreparedStatement stmt = conn.prepareStatement(sql)) {
-            stmt.setInt(1, ingredientId);
-            try (ResultSet rs = stmt.executeQuery()) {
-                if (rs.next()) {
-                    double currentQty = rs.getDouble("quantity");
-                    double minThreshold = rs.getDouble("min_threshold");
-                    double criticalLevel = minThreshold * 0.5;
-                    return currentQty <= criticalLevel;
-                }
-            }
-        } catch (SQLException e) {
-            System.err.println("Error checking critical threshold: " + e.getMessage());
         }
         return false;
     }
@@ -376,7 +292,7 @@ public boolean isAtOrBelowThreshold(int ingredientId) {
             stmt.setInt(2, ingredientId);
             return stmt.executeUpdate() > 0;
         } catch (SQLException e) {
-            System.err.println("Error deducting quantity: " + e.getMessage());
+            System.err.println("Error deducting ingredient: " + e.getMessage());
         }
         return false;
     }

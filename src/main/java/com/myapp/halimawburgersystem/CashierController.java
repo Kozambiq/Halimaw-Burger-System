@@ -1,7 +1,6 @@
 package com.myapp.halimawburgersystem;
 
 import com.myapp.dao.ComboDAO;
-import com.myapp.dao.IngredientDAO;
 import com.myapp.dao.MenuItemDAO;
 import com.myapp.dao.OrderDAO;
 import com.myapp.model.Combo;
@@ -66,7 +65,6 @@ public class CashierController {
     private MenuItemDAO menuItemDAO = new MenuItemDAO();
     private ComboDAO comboDAO = new ComboDAO();
     private OrderDAO orderDAO = new OrderDAO();
-    private IngredientDAO ingredientDAO = new IngredientDAO();
     private Map<Integer, Integer> orderItems = new HashMap<>();
     private Map<Integer, Double> itemPrices = new HashMap<>();
     private Map<Integer, Double> comboPrices = new HashMap<>();
@@ -245,8 +243,6 @@ public class CashierController {
         card.setMaxSize(150, 110);
         card.getStyleClass().add("menu-card");
 
-        String stockStatus = menuItemDAO.getMenuItemStockStatus(item.getId(), ingredientDAO);
-
         VBox content = new VBox(4);
         content.setPadding(new Insets(12));
 
@@ -262,37 +258,20 @@ public class CashierController {
         content.getChildren().addAll(nameLabel, priceLabel, catLabel);
 
         boolean isOutOfStock = "Out of Stock".equals(item.getAvailability());
-        boolean isEmptyStock = IngredientDAO.STOCK_EMPTY.equals(stockStatus);
-        boolean isCriticalStock = IngredientDAO.STOCK_CRITICAL.equals(stockStatus);
-        boolean isLowStock = IngredientDAO.STOCK_LOW.equals(stockStatus);
-
-        if (isOutOfStock || isEmptyStock) {
+        if (isOutOfStock) {
             card.getStyleClass().add("menu-card-disabled");
-            Label outLabel = new Label("OUT");
+
+            Label outLabel = new Label("OUT OF STOCK");
             outLabel.getStyleClass().add("menu-out-label");
-            StackPane.setAlignment(outLabel, javafx.geometry.Pos.TOP_RIGHT);
-            StackPane.setMargin(outLabel, new Insets(4, 4, 0, 0));
+            StackPane.setAlignment(outLabel, javafx.geometry.Pos.CENTER);
             card.getChildren().addAll(content, outLabel);
-        } else if (isCriticalStock) {
-            Label badge = new Label("CRITICAL");
-            badge.getStyleClass().add("menu-stock-critical");
-            StackPane.setAlignment(badge, javafx.geometry.Pos.TOP_RIGHT);
-            StackPane.setMargin(badge, new Insets(4, 4, 0, 0));
-            card.getChildren().addAll(content, badge);
-        } else if (isLowStock) {
-            Label badge = new Label("LOW");
-            badge.getStyleClass().add("menu-stock-low");
-            StackPane.setAlignment(badge, javafx.geometry.Pos.TOP_RIGHT);
-            StackPane.setMargin(badge, new Insets(4, 4, 0, 0));
-            card.getChildren().addAll(content, badge);
         } else {
             card.getChildren().add(content);
         }
 
-        final boolean canClick = !isOutOfStock && !isEmptyStock;
         final MenuItemModel clickedItem = item;
         card.setOnMouseClicked((MouseEvent event) -> {
-            if (canClick) {
+            if (!isOutOfStock) {
                 addMenuItemToOrder(clickedItem);
             }
         });
