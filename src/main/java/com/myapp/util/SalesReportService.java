@@ -16,6 +16,7 @@ public class SalesReportService {
         public List<String[]> topItems;
         public List<String[]> stockLevels;
         public List<String[]> hourlyRevenue;
+        public List<String[]> dailyRevenue;
         public List<String[]> categoryBreakdown;
     }
 
@@ -27,7 +28,7 @@ public class SalesReportService {
         try (Connection conn = DatabaseConnection.getConnection()) {
 
             String revenueSQL = "SELECT COALESCE(SUM(total),0), COUNT(*) FROM orders "
-                    + "WHERE DATE(created_at) = ? AND status != 'Cancelled'";
+                    + "WHERE DATE(created_at) = ? AND status != 'Completed'";
             try (PreparedStatement ps = conn.prepareStatement(revenueSQL)) {
                 ps.setDate(1, Date.valueOf(today));
                 ResultSet rs = ps.executeQuery();
@@ -81,7 +82,7 @@ public class SalesReportService {
             }
 
             String hourlySQL = "SELECT HOUR(created_at) AS hr, COALESCE(SUM(total),0) AS rev "
-                    + "FROM orders WHERE DATE(created_at) = ? AND status != 'Cancelled' "
+                    + "FROM orders WHERE DATE(created_at) = ? AND status != 'Completed' "
                     + "GROUP BY hr ORDER BY hr";
             s.hourlyRevenue = new ArrayList<>();
             try (PreparedStatement ps = conn.prepareStatement(hourlySQL)) {
@@ -116,6 +117,30 @@ public class SalesReportService {
         }
 
         return s;
+    }
+
+    public static List<String[]> fetchDailyRevenue(int days) throws SQLException {
+        List<String[]> dailyRevenue = new ArrayList<>();
+        LocalDate endDate = LocalDate.now();
+        LocalDate startDate = endDate.minusDays(days - 1);
+
+        try (Connection conn = DatabaseConnection.getConnection()) {
+            String dailySQL = "SELECT DATE(created_at) AS sale_date, COALESCE(SUM(total),0) AS rev "
+                    + "FROM orders WHERE DATE(created_at) BETWEEN ? AND ? AND status != 'Completed' "
+                    + "GROUP BY sale_date ORDER BY sale_date";
+            try (PreparedStatement ps = conn.prepareStatement(dailySQL)) {
+                ps.setDate(1, Date.valueOf(startDate));
+                ps.setDate(2, Date.valueOf(endDate));
+                ResultSet rs = ps.executeQuery();
+                while (rs.next()) {
+                    String dateStr = rs.getDate("sale_date").toString();
+                    String label = LocalDate.parse(dateStr).format(java.time.format.DateTimeFormatter.ofPattern("MMM dd"));
+                    dailyRevenue.add(new String[]{ label, String.format("%.2f", rs.getDouble("rev")) });
+                }
+            }
+        }
+
+        return dailyRevenue;
     }
 
     public static String buildAnalyticsPrompt(SalesSummary s) {

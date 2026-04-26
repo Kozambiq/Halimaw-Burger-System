@@ -6,15 +6,19 @@ import com.myapp.util.GeminiService;
 import com.myapp.util.SalesReportService;
 import com.myapp.util.SalesReportService.SalesSummary;
 import javafx.application.Platform;
+import javafx.collections.FXCollections;
+import javafx.collections.ObservableList;
 import javafx.concurrent.Task;
 import javafx.fxml.FXML;
 import javafx.scene.control.Button;
+import javafx.scene.control.ComboBox;
 import javafx.scene.control.Label;
 import javafx.scene.web.WebEngine;
 import javafx.scene.web.WebView;
 
 import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
+import java.util.List;
 
 public class SalesReportController {
 
@@ -45,8 +49,12 @@ public class SalesReportController {
 
     // WebViews for chart and AI responses
     @FXML private WebView chartWebView;
+    @FXML private WebView dailyChartWebView;
     @FXML private WebView analysisWebView;
     @FXML private WebView recommendationWebView;
+
+    @FXML private ComboBox<String> cmbDailyFilter;
+    private int dailyFilterDays = 7;
 
     // Shared CSS for AI response WebViews to match app theme
     private static final String WEB_CSS =
@@ -69,6 +77,10 @@ public class SalesReportController {
     public void initialize() {
         updateTopbarDate();
         updateSidebarUser();
+        if (cmbDailyFilter != null) {
+            cmbDailyFilter.setItems(FXCollections.observableArrayList("Last 7 Days", "Last 30 Days", "This Month"));
+            cmbDailyFilter.setValue("Last 7 Days");
+        }
         loadReport();
     }
 
@@ -156,6 +168,7 @@ public class SalesReportController {
             Platform.runLater(() -> {
                 updateStatCards(summary);
                 renderChart(summary);
+                loadDailyChart();
                 runAiAnalysis(summary);
                 runAiRecommendations(summary);
             });
@@ -238,6 +251,92 @@ public class SalesReportController {
                 + "</script></body></html>";
 
         chartWebView.getEngine().loadContent(html);
+    }
+
+    private void renderDailyChart(List<String[]> dailyData) {
+        if (dailyChartWebView == null) return;
+
+        StringBuilder labels = new StringBuilder();
+        StringBuilder data = new StringBuilder();
+        for (int i = 0; i < dailyData.size(); i++) {
+            String[] day = dailyData.get(i);
+            if (i > 0) { labels.append(","); data.append(","); }
+            labels.append("\"").append(day[0]).append("\"");
+            data.append(day[1]);
+        }
+
+        if (dailyData.isEmpty()) {
+            labels.append("\"No data\"");
+            data.append("0");
+        }
+
+        String html = "<!DOCTYPE html><html><head>"
+                + "<script src='https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.js'></script>"
+                + "<style>body{margin:0;padding:4px;background:#1a1208;font-family:sans-serif;}"
+                + "canvas{max-height:140px;}</style></head><body>"
+                + "<canvas id='dailyChart'></canvas>"
+                + "<script>"
+                + "new Chart(document.getElementById('dailyChart'),{"
+                + "  type:'bar',"
+                + "  data:{"
+                + "    labels:[" + labels + "],"
+                + "    datasets:[{"
+                + "      label:'Revenue (PHP)',"
+                + "      data:[" + data + "],"
+                + "      backgroundColor:'rgba(220,80,50,0.75)',"
+                + "      borderRadius:4,"
+                + "      barThickness:40,"
+                + "      maxBarThickness:60"
+                + "    }]"
+                + "  },"
+                + "  options:{"
+                + "    responsive:true,"
+                + "    layout:{padding:{top:0,bottom:0}},"
+                + "    plugins:{legend:{display:false}},"
+                + "    scales:{"
+                + "      y:{beginAtZero:true,ticks:{color:'#c8a97a',callback:v=>'₱'+v,maxTicksLimit:5},grid:{color:'rgba(200,169,122,0.1)'}},"
+                + "      x:{ticks:{color:'#c8a97a'},grid:{display:false},offset:true}"
+                + "    }"
+                + "  }"
+                + "});"
+                + "</script></body></html>";
+
+        dailyChartWebView.getEngine().loadContent(html);
+    }
+
+    @FXML
+    private void onDailyFilterChanged() {
+        if (cmbDailyFilter == null || cmbDailyFilter.getValue() == null) return;
+
+        String selected = cmbDailyFilter.getValue();
+        switch (selected) {
+            case "Last 7 Days" -> dailyFilterDays = 7;
+            case "Last 30 Days" -> dailyFilterDays = 30;
+            case "This Month" -> dailyFilterDays = LocalDate.now().getDayOfMonth();
+        }
+
+        loadDailyChart();
+    }
+
+    private void loadDailyChart() {
+        Task<List<String[]>> task = new Task<>() {
+            @Override
+            protected List<String[]> call() throws Exception {
+                return SalesReportService.fetchDailyRevenue(dailyFilterDays);
+            }
+        };
+
+        task.setOnSucceeded(e -> Platform.runLater(() -> {
+            renderDailyChart(task.getValue());
+        }));
+
+        task.setOnFailed(e -> Platform.runLater(() -> {
+            if (dailyChartWebView != null) {
+                dailyChartWebView.getEngine().loadContent("<html><body style='background:#1a1208;margin:0;padding:20px;'><span style='color:#c0392b'>Failed to load data</span></body></html>");
+            }
+        }));
+
+        new Thread(task).start();
     }
 
     private void runAiAnalysis(SalesSummary summary) {
