@@ -235,6 +235,28 @@ public class MenuItemDAO {
         return ingredients;
     }
 
+    public String getMenuItemStockStatus(int menuItemId, IngredientDAO ingredientDAO) {
+        List<MenuItemIngredient> ingredients = getIngredientsForMenuItem(menuItemId);
+        
+        boolean hasEmpty = false;
+        boolean hasCritical = false;
+        boolean hasLow = false;
+
+        for (MenuItemIngredient mi : ingredients) {
+            String status = ingredientDAO.getStockStatus(mi.getIngredientId());
+            switch (status) {
+                case IngredientDAO.STOCK_EMPTY -> hasEmpty = true;
+                case IngredientDAO.STOCK_CRITICAL -> hasCritical = true;
+                case IngredientDAO.STOCK_LOW -> hasLow = true;
+            }
+        }
+
+        if (hasEmpty) return IngredientDAO.STOCK_EMPTY;
+        if (hasCritical) return IngredientDAO.STOCK_CRITICAL;
+        if (hasLow) return IngredientDAO.STOCK_LOW;
+        return IngredientDAO.STOCK_OK;
+    }
+
     public List<String> getAllCategories() {
         List<String> categories = new ArrayList<>();
         String sql = "SELECT DISTINCT category FROM menu_items ORDER BY category";

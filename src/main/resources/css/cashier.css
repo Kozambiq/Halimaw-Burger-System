@@ -251,6 +251,28 @@
     -fx-background-radius: 3;
 }
 
+.menu-stock-critical {
+    -fx-font-family: 'DM Sans', sans-serif;
+    -fx-font-size: 9px;
+    -fx-font-weight: 600;
+    -fx-letter-spacing: 0.1em;
+    -fx-text-fill: #fff;
+    -fx-background-color: #E24B4A;
+    -fx-padding: 2 6 2 6;
+    -fx-background-radius: 3;
+}
+
+.menu-stock-low {
+    -fx-font-family: 'DM Sans', sans-serif;
+    -fx-font-size: 9px;
+    -fx-font-weight: 600;
+    -fx-letter-spacing: 0.1em;
+    -fx-text-fill: #1a1208;
+    -fx-background-color: #EF9F27;
+    -fx-padding: 2 6 2 6;
+    -fx-background-radius: 3;
+}
+
 /* Combo/Promo Badge */
 .menu-promo-badge {
     -fx-font-family: 'DM Sans', sans-serif;
