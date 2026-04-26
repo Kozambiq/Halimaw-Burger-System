@@ -135,6 +135,7 @@ public class CashierController {
 
     private int loadMenuItems() {
         try {
+            menuItemDAO.syncAvailabilityToDatabase();
             allMenuItems = menuItemDAO.findAllWithIngredientStatus();
             menuGrid.getChildren().clear();
             menuGrid.getColumnConstraints().clear();
