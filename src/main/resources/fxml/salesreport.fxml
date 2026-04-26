@@ -111,6 +111,9 @@
             <Button fx:id="btnRefresh" text="↻  Refresh" onAction="#onRefresh" style="-fx-cursor:hand;">
                 <padding><Insets top="6" right="14" bottom="6" left="14"/></padding>
             </Button>
+            <Button text="Test AI" onAction="#onTestAI" style="-fx-cursor:hand;">
+                <padding><Insets top="6" right="14" bottom="6" left="14"/></padding>
+            </Button>
         </HBox>
 
         <ScrollPane fitToWidth="true" VBox.vgrow="ALWAYS" styleClass="content-scroll">
@@ -138,7 +141,7 @@
                 </VBox>
 
                 <!-- AI Analysis + Recommendations side by side -->
-                <HBox spacing="12" VBox.vgrow="ALWAYS">
+                <HBox spacing="12">
 
                     <!-- AI Analysis -->
                     <VBox styleClass="widget" HBox.hgrow="ALWAYS" spacing="8">
@@ -147,10 +150,7 @@
                             <Region HBox.hgrow="ALWAYS"/>
                             <Label fx:id="lblAnalysisStatus" styleClass="stat-label" text="Loading..."/>
                         </HBox>
-                        <Label fx:id="lblAnalysisText"
-                               wrapText="true"
-                               style="-fx-font-size: 13px; -fx-text-fill: #8a7055;"
-                               text=""/>
+                        <WebView fx:id="analysisWebView" prefHeight="220"/>
                     </VBox>
 
                     <!-- AI Recommendations -->
@@ -160,10 +160,7 @@
                             <Region HBox.hgrow="ALWAYS"/>
                             <Label fx:id="lblRecommendationStatus" styleClass="stat-label" text="Loading..."/>
                         </HBox>
-                        <Label fx:id="lblRecommendationText"
-                               wrapText="true"
-                               style="-fx-font-size: 13px; -fx-text-fill: #8a7055;"
-                               text=""/>
+                        <WebView fx:id="recommendationWebView" prefHeight="220"/>
                     </VBox>
 
                 </HBox>

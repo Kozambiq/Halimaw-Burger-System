@@ -18,7 +18,6 @@ import java.time.format.DateTimeFormatter;
 
 public class SalesReportController {
 
-    // --- Sidebar nav buttons ---
     @FXML private Button btnDashboard;
     @FXML private Button btnOrders;
     @FXML private Button btnKitchen;
@@ -28,30 +27,43 @@ public class SalesReportController {
     @FXML private Button btnSales;
     @FXML private Button btnStaff;
 
-    // --- Topbar ---
     @FXML private Label pageTitle;
     @FXML private Label topbarDate;
 
-    // --- Sidebar user info ---
     @FXML private Label sidebarAvatarText;
     @FXML private Label sidebarUserName;
     @FXML private Label sidebarUserRole;
 
-    // --- Stat cards ---
     @FXML private Label lblRevenue;
     @FXML private Label lblRevenueDelta;
     @FXML private Label lblOrders;
     @FXML private Label lblOrdersDelta;
 
-    // --- AI output ---
     @FXML private Label lblAnalysisStatus;
-    @FXML private Label lblAnalysisText;
     @FXML private Label lblRecommendationStatus;
-    @FXML private Label lblRecommendationText;
     @FXML private Button btnRefresh;
 
-    // --- Chart ---
+    // WebViews for chart and AI responses
     @FXML private WebView chartWebView;
+    @FXML private WebView analysisWebView;
+    @FXML private WebView recommendationWebView;
+
+    // Shared CSS for AI response WebViews to match app theme
+    private static final String WEB_CSS =
+            "<style>" +
+                    "* { box-sizing: border-box; margin: 0; padding: 0; }" +
+                    "body { background: #2a1f0e; font-family: 'Segoe UI', sans-serif;" +
+                    "       color: #c8a97a; font-size: 13px; padding: 4px 2px; }" +
+                    "h4 { color: #e8c99a; font-size: 13px; font-weight: 600;" +
+                    "     text-transform: uppercase; letter-spacing: 0.05em;" +
+                    "     margin: 12px 0 6px 0; border-bottom: 1px solid rgba(200,169,122,0.2);" +
+                    "     padding-bottom: 4px; }" +
+                    "h4:first-child { margin-top: 0; }" +
+                    "ul { padding-left: 16px; margin: 4px 0; }" +
+                    "li { margin: 4px 0; line-height: 1.5; }" +
+                    "b { color: #e8c99a; font-weight: 600; }" +
+                    "</style>";
+
 
     @FXML
     public void initialize() {
@@ -61,7 +73,6 @@ public class SalesReportController {
     }
 
     public void setActiveNav(String page) {
-        // Style matching your existing pattern
         if (btnDashboard != null) btnDashboard.getStyleClass().remove("nav-item-active");
         if (btnOrders != null)    btnOrders.getStyleClass().remove("nav-item-active");
         if (btnKitchen != null)   btnKitchen.getStyleClass().remove("nav-item-active");
@@ -71,10 +82,8 @@ public class SalesReportController {
         if (btnSales != null)     btnSales.getStyleClass().remove("nav-item-active");
         if (btnStaff != null)     btnStaff.getStyleClass().remove("nav-item-active");
 
-        switch (page) {
-            case "Sales Reports" -> { if (btnSales != null) btnSales.getStyleClass().add("nav-item-active"); }
-            case "Dashboard"     -> { if (btnDashboard != null) btnDashboard.getStyleClass().add("nav-item-active"); }
-        }
+        if (page.equals("Sales Reports") && btnSales != null)
+            btnSales.getStyleClass().add("nav-item-active");
     }
 
     @FXML
@@ -111,13 +120,29 @@ public class SalesReportController {
         loadReport();
     }
 
+    @FXML
+    private void onTestAI() {
+        System.out.println("Testing Groq...");
+        Task<String> task = new Task<>() {
+            @Override
+            protected String call() throws Exception {
+                return GeminiService.analyze("Say hello in one sentence. Respond in HTML using <b> for emphasis.");
+            }
+        };
+        task.setOnSucceeded(e -> Platform.runLater(() -> {
+            System.out.println("Groq response: " + task.getValue());
+            loadHtml(analysisWebView, task.getValue());
+        }));
+        task.setOnFailed(e -> System.out.println("Groq FAILED: " + task.getException().getMessage()));
+        new Thread(task).start();
+    }
+
     private void loadReport() {
-        // Disable refresh while loading
         if (btnRefresh != null) btnRefresh.setDisable(true);
         setStatus(lblAnalysisStatus, "Loading...");
         setStatus(lblRecommendationStatus, "Loading...");
-        if (lblAnalysisText != null) lblAnalysisText.setText("");
-        if (lblRecommendationText != null) lblRecommendationText.setText("");
+        loadHtml(analysisWebView, "<i style='color:#c8a97a'>Loading analysis...</i>");
+        loadHtml(recommendationWebView, "<i style='color:#c8a97a'>Loading recommendations...</i>");
 
         Task<SalesSummary> dbTask = new Task<>() {
             @Override
@@ -136,13 +161,11 @@ public class SalesReportController {
             });
         });
 
-        dbTask.setOnFailed(e -> {
-            Platform.runLater(() -> {
-                setStatus(lblAnalysisStatus, "Database error");
-                setStatus(lblRecommendationStatus, "Database error");
-                if (btnRefresh != null) btnRefresh.setDisable(false);
-            });
-        });
+        dbTask.setOnFailed(e -> Platform.runLater(() -> {
+            setStatus(lblAnalysisStatus, "Database error");
+            setStatus(lblRecommendationStatus, "Database error");
+            if (btnRefresh != null) btnRefresh.setDisable(false);
+        }));
 
         new Thread(dbTask).start();
     }
@@ -169,7 +192,6 @@ public class SalesReportController {
     private void renderChart(SalesSummary s) {
         if (chartWebView == null) return;
 
-        // Build labels and data for hourly revenue chart
         StringBuilder labels = new StringBuilder();
         StringBuilder data = new StringBuilder();
         for (int i = 0; i < s.hourlyRevenue.size(); i++) {
@@ -179,80 +201,47 @@ public class SalesReportController {
             data.append(hr[1]);
         }
 
-        // If no data yet, show placeholder
         if (s.hourlyRevenue.isEmpty()) {
             labels.append("\"No data yet\"");
             data.append("0");
         }
 
         String html = "<!DOCTYPE html><html><head>"
-            + "<script src='https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.js'></script>"
-            + "<style>"
-            + "body{margin:0;padding:0;background:#1a1208;font-family:'Segoe UI',sans-serif;}"
-            + "canvas{max-height:250px;}"
-            + "</style></head><body>"
-            + "<canvas id='chart'></canvas>"
-            + "<script>"
-            + "new Chart(document.getElementById('chart'),{"
-            + "  type:'bar',"
-            + "  data:{"
-            + "    labels:[" + labels + "],"
-            + "    datasets:[{"
-            + "      label:'Revenue (PHP)',"
-            + "      data:[" + data + "],"
-            + "      backgroundColor:'rgba(200,80,10,0.85)',"
-            + "      borderColor:'#c8500a',"
-            + "      borderWidth:1,"
-            + "      borderRadius:4,"
-            + "      barThickness:40,"
-            + "      maxBarThickness:60"
-            + "    }]"
-            + "  },"
-            + "  options:{"
-            + "    responsive:true,"
-            + "    maintainAspectRatio:false,"
-            + "    layout:{padding:{top:0,bottom:0}},"
-            + "    plugins:{"
-            + "      legend:{display:false},"
-            + "      tooltip:{"
-            + "        backgroundColor:'#2e2410',"
-            + "        titleColor:'#f5ede0',"
-            + "        bodyColor:'#c4a882',"
-            + "        borderColor:'#5c4828',"
-            + "        borderWidth:1,"
-            + "        padding:8,"
-            + "        displayColors:false,"
-            + "        callbacks:{"
-            + "          label:function(ctx){return '₱' + ctx.parsed.y.toLocaleString();}"
-            + "        }"
-            + "      }"
-            + "    },"
-            + "    scales:{"
-            + "      x:{"
-            + "        grid:{display:false},"
-            + "        ticks:{color:'#c8a97a',font:{size:10}}"
-            + "      },"
-            + "      y:{"
-            + "        beginAtZero:true,"
-            + "        grid:{color:'rgba(200,169,122,0.1)'},"
-            + "        border:{display:false},"
-            + "        ticks:{"
-            + "          color:'#c8a97a',"
-            + "          font:{size:10},"
-            + "          callback:function(v){return '₱' + v.toLocaleString();}"
-            + "        }"
-            + "      }"
-            + "    }"
-            + "  }"
-            + "});"
-            + "</script></body></html>";
+                + "<script src='https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.js'></script>"
+                + "<style>body{margin:0;padding:8px;background:#1a1208;font-family:sans-serif;}"
+                + "canvas{display:block;}</style></head><body>"
+                + "<canvas id='chart'></canvas>"
+                + "<script>"
+                + "new Chart(document.getElementById('chart'),{"
+                + "  type:'bar',"
+                + "  data:{"
+                + "    labels:[" + labels + "],"
+                + "    datasets:[{"
+                + "      label:'Revenue (PHP)',"
+                + "      data:[" + data + "],"
+                + "      backgroundColor:'rgba(220,80,50,0.75)',"
+                + "      borderRadius:4,"
+                + "      barThickness:40,"
+                + "      maxBarThickness:60"
+                + "    }]"
+                + "  },"
+                + "  options:{"
+                + "    responsive:true,"
+                + "    layout:{padding:{top:0,bottom:0}},"
+                + "    plugins:{legend:{display:false}},"
+                + "    scales:{"
+                + "      y:{beginAtZero:true,ticks:{color:'#c8a97a',callback:v=>'₱'+v},grid:{color:'rgba(200,169,122,0.1)'}},"
+                + "      x:{ticks:{color:'#c8a97a'},grid:{display:false},offset:true}"
+                + "    }"
+                + "  }"
+                + "});"
+                + "</script></body></html>";
 
-        WebEngine engine = chartWebView.getEngine();
-        engine.loadContent(html);
+        chartWebView.getEngine().loadContent(html);
     }
 
     private void runAiAnalysis(SalesSummary summary) {
-        setStatus(lblAnalysisStatus, "Analyzing with AI...");
+        setStatus(lblAnalysisStatus, "Analyzing...");
         String prompt = SalesReportService.buildAnalyticsPrompt(summary);
 
         Task<String> task = new Task<>() {
@@ -264,12 +253,13 @@ public class SalesReportController {
 
         task.setOnSucceeded(e -> Platform.runLater(() -> {
             setStatus(lblAnalysisStatus, "Done");
-            if (lblAnalysisText != null) lblAnalysisText.setText(task.getValue());
+            loadHtml(analysisWebView, task.getValue());
             checkAllDone();
         }));
 
         task.setOnFailed(e -> Platform.runLater(() -> {
-            setStatus(lblAnalysisStatus, "AI error - check API key");
+            setStatus(lblAnalysisStatus, "AI error");
+            loadHtml(analysisWebView, "<span style='color:#c0392b'>Failed to load analysis.</span>");
             checkAllDone();
         }));
 
@@ -277,7 +267,7 @@ public class SalesReportController {
     }
 
     private void runAiRecommendations(SalesSummary summary) {
-        setStatus(lblRecommendationStatus, "Generating recommendations...");
+        setStatus(lblRecommendationStatus, "Analyzing...");
         String prompt = SalesReportService.buildRecommendationPrompt(summary);
 
         Task<String> task = new Task<>() {
@@ -289,24 +279,31 @@ public class SalesReportController {
 
         task.setOnSucceeded(e -> Platform.runLater(() -> {
             setStatus(lblRecommendationStatus, "Done");
-            if (lblRecommendationText != null) lblRecommendationText.setText(task.getValue());
+            loadHtml(recommendationWebView, task.getValue());
             checkAllDone();
         }));
 
         task.setOnFailed(e -> Platform.runLater(() -> {
-            setStatus(lblRecommendationStatus, "AI error - check API key");
+            setStatus(lblRecommendationStatus, "AI error");
+            loadHtml(recommendationWebView, "<span style='color:#c0392b'>Failed to load recommendations.</span>");
             checkAllDone();
         }));
 
         new Thread(task).start();
     }
 
+    // Wraps AI HTML response with shared CSS and loads into WebView
+    private void loadHtml(WebView webView, String content) {
+        if (webView == null) return;
+        String fullHtml = "<!DOCTYPE html><html><head>" + WEB_CSS + "</head><body>" + content + "</body></html>";
+        webView.getEngine().loadContent(fullHtml);
+    }
+
     private void checkAllDone() {
-        // Re-enable refresh when both AI calls finish
         boolean analysisDone = lblAnalysisStatus != null &&
-            !lblAnalysisStatus.getText().equals("Analyzing with AI...");
+                !lblAnalysisStatus.getText().equals("Analyzing...");
         boolean recoDone = lblRecommendationStatus != null &&
-            !lblRecommendationStatus.getText().equals("Generating recommendations...");
+                !lblRecommendationStatus.getText().equals("Analyzing...");
         if (analysisDone && recoDone && btnRefresh != null) {
             btnRefresh.setDisable(false);
         }
@@ -324,7 +321,6 @@ public class SalesReportController {
     }
 
     private void updateSidebarUser() {
-        User user = Main.getCurrentUser();
         Staff staff = Main.getCurrentStaff();
         if (staff != null) {
             if (sidebarUserName != null) sidebarUserName.setText(staff.getName());
@@ -332,8 +328,8 @@ public class SalesReportController {
             if (sidebarAvatarText != null) {
                 String[] parts = staff.getName().split(" ");
                 String initials = parts.length >= 2
-                    ? "" + parts[0].charAt(0) + parts[1].charAt(0)
-                    : staff.getName().substring(0, Math.min(2, staff.getName().length()));
+                        ? "" + parts[0].charAt(0) + parts[1].charAt(0)
+                        : staff.getName().substring(0, Math.min(2, staff.getName().length()));
                 sidebarAvatarText.setText(initials.toUpperCase());
             }
         }
