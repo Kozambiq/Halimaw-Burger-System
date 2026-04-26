@@ -241,7 +241,7 @@ public class KitchenController {
     }
 
     private void updateStatus(Order order, String newStatus) {
-        if ("Completed".equals(newStatus)) {
+        if ("Preparing".equals(newStatus) && "New".equals(order.getStatus())) {
             IngredientDAO ingredientDAO = new IngredientDAO();
             MenuItemDAO menuItemDAO = new MenuItemDAO();
             List<OrderItem> items = orderDAO.findItemsByOrderId(order.getId());
