@@ -1,0 +1,254 @@
+package com.myapp.halimawburgersystem;
+
+import com.myapp.dao.OrderDAO;
+import com.myapp.model.Order;
+import com.myapp.model.Staff;
+import javafx.application.Platform;
+import javafx.event.ActionEvent;
+import javafx.fxml.FXML;
+import javafx.geometry.Insets;
+import javafx.geometry.Pos;
+import javafx.scene.control.Alert;
+import javafx.scene.control.Button;
+import javafx.scene.control.ButtonType;
+import javafx.scene.control.Label;
+import javafx.scene.control.ScrollPane;
+import javafx.scene.layout.HBox;
+import javafx.scene.layout.Priority;
+import javafx.scene.layout.Region;
+import javafx.scene.layout.VBox;
+
+import java.time.Duration;
+import java.time.LocalDateTime;
+import java.util.List;
+import java.util.concurrent.Executors;
+import java.util.concurrent.ScheduledExecutorService;
+import java.util.concurrent.TimeUnit;
+
+public class CookController {
+
+    @FXML private Label pageTitle;
+    @FXML private Label userDisplayName;
+    @FXML private Label userDisplayRole;
+    @FXML private Label sidebarAvatarText;
+    @FXML private Label sidebarUserName;
+    @FXML private Label sidebarUserRole;
+
+    @FXML private Button btnKitchen;
+
+    @FXML private VBox colNew;
+    @FXML private VBox colPreparing;
+    @FXML private VBox colReady;
+
+    @FXML private Label countNew;
+    @FXML private Label countPreparing;
+    @FXML private Label countReady;
+
+    private OrderDAO orderDAO = new OrderDAO();
+    private ScheduledExecutorService timerService;
+
+    @FXML
+    public void initialize() {
+        loadUserInfo();
+        loadQueue();
+        
+        timerService = Executors.newSingleThreadScheduledExecutor(r -> {
+            Thread t = new Thread(r);
+            t.setDaemon(true);
+            return t;
+        });
+        timerService.scheduleAtFixedRate(() -> Platform.runLater(this::loadQueue), 5, 5, TimeUnit.SECONDS);
+    }
+
+    private void loadUserInfo() {
+        Staff staff = Main.getCurrentStaff();
+        if (staff != null) {
+            String initials = staff.getInitials();
+            if (userDisplayName != null) userDisplayName.setText(initials);
+            if (userDisplayRole != null) userDisplayRole.setText(staff.getRole());
+            if (sidebarAvatarText != null) sidebarAvatarText.setText(initials);
+            if (sidebarUserName != null) sidebarUserName.setText(staff.getName());
+            if (sidebarUserRole != null) sidebarUserRole.setText(staff.getRole());
+        }
+    }
+
+    public void loadQueue() {
+        List<Order> allOrders = orderDAO.findAll();
+        
+        colNew.getChildren().clear();
+        colPreparing.getChildren().clear();
+        colReady.getChildren().clear();
+
+        int n = 0, p = 0, r = 0;
+        LocalDateTime now = LocalDateTime.now();
+
+        for (Order order : allOrders) {
+            String status = order.getStatus();
+            
+            if ("Cancelled".equals(status)) {
+                LocalDateTime cancelledAt = order.getCancelledAt();
+                if (cancelledAt == null) {
+                    cancelledAt = now;
+                }
+                
+                long secsSinceCancel = Duration.between(cancelledAt, now).getSeconds();
+                if (secsSinceCancel > 60) continue; 
+
+                VBox card = createOrderCard(order);
+                colNew.getChildren().add(0, card);
+                continue;
+            }
+
+            if ("New".equals(status)) {
+                colNew.getChildren().add(createOrderCard(order));
+                n++;
+            } else if ("Preparing".equals(status)) {
+                colPreparing.getChildren().add(createOrderCard(order));
+                p++;
+            } else if ("Done".equals(status)) {
+                colReady.getChildren().add(createOrderCard(order));
+                r++;
+            }
+        }
+
+        countNew.setText(String.valueOf(n));
+        countPreparing.setText(String.valueOf(p));
+        countReady.setText(String.valueOf(r));
+    }
+
+    private VBox createOrderCard(Order order) {
+        VBox card = new VBox(8);
+        card.getStyleClass().add("order-card");
+        
+        if ("Cancelled".equals(order.getStatus())) {
+            card.getStyleClass().add("cancelled-card");
+        }
+        
+        long mins = Duration.between(order.getCreatedAt(), LocalDateTime.now()).toMinutes();
+        boolean isUrgent = false;
+
+        if ("New".equals(order.getStatus()) && mins >= 5) {
+            isUrgent = true;
+        } else if ("Preparing".equals(order.getStatus()) && mins >= 15) {
+            isUrgent = true;
+        }
+        
+        if (isUrgent) {
+            card.getStyleClass().add("urgent");
+        }
+        
+        if ("Done".equals(order.getStatus())) {
+            card.setStyle("-fx-border-color: #4a8c3f; -fx-background-color: rgba(74, 140, 63, 0.15);");
+        }
+
+        HBox header = new HBox();
+        header.setAlignment(Pos.CENTER_LEFT);
+        Label orderNum = new Label("#" + String.format("%04d", order.getOrderNumber()));
+        orderNum.getStyleClass().add("card-order");
+        Region spacer = new Region();
+        HBox.setHgrow(spacer, Priority.ALWAYS);
+        Label type = new Label(order.getOrderType());
+        type.getStyleClass().add("card-type");
+        header.getChildren().addAll(orderNum, spacer, type);
+
+        Label items = new Label(order.getNotes() != null ? order.getNotes() : "No details");
+        items.getStyleClass().add("card-items");
+        items.setWrapText(true);
+
+        HBox footer = new HBox();
+        footer.setAlignment(Pos.CENTER_LEFT);
+        
+        String timerText = mins + "m ago";
+        if ("Cancelled".equals(order.getStatus())) timerText = "CANCELLED";
+        else if ("Done".equals(order.getStatus())) timerText = "Ready " + mins + "m";
+
+        Label timer = new Label(timerText + (isUrgent ? " ⚠" : ""));
+        timer.getStyleClass().add("card-timer");
+        if (isUrgent) timer.getStyleClass().add("urgent-text");
+        if ("Done".equals(order.getStatus())) timer.setStyle("-fx-text-fill: #7ec470;");
+        if ("Cancelled".equals(order.getStatus())) timer.setStyle("-fx-text-fill: #e07070;");
+
+        Region footerSpacer = new Region();
+        HBox.setHgrow(footerSpacer, Priority.ALWAYS);
+        
+        Button actionBtn = new Button();
+        actionBtn.getStyleClass().add("btn-card");
+        
+        if ("New".equals(order.getStatus())) {
+            actionBtn.setText("Start");
+            String warning = orderDAO.checkThresholdWarnings(order.getId());
+            if (warning != null) {
+                actionBtn.setStyle("-fx-background-color: #b8860b;");
+            }
+            final String finalWarning = warning;
+            actionBtn.setOnAction(e -> {
+                if (finalWarning != null) {
+                    Alert warn = new Alert(Alert.AlertType.WARNING);
+                    warn.setTitle("Low Stock Warning");
+                    warn.setHeaderText("Starting this order will cause low stock for:");
+                    warn.setContentText(finalWarning);
+                    warn.getDialogPane().setStyle("-fx-background-color: #2e2410; -fx-border-color: #4a3820; -fx-border-width: 1;");
+                    warn.showAndWait();
+                }
+                updateStatus(order, "Preparing");
+            });
+        } else if ("Preparing".equals(order.getStatus())) {
+            actionBtn.setText("Mark Ready");
+            actionBtn.setOnAction(e -> updateStatus(order, "Done"));
+        } else if ("Done".equals(order.getStatus())) {
+            actionBtn.setText("Complete");
+            actionBtn.setStyle("-fx-background-color: #4a8c3f;");
+            actionBtn.setOnAction(e -> updateStatus(order, "Completed")); 
+        } else {
+            actionBtn.setVisible(false);
+            actionBtn.setManaged(false);
+        }
+
+        footer.getChildren().addAll(timer, footerSpacer, actionBtn);
+        card.getChildren().addAll(header, items, footer);
+        
+        card.setOnMouseClicked(e -> {
+            if (!"Cancelled".equals(order.getStatus()) && !"Completed".equals(order.getStatus())) {
+                Alert confirm = new Alert(Alert.AlertType.CONFIRMATION);
+                confirm.setTitle("Cancel Kitchen Order");
+                confirm.setHeaderText("Cancel Order #" + String.format("%04d", order.getOrderNumber()) + "?");
+                confirm.setContentText("This will move the order to 'Cancelled' status.");
+                confirm.getDialogPane().setStyle("-fx-background-color: #2e2410; -fx-border-color: #4a3820; -fx-border-width: 1;");
+                
+                if (confirm.showAndWait().get() == ButtonType.OK) {
+                    updateStatus(order, "Cancelled");
+                }
+            }
+        });
+
+        return card;
+    }
+
+    private void updateStatus(Order order, String newStatus) {
+        if ("Cancelled".equals(newStatus) && "New".equals(order.getStatus())) {
+            orderDAO.releaseReservationsForOrder(order.getId());
+        }
+
+        if ("Preparing".equals(newStatus) && "New".equals(order.getStatus())) {
+            orderDAO.deductIngredientsForOrder(order.getId());
+        }
+        
+        if (orderDAO.updateStatus(order.getId(), newStatus)) {
+            loadQueue();
+        }
+    }
+
+    @FXML
+    private void onNavigate(ActionEvent event) {
+    }
+
+    @FXML
+    private void onLogout(ActionEvent event) {
+        try {
+            if (timerService != null) timerService.shutdown();
+            Main.showLogin();
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+    }
+}

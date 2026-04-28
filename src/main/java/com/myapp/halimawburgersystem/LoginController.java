@@ -151,6 +151,8 @@ public class LoginController {
 
                     if ("Cashier".equals(user.getRole())) {
                         Main.showCashier();
+                    } else if ("Cook".equals(user.getRole())) {
+                        Main.showCook();
                     } else {
                         Main.showDashboard();
                     }

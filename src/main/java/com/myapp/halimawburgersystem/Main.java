@@ -32,6 +32,8 @@ public class Main extends Application {
     private static KitchenController kitchenController;
     private static Parent salesReportRoot;
     private static SalesReportController salesReportController;
+    private static Parent cookRoot;
+    private static CookController cookController;
 
     private static User currentUser;
     private static Staff currentStaff;
@@ -294,6 +296,33 @@ public class Main extends Application {
         if (salesReportController != null) {
             salesReportController.setActiveNav("Sales Reports");
         }
+    }
+
+    public static void showCook() throws Exception {
+        if (cookRoot == null) {
+            FXMLLoader fxmlLoader = new FXMLLoader(Main.class.getResource("/fxml/cook.fxml"));
+            cookRoot = fxmlLoader.load();
+            cookController = fxmlLoader.getController();
+        }
+
+        if (cachedScene == null) {
+            cachedScene = new Scene(cookRoot, 1280, 800);
+            mainStage.setScene(cachedScene);
+        } else {
+            cachedScene.setRoot(cookRoot);
+        }
+
+        mainStage.setTitle("BurgerHQ - Kitchen Queue");
+        mainStage.show();
+
+        if (cookController != null) {
+            cookController.loadQueue();
+        }
+    }
+
+    public static void clearCookCache() {
+        cookRoot = null;
+        cookController = null;
     }
 
     public static void clearSalesReportCache() {
