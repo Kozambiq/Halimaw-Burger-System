@@ -121,7 +121,7 @@
             <padding><Insets top="16" right="24" bottom="16" left="24"/></padding>
             <Label fx:id="pageTitle" styleClass="topbar-title" text="Dashboard"/>
             <Region HBox.hgrow="ALWAYS"/>
-            <Label styleClass="topbar-date" text="Sat, Apr 18 2026 · 1:32 PM"/>
+            <Label styleClass="topbar-date" text=""/>
         </HBox>
 
         <VBox spacing="16" styleClass="content-area" VBox.vgrow="ALWAYS">

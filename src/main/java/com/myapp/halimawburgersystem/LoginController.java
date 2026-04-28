@@ -6,12 +6,16 @@ import com.myapp.model.Staff;
 import com.myapp.model.User;
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
+import javafx.geometry.Insets;
+import javafx.geometry.Pos;
 import javafx.scene.control.Alert;
 import javafx.scene.control.Alert.AlertType;
 import javafx.scene.control.Label;
 import javafx.scene.control.PasswordField;
 import javafx.scene.control.TextField;
 import javafx.scene.shape.SVGPath;
+import javafx.stage.Stage;
+import javafx.stage.StageStyle;
 
 public class LoginController {
 
@@ -163,10 +167,7 @@ public class LoginController {
                 }
             },
             () -> {
-                userDAO.findByEmail(email).ifPresentOrElse(
-                    user -> showStyledAlert(AlertType.ERROR, "Wrong email or password.", ""),
-                    () -> showStyledAlert(AlertType.ERROR, "Account not found.", "")
-                );
+                showStyledAlert(AlertType.ERROR, "Wrong email or password.", "");
             }
         );
     }
@@ -174,20 +175,18 @@ public class LoginController {
     private void showStyledAlert(AlertType type, String header, String content) {
         Alert alert = new Alert(type);
         alert.setTitle(type == AlertType.ERROR ? "Error" : "Warning");
-        alert.setHeaderText(header);
+        alert.setHeaderText(null);
         alert.setContentText(content);
+        
+        Label headerLabel = new Label(header);
+        headerLabel.setStyle("-fx-text-fill: #e07070; -fx-font-size: 14px; -fx-font-weight: bold;");
+        headerLabel.setAlignment(Pos.CENTER);
+        headerLabel.setPadding(new Insets(35, 0, 0, 0));
+        alert.getDialogPane().setHeader(headerLabel);
+        
         alert.getDialogPane().getStyleClass().add("dialog-pane");
-        alert.getDialogPane().setStyle("-fx-background-color: #2e2410; -fx-border-color: #4a3820; -fx-border-width: 1; -fx-border-radius: 12; -fx-background-radius: 12;");
-
-        javafx.scene.Node headerNode = alert.getDialogPane().lookup(".header-panel");
-        if (headerNode != null) {
-            headerNode.setStyle("-fx-background-color: transparent;");
-        }
-
-        javafx.scene.control.Label headerText = (javafx.scene.control.Label) alert.getDialogPane().lookup(".header");
-        if (headerText != null) {
-            headerText.setStyle("-fx-text-fill: #e07070; -fx-font-size: 14px;");
-        }
+        alert.getDialogPane().setStyle("-fx-background-color: #2e2410; -fx-border-color: #e07070; -fx-border-width: 1; -fx-border-radius: 12; -fx-background-radius: 12;");
+        alert.getDialogPane().setGraphic(null);
 
         javafx.scene.Node contentNode = alert.getDialogPane().lookup(".content");
         if (contentNode != null) {
@@ -200,6 +199,10 @@ public class LoginController {
         javafx.scene.control.Button okButton = (javafx.scene.control.Button) alert.getDialogPane().lookupButton(javafx.scene.control.ButtonType.OK);
         okButton.setStyle("-fx-background-color: #c8500a; -fx-text-fill: #f5ede0; -fx-border-radius: 6; -fx-padding: 8 16 8 16; -fx-font-size: 12px; -fx-font-weight: bold;");
 
+        Stage stage = (Stage) alert.getDialogPane().getScene().getWindow();
+        stage.setResizable(false);
+        stage.initStyle(StageStyle.UTILITY);
+        
         alert.showAndWait();
     }
 
