@@ -54,6 +54,7 @@ public class MenuItemsController {
     @FXML private Button btnStaff;
 
     @FXML private TextField searchField;
+    @FXML private ComboBox<String> cmbCategoryFilter;
     @FXML private Button btnSearch;
     @FXML private Button btnAddItem;
 
@@ -67,39 +68,46 @@ public class MenuItemsController {
         alreadyLoaded = true;
 
         setActiveNav("Menu Items");
+        setupCategoryFilter();
         setupTableColumns();
         setupSearchAutocomplete();
         loadMenuItems();
     }
 
+    private void setupCategoryFilter() {
+        if (cmbCategoryFilter == null) return;
+        List<String> categories = new ArrayList<>();
+        categories.add("All Categories");
+        categories.addAll(menuItemDAO.getAllCategories());
+        cmbCategoryFilter.setItems(FXCollections.observableArrayList(categories));
+        cmbCategoryFilter.getSelectionModel().select(0);
+        
+        cmbCategoryFilter.setOnAction(e -> applyFilters());
+    }
+
+    private void applyFilters() {
+        String query = searchField.getText().trim().toLowerCase();
+        String category = cmbCategoryFilter.getValue();
+        
+        if (allMenuItems == null) return;
+        
+        List<MenuItemModel> filtered = allMenuItems.stream()
+            .filter(item -> {
+                boolean matchesSearch = query.isEmpty() || item.getName().toLowerCase().contains(query);
+                boolean matchesCat = category == null || "All Categories".equals(category) || item.getCategory().equals(category);
+                return matchesSearch && matchesCat;
+            })
+            .collect(Collectors.toList());
+            
+        menuItemsTable.setItems(FXCollections.observableArrayList(filtered));
+    }
+
     private void setupSearchAutocomplete() {
         javafx.scene.control.ListView<String> suggestionList = new javafx.scene.control.ListView<>();
         suggestionList.getStyleClass().add("suggestion-list");
-        suggestionList.setFixedCellSize(32);
+        suggestionList.setFixedCellSize(36);
         suggestionList.setMaxHeight(200);
-        suggestionList.setPrefWidth(300);
-        suggestionList.setStyle(
-            "-fx-background-color: #2e2410;" +
-            "-fx-border-color: #4a3820;" +
-            "-fx-border-width: 1;" +
-            "-fx-border-radius: 6;" +
-            "-fx-background-radius: 6;" +
-            "-fx-padding: 4 0 4 0;"
-        );
-        suggestionList.setCellFactory(list -> new javafx.scene.control.ListCell<String>() {
-            @Override
-            protected void updateItem(String item, boolean empty) {
-                super.updateItem(item, empty);
-                if (empty || item == null) {
-                    setText(null);
-                    setGraphic(null);
-                } else {
-                    setText(item);
-                    setTextFill(Color.valueOf("#f5ede0"));
-                    setStyle("-fx-background-color: transparent; -fx-text-fill: #f5ede0; -fx-font-size: 13px; -fx-padding: 8 16 8 16; -fx-cursor: hand;");
-                }
-            }
-        });
+        suggestionList.setPrefWidth(280);
 
         javafx.stage.Popup suggestionPopup = new javafx.stage.Popup();
         suggestionPopup.setAutoHide(true);
@@ -111,6 +119,7 @@ public class MenuItemsController {
             String query = searchField.getText().trim().toLowerCase();
             if (query.isEmpty()) {
                 suggestionPopup.hide();
+                applyFilters();
                 return;
             }
 
@@ -121,12 +130,13 @@ public class MenuItemsController {
             if (!matches.isEmpty()) {
                 int rowCount = Math.min(matches.size(), 6);
                 suggestionList.setItems(FXCollections.observableArrayList(matches));
-                suggestionList.setPrefHeight(rowCount * 32 + 8);
+                suggestionList.setPrefHeight(rowCount * 36 + 2);
                 javafx.geometry.Bounds bounds = searchField.localToScreen(searchField.getBoundsInLocal());
                 suggestionPopup.show(searchField, bounds.getMinX(), bounds.getMaxY());
             } else {
                 suggestionPopup.hide();
             }
+            applyFilters();
         });
 
         suggestionList.setOnMouseClicked(e -> {
@@ -134,6 +144,7 @@ public class MenuItemsController {
                 String selected = suggestionList.getSelectionModel().getSelectedItem();
                 searchField.setText(selected);
                 suggestionPopup.hide();
+                applyFilters();
             }
         });
 
@@ -146,221 +157,138 @@ public class MenuItemsController {
 
     @FXML
     private void onSearchMenuItem() {
-        String searchText = searchField.getText().trim();
-        if (searchText.isEmpty()) {
-            loadMenuItems();
-            return;
-        }
-
-        List<MenuItemModel> results = menuItemDAO.findByName(searchText);
-
-        Platform.runLater(() -> {
-            if (!results.isEmpty()) {
-                menuItemsTable.setItems(FXCollections.observableArrayList(results));
-                menuItemsTable.getSelectionModel().select(0);
-                menuItemsTable.scrollTo(0);
-            }
-        });
+        applyFilters();
     }
 
     @FXML
     private void onAddItem() {
         Dialog<Boolean> dialog = new Dialog<>();
         dialog.setTitle("Add Menu Item");
-        dialog.setHeaderText(null);
         dialog.getDialogPane().getStyleClass().add("dialog-pane");
-        dialog.getDialogPane().setStyle("-fx-background-color: #2e2410; -fx-border-color: #4a3820; -fx-border-width: 1; -fx-border-radius: 12; -fx-background-radius: 12;");
-
-        String labelStyle = "-fx-text-fill: #a09070; -fx-font-size: 12px;";
-        String fieldStyle = "-fx-background-color: #221a0e; -fx-text-fill: #f5ede0; -fx-prompt-text-fill: #8a7055; -fx-border-color: #4a3820; -fx-border-width: 1; -fx-border-radius: 6; -fx-background-radius: 6; -fx-padding: 8 12 8 12; -fx-font-size: 13px;";
-        String errorStyle = "-fx-text-fill: #e07070; -fx-font-size: 11px;";
 
         GridPane grid = new GridPane();
-        grid.setHgap(10);
-        grid.setVgap(5);
-        grid.setMaxWidth(500);
+        grid.setHgap(16);
+        grid.setVgap(8);
+        grid.setPadding(new Insets(20, 0, 0, 0));
 
-        Label nameLabel = new Label("Name:");
-        nameLabel.setStyle(labelStyle);
         TextField nameField = new TextField();
-        nameField.setStyle(fieldStyle);
+        nameField.setPromptText("Item name (e.g. Halimaw Burger)");
+        nameField.getStyleClass().add("dialog-field");
         nameField.setPrefWidth(300);
         Label nameError = new Label("");
-        nameError.setStyle(errorStyle);
+        nameError.getStyleClass().add("dialog-error");
         nameError.setVisible(false);
         nameError.setManaged(false);
 
-        Label categoryLabel = new Label("Category:");
-        categoryLabel.setStyle(labelStyle);
         ComboBox<String> categoryCombo = new ComboBox<>();
-        categoryCombo.setStyle("-fx-background-color: #221a0e; -fx-text-fill: white; -fx-prompt-text-fill: #8a7055; -fx-border-color: #4a3820; -fx-border-width: 1; -fx-border-radius: 6; -fx-background-radius: 6; -fx-padding: 8 12 8 12; -fx-font-size: 13px;");
+        categoryCombo.getStyleClass().add("dialog-field");
         categoryCombo.setPrefWidth(300);
-        categoryCombo.setCellFactory(list -> new javafx.scene.control.ListCell<String>() {
-            @Override
-            protected void updateItem(String item, boolean empty) {
-                super.updateItem(item, empty);
-                if (empty || item == null) { setText(null); } else { setText(item); setStyle("-fx-background-color: #221a0e; -fx-text-fill: #f5ede0; -fx-font-size: 13px;"); }
-            }
-        });
-        categoryCombo.setButtonCell(new javafx.scene.control.ListCell<String>() {
-            @Override
-            protected void updateItem(String item, boolean empty) {
-                super.updateItem(item, empty);
-                if (empty || item == null) { setText(null); } else { setText(item); setStyle("-fx-background-color: #221a0e; -fx-text-fill: white; -fx-font-size: 13px;"); }
-            }
-        });
-        List<String> categories = menuItemDAO.getAllCategories();
-        categoryCombo.getItems().addAll(categories);
-        categoryCombo.getSelectionModel().select(0);
+        categoryCombo.setPromptText("Select category");
+        categoryCombo.getItems().addAll(menuItemDAO.getAllCategories());
 
-        Label priceLabel = new Label("Price:");
-        priceLabel.setStyle(labelStyle);
         TextField priceField = new TextField();
-        priceField.setStyle(fieldStyle);
+        priceField.setPromptText("0.00");
+        priceField.getStyleClass().add("dialog-field");
         priceField.setPrefWidth(300);
         Label priceError = new Label("");
-        priceError.setStyle(errorStyle);
+        priceError.getStyleClass().add("dialog-error");
         priceError.setVisible(false);
         priceError.setManaged(false);
 
-        grid.add(nameLabel, 0, 0);
+        grid.add(new Label("NAME") {{ getStyleClass().add("dialog-label"); }}, 0, 0);
         grid.add(nameField, 1, 0);
         grid.add(nameError, 1, 1);
-        grid.add(categoryLabel, 0, 2);
+        grid.add(new Label("CATEGORY") {{ getStyleClass().add("dialog-label"); }}, 0, 2);
         grid.add(categoryCombo, 1, 2);
-        grid.add(priceLabel, 0, 4);
-        grid.add(priceField, 1, 4);
-        grid.add(priceError, 1, 5);
+        grid.add(new Label("PRICE") {{ getStyleClass().add("dialog-label"); }}, 0, 3);
+        grid.add(priceField, 1, 3);
+        grid.add(priceError, 1, 4);
 
-        VBox content = new VBox(10);
+        VBox content = new VBox(20);
         content.getChildren().add(grid);
-        content.setPadding(new Insets(10, 0, 0, 0));
 
-        Label ingredientsLabel = new Label("Ingredients:");
-        ingredientsLabel.setStyle(labelStyle);
+        Label ingredientsLabel = new Label("RECIPE INGREDIENTS");
+        ingredientsLabel.getStyleClass().add("dialog-label");
 
         HBox searchBox = new HBox(10);
         searchBox.setAlignment(javafx.geometry.Pos.CENTER_LEFT);
 
-        TextField searchField = new TextField();
-        searchField.setStyle(fieldStyle);
-        searchField.setPrefWidth(200);
-        searchField.setPromptText("Search ingredient...");
+        TextField ingSearch = new TextField();
+        ingSearch.getStyleClass().add("dialog-field");
+        ingSearch.setPrefWidth(200);
+        ingSearch.setPromptText("Search ingredient...");
 
-javafx.scene.control.ListView<String> suggestionList = new javafx.scene.control.ListView<>();
-        suggestionList.getStyleClass().add("suggestion-list");
-        suggestionList.setFixedCellSize(32);
-        suggestionList.setMaxHeight(160);
-        suggestionList.setPrefWidth(220);
-        suggestionList.setStyle("-fx-background-color: #2e2410; -fx-border-color: #4a3820; -fx-border-width: 1; -fx-border-radius: 6; -fx-background-radius: 6;");
-        suggestionList.setCellFactory(list -> new javafx.scene.control.ListCell<String>() {
-            @Override
-            protected void updateItem(String item, boolean empty) {
-                super.updateItem(item, empty);
-                if (empty || item == null) { setText(null); setGraphic(null); }
-                else { setText(item); setStyle("-fx-background-color: transparent; -fx-text-fill: #f5ede0; -fx-font-size: 13px; -fx-padding: 8 16 8 16; -fx-wrap-text: true;"); }
-            }
-        });
+        javafx.scene.control.ListView<String> ingSuggestionList = new javafx.scene.control.ListView<>();
+        ingSuggestionList.getStyleClass().add("suggestion-list");
+        ingSuggestionList.setFixedCellSize(36);
+        ingSuggestionList.setMaxHeight(160);
+        ingSuggestionList.setPrefWidth(220);
 
-        javafx.stage.Popup suggestionPopup = new javafx.stage.Popup();
-        suggestionPopup.setAutoHide(true);
-        suggestionPopup.getContent().add(suggestionList);
-
-        suggestionList.setOnMousePressed(e -> {
-            if (!suggestionList.getSelectionModel().isEmpty()) {
-                searchField.setText(suggestionList.getSelectionModel().getSelectedItem());
-                suggestionPopup.hide();
-            }
-        });
+        javafx.stage.Popup ingSuggestionPopup = new javafx.stage.Popup();
+        ingSuggestionPopup.setAutoHide(true);
+        ingSuggestionPopup.getContent().add(ingSuggestionList);
 
         TextField qtyField = new TextField();
-        qtyField.setStyle(fieldStyle);
+        qtyField.getStyleClass().add("dialog-field");
         qtyField.setPrefWidth(80);
         qtyField.setPromptText("Qty");
 
-        javafx.scene.control.Button addBtn = new javafx.scene.control.Button("Send");
-        addBtn.setStyle("-fx-background-color: #4CAF50; -fx-text-fill: white; -fx-font-weight: bold; -fx-border-radius: 6; -fx-background-radius: 6; -fx-padding: 8 12 8 12; -fx-font-size: 12px; -fx-cursor: hand;");
+        Button addBtn = new Button("ADD");
+        addBtn.getStyleClass().addAll("btn-primary");
+        addBtn.setStyle("-fx-padding: 8 16 8 16; -fx-font-size: 11px;");
         
-        final Runnable[] validateFormHolder = new Runnable[1];
-
         Label qtyError = new Label("");
-        qtyError.setStyle(errorStyle);
+        qtyError.getStyleClass().add("dialog-error");
         qtyError.setVisible(false);
         qtyError.setManaged(false);
 
-        searchBox.getChildren().addAll(searchField, qtyField, addBtn, qtyError);
+        searchBox.getChildren().addAll(ingSearch, qtyField, addBtn, qtyError);
 
-        VBox ingredientList = new VBox(5);
+        VBox ingredientList = new VBox(8);
         List<MenuItemIngredient> ingredientDataList = new ArrayList<>();
 
         List<String> allIngredientNames = menuItemDAO.searchIngredients("").stream().map(Ingredient::getName).collect(Collectors.toList());
 
-        searchField.textProperty().addListener(obs -> {
-            String query = searchField.getText().trim().toLowerCase();
-            if (query.isEmpty()) {
-                suggestionPopup.hide();
-                return;
-            }
-            List<String> matches = allIngredientNames.stream().filter(name -> name.toLowerCase().contains(query)).collect(Collectors.toList());
+        ingSearch.textProperty().addListener(obs -> {
+            String q = ingSearch.getText().trim().toLowerCase();
+            if (q.isEmpty()) { ingSuggestionPopup.hide(); return; }
+            List<String> matches = allIngredientNames.stream().filter(n -> n.toLowerCase().contains(q)).collect(Collectors.toList());
             if (!matches.isEmpty()) {
-                int rowCount = Math.min(matches.size(), 5);
-                suggestionList.setItems(FXCollections.observableArrayList(matches));
-                suggestionList.setPrefHeight(rowCount * 32 + 4);
-                javafx.geometry.Bounds bounds = searchField.localToScreen(searchField.getBoundsInLocal());
-                suggestionPopup.show(searchField, bounds.getMinX(), bounds.getMaxY());
-            } else {
-                suggestionPopup.hide();
-            }
+                ingSuggestionList.setItems(FXCollections.observableArrayList(matches));
+                ingSuggestionList.setPrefHeight(Math.min(matches.size(), 5) * 36 + 2);
+                javafx.geometry.Bounds bounds = ingSearch.localToScreen(ingSearch.getBoundsInLocal());
+                ingSuggestionPopup.show(ingSearch, bounds.getMinX(), bounds.getMaxY());
+            } else { ingSuggestionPopup.hide(); }
         });
 
-        suggestionList.setOnMouseClicked(e -> {
-            if (!suggestionList.getSelectionModel().isEmpty()) {
-                searchField.setText(suggestionList.getSelectionModel().getSelectedItem());
-                suggestionPopup.hide();
+        ingSuggestionList.setOnMouseClicked(e -> {
+            if (!ingSuggestionList.getSelectionModel().isEmpty()) {
+                ingSearch.setText(ingSuggestionList.getSelectionModel().getSelectedItem());
+                ingSuggestionPopup.hide();
             }
         });
 
         addBtn.setOnAction(e -> {
-            String searchText = searchField.getText().trim();
-            String qtyText = qtyField.getText().trim();
-            if (searchText.isEmpty() || qtyText.isEmpty()) return;
-            boolean exists = menuItemDAO.ingredientExistsByName(searchText);
-            if (!exists) return;
-            for (MenuItemIngredient existing : ingredientDataList) {
-                if (existing.getIngredientName().equalsIgnoreCase(searchText)) {
-                    qtyError.setText(searchText + " already in list");
-                    qtyError.setVisible(true);
-                    qtyError.setManaged(true);
-                    return;
-                }
+            String txt = ingSearch.getText().trim();
+            String qtxt = qtyField.getText().trim();
+            if (txt.isEmpty() || qtxt.isEmpty()) return;
+            if (!menuItemDAO.ingredientExistsByName(txt)) return;
+            
+            for (MenuItemIngredient ex : ingredientDataList) {
+                if (ex.getIngredientName().equalsIgnoreCase(txt)) return;
             }
-            String unit = menuItemDAO.getIngredientUnit(searchText);
-            boolean isPcs = "pcs".equalsIgnoreCase(unit);
+
             try {
-                double qty = Double.parseDouble(qtyText);
-                if (isPcs && qty != Math.floor(qty)) {
-                    qtyError.setText("Whole numbers only for pcs");
-                    qtyError.setVisible(true);
-                    qtyError.setManaged(true);
-                    return;
+                double q = Double.parseDouble(qtxt);
+                List<Ingredient> res = menuItemDAO.searchIngredients(txt);
+                if (!res.isEmpty()) {
+                    Ingredient i = res.get(0);
+                    MenuItemIngredient mi = new MenuItemIngredient(i.getId(), i.getName(), i.getUnit(), q);
+                    ingredientDataList.add(mi);
+                    addIngredientRow(ingredientList, mi, ingredientDataList, "");
+                    ingSearch.clear(); qtyField.clear(); qtyError.setVisible(false);
                 }
-                List<Ingredient> results = menuItemDAO.searchIngredients(searchText);
-                if (!results.isEmpty()) {
-                    Ingredient ing = results.get(0);
-                    MenuItemIngredient newIng = new MenuItemIngredient(ing.getId(), ing.getName(), ing.getUnit(), qty);
-                    ingredientDataList.add(newIng);
-                    addIngredientRow(ingredientList, newIng, ingredientDataList, fieldStyle);
-                    searchField.clear();
-                    qtyField.clear();
-                    qtyError.setVisible(false);
-                    qtyError.setManaged(false);
-                    if (validateFormHolder[0] != null) validateFormHolder[0].run();
-                }
-            } catch (NumberFormatException ex) {
-                qtyError.setText("Enter valid number");
-                qtyError.setVisible(true);
-                qtyError.setManaged(true);
-            }
+            } catch (Exception ex) {}
         });
 
         content.getChildren().addAll(ingredientsLabel, searchBox, ingredientList);
@@ -369,138 +297,29 @@ javafx.scene.control.ListView<String> suggestionList = new javafx.scene.control.
         dialog.getDialogPane().setMinHeight(400);
         dialog.getDialogPane().getButtonTypes().addAll(javafx.scene.control.ButtonType.CANCEL, javafx.scene.control.ButtonType.OK);
 
-        javafx.scene.control.Button okButton = (javafx.scene.control.Button) dialog.getDialogPane().lookupButton(javafx.scene.control.ButtonType.OK);
-        okButton.setText("Save");
-        okButton.setDisable(true);
-        okButton.setStyle("-fx-background-color: #555555; -fx-text-fill: #aaaaaa; -fx-border-radius: 6; -fx-padding: 8 16 8 16; -fx-font-size: 12px; -fx-font-weight: bold;");
-
-        dialog.getDialogPane().lookupButton(javafx.scene.control.ButtonType.CANCEL).setStyle("-fx-background-color: transparent; -fx-text-fill: #a09070; -fx-border-color: #4a3820; -fx-border-width: 1; -fx-border-radius: 6; -fx-padding: 8 16 8 16; -fx-font-size: 12px;");
-
-        final List<MenuItemIngredient> fIngredientDataList = ingredientDataList;
-        Runnable validateForm = () -> {
-            String name = nameField.getText().trim();
-            String priceText = priceField.getText().trim();
-            boolean valid = !name.isEmpty() && !priceText.isEmpty() && categoryCombo.getValue() != null && !fIngredientDataList.isEmpty();
-            if (valid) {
-                try {
-                    Double.parseDouble(priceText);
-                } catch (Exception ex) {
-                    valid = false;
-                }
-            }
-            okButton.setDisable(!valid);
-            okButton.setStyle(valid 
-                ? "-fx-background-color: #c8500a; -fx-text-fill: #f5ede0; -fx-border-radius: 6; -fx-padding: 8 16 8 16; -fx-font-size: 12px; -fx-font-weight: bold;"
-                : "-fx-background-color: #555555; -fx-text-fill: #aaaaaa; -fx-border-radius: 6; -fx-padding: 8 16 8 16; -fx-font-size: 12px; -fx-font-weight: bold;");
-        };
-        validateFormHolder[0] = validateForm;
-        validateForm.run();
-
-        nameField.textProperty().addListener((obs, oldVal, newVal) -> {
-            String name = newVal.trim();
-            nameError.setVisible(false);
-            nameError.setManaged(false);
-            nameField.setStyle(fieldStyle);
-            if (!name.isEmpty() && menuItemDAO.existsByName(name)) {
-                nameError.setText("Already exists");
-                nameError.setVisible(true);
-                nameError.setManaged(true);
-                nameField.setStyle(fieldStyle + "-fx-border-color: #e07070;");
-            }
-            validateForm.run();
-            if (!name.isEmpty() && menuItemDAO.existsByName(name)) {
-                okButton.setDisable(true);
-                okButton.setStyle("-fx-background-color: #555555; -fx-text-fill: #aaaaaa; -fx-border-radius: 6; -fx-padding: 8 16 8 16; -fx-font-size: 12px; -fx-font-weight: bold;");
-            }
-        });
-
-        priceField.textProperty().addListener((obs, oldVal, newVal) -> {
-            String priceText = newVal.trim();
-            priceError.setVisible(false);
-            priceError.setManaged(false);
-            priceField.setStyle(fieldStyle);
-            if (!priceText.isEmpty()) {
-                try {
-                    double p = Double.parseDouble(priceText);
-                    if (p <= 0) {
-                        priceError.setText("Must be greater than 0");
-                        priceError.setVisible(true);
-                        priceError.setManaged(true);
-                        priceField.setStyle(fieldStyle + "-fx-border-color: #e07070;");
-                    }
-                } catch (NumberFormatException ex) {
-                    priceError.setText("Invalid price");
-                    priceError.setVisible(true);
-                    priceError.setManaged(true);
-                    priceField.setStyle(fieldStyle + "-fx-border-color: #e07070;");
-                }
-            }
-            validateForm.run();
-        });
+        Button okButton = (Button) dialog.getDialogPane().lookupButton(javafx.scene.control.ButtonType.OK);
+        okButton.setText("SAVE ITEM");
+        okButton.getStyleClass().add("btn-primary");
+        
+        dialog.setResultConverter(btn -> btn == javafx.scene.control.ButtonType.OK);
 
         okButton.setOnAction(e -> {
             String name = nameField.getText().trim();
-            String category = categoryCombo.getValue();
-            String priceText = priceField.getText().trim();
-
-            nameField.setStyle(fieldStyle);
-            priceField.setStyle(fieldStyle);
-            nameError.setVisible(false);
-            nameError.setManaged(false);
-            priceError.setVisible(false);
-            priceError.setManaged(false);
-            boolean valid = true;
-
-            if (name.isEmpty()) {
-                nameError.setText("Required");
-                nameError.setVisible(true);
-                nameError.setManaged(true);
-                nameField.setStyle(fieldStyle + "-fx-border-color: #e07070;");
-                valid = false;
-            } else if (menuItemDAO.existsByName(name)) {
-                nameError.setText("Already exists");
-                nameError.setVisible(true);
-                nameError.setManaged(true);
-                nameField.setStyle(fieldStyle + "-fx-border-color: #e07070;");
-                valid = false;
-            }
-
-            if (priceText.isEmpty()) {
-                priceError.setText("Required");
-                priceError.setVisible(true);
-                priceError.setManaged(true);
-                priceField.setStyle(fieldStyle + "-fx-border-color: #e07070;");
-                valid = false;
-            } else {
-                try {
-                    double p = Double.parseDouble(priceText);
-                    if (p <= 0) {
-                        priceError.setText("Must be greater than 0");
-                        priceError.setVisible(true);
-                        priceError.setManaged(true);
-                        priceField.setStyle(fieldStyle + "-fx-border-color: #e07070;");
-                        valid = false;
-                    }
-                } catch (NumberFormatException ex) {
-                    priceError.setText("Invalid price");
-                    priceError.setVisible(true);
-                    priceError.setManaged(true);
-                    priceField.setStyle(fieldStyle + "-fx-border-color: #e07070;");
-                    valid = false;
-                }
-            }
-
-            if (valid && category != null) {
-                double price = Double.parseDouble(priceText);
-                int newId = menuItemDAO.insertAndGetId(name, category, price);
-                if (newId > 0 && !ingredientDataList.isEmpty()) {
-                    menuItemDAO.updateMenuItemIngredients(newId, ingredientDataList);
-                }
-                loadMenuItems();
-                dialog.close();
-            } else {
+            String cat = categoryCombo.getValue();
+            String ptxt = priceField.getText().trim();
+            if (name.isEmpty() || cat == null || ptxt.isEmpty() || ingredientDataList.isEmpty()) {
                 e.consume();
+                return;
             }
+            try {
+                double p = Double.parseDouble(ptxt);
+                int nid = menuItemDAO.insertAndGetId(name, cat, p);
+                if (nid > 0) {
+                    menuItemDAO.updateMenuItemIngredients(nid, ingredientDataList);
+                    loadMenuItems();
+                    dialog.close();
+                }
+            } catch (Exception ex) { e.consume(); }
         });
 
         dialog.showAndWait();
@@ -547,40 +366,52 @@ javafx.scene.control.ListView<String> suggestionList = new javafx.scene.control.
     }
 
     private void setupTableColumns() {
-        colName.setCellValueFactory(new PropertyValueFactory<MenuItemModel, String>("name"));
+        colName.setCellValueFactory(new PropertyValueFactory<>("name"));
+        colName.setCellFactory(col -> new TableCell<MenuItemModel, String>() {
+            @Override protected void updateItem(String item, boolean empty) {
+                super.updateItem(item, empty);
+                if (empty || item == null) setText(null);
+                else { setText(item); getStyleClass().add("cell-name"); }
+            }
+        });
 
-        colCategory.setCellValueFactory(new PropertyValueFactory<MenuItemModel, String>("category"));
+        colCategory.setCellValueFactory(new PropertyValueFactory<>("category"));
+        colCategory.setCellFactory(col -> new TableCell<MenuItemModel, String>() {
+            @Override protected void updateItem(String item, boolean empty) {
+                super.updateItem(item, empty);
+                if (empty || item == null) setText(null);
+                else { setText(item.toUpperCase()); getStyleClass().add("cell-cat"); }
+            }
+        });
 
-        colPrice.setCellValueFactory(new PropertyValueFactory<MenuItemModel, String>("formattedPrice"));
+        colPrice.setCellValueFactory(new PropertyValueFactory<>("formattedPrice"));
+        colPrice.setCellFactory(col -> new TableCell<MenuItemModel, String>() {
+            @Override protected void updateItem(String item, boolean empty) {
+                super.updateItem(item, empty);
+                if (empty || item == null) setText(null);
+                else { setText(item); getStyleClass().add("cell-price"); }
+            }
+        });
 
         menuItemsTable.setColumnResizePolicy(TableView.CONSTRAINED_RESIZE_POLICY);
 
-        colAvailability.setCellValueFactory(new PropertyValueFactory<MenuItemModel, String>("availability"));
+        colAvailability.setCellValueFactory(new PropertyValueFactory<>("availability"));
         colAvailability.setCellFactory(col -> new TableCell<MenuItemModel, String>() {
             @Override
             protected void updateItem(String status, boolean empty) {
                 super.updateItem(status, empty);
                 if (empty || status == null) {
-                    setGraphic(null);
-                    setText(null);
-                    return;
+                    setGraphic(null); setText(null); return;
                 }
 
-                Label pill = new Label(status);
+                Label pill = new Label(status.toUpperCase());
                 pill.getStyleClass().add("status-pill");
 
-                if ("Unavailable".equals(status)) {
-                    pill.getStyleClass().add("pill-out");
-                } else if ("Available".equals(status)) {
-                    pill.getStyleClass().add("pill-ok");
-                } else if ("Low Stock".equals(status)) {
-                    pill.getStyleClass().add("pill-low");
-                } else if ("Out of Stock".equals(status)) {
-                    pill.getStyleClass().add("pill-out");
-                }
+                if ("Available".equals(status)) pill.getStyleClass().add("pill-available");
+                else if ("Low Stock".equals(status)) pill.getStyleClass().add("pill-low");
+                else pill.getStyleClass().add("pill-out");
 
-                setGraphic(pill);
-                setText(null);
+                setGraphic(pill); setText(null);
             }
         });
 
@@ -588,40 +419,31 @@ javafx.scene.control.ListView<String> suggestionList = new javafx.scene.control.
             @Override
             protected void updateItem(String item, boolean empty) {
                 super.updateItem(item, empty);
-                if (empty) {
-                    setGraphic(null);
-                    setText(null);
-                    return;
-                }
+                if (empty) { setGraphic(null); return; }
 
                 MenuItemModel menuItem = getTableView().getItems().get(getIndex());
-                if (menuItem == null) {
-                    setGraphic(null);
-                    return;
-                }
-
                 MenuButton menuBtn = new MenuButton("...");
                 menuBtn.getStyleClass().add("menu-btn-dots");
 
-                MenuItem edit = new MenuItem("Edit");
-                edit.setStyle("-fx-text-fill: #f5ede0; -fx-font-size: 13px; -fx-padding: 8 16 8 16;");
+                MenuItem edit = new MenuItem("Edit Details");
                 edit.setOnAction(e -> showEditPopup(menuItem));
 
-                String currentAvailability = menuItem.getAvailability();
-                if ("Unavailable".equals(currentAvailability)) {
-                    MenuItem enable = new MenuItem("Enable");
-                    enable.setStyle("-fx-text-fill: #4CAF50; -fx-font-size: 13px; -fx-padding: 8 16 8 16;");
-                    enable.setOnAction(e -> showEnableConfirmation(menuItem));
+                if ("Unavailable".equals(menuItem.getAvailability())) {
+                    MenuItem enable = new MenuItem("Enable Item");
+                    enable.setOnAction(e -> {
+                        menuItemDAO.updateAvailability(menuItem.getId(), "Available");
+                        loadMenuItems();
+                    });
                     menuBtn.getItems().addAll(edit, enable);
                 } else {
-                    MenuItem disable = new MenuItem("Disable");
-                    disable.setStyle("-fx-text-fill: #e07070; -fx-font-size: 13px; -fx-padding: 8 16 8 16;");
-                    disable.setOnAction(e -> showDisableConfirmation(menuItem));
+                    MenuItem disable = new MenuItem("Disable Item");
+                    disable.setOnAction(e -> {
+                        menuItemDAO.updateAvailability(menuItem.getId(), "Unavailable");
+                        loadMenuItems();
+                    });
                     menuBtn.getItems().addAll(edit, disable);
                 }
-
                 setGraphic(menuBtn);
-                setText(null);
             }
         });
     }
@@ -769,7 +591,7 @@ javafx.scene.control.ListView<String> suggestionList = new javafx.scene.control.
         VBox ingredientList = new VBox(5);
         final List<MenuItemIngredient> ingredientDataList = new ArrayList<>(currentIngredients);
         for (MenuItemIngredient ing : currentIngredients) {
-            addIngredientRow(ingredientList, ing, ingredientDataList, fieldStyle);
+            addIngredientRow(ingredientList, ing, ingredientDataList);
         }
 
         List<String> allIngredientNames = menuItemDAO.searchIngredients("").stream()

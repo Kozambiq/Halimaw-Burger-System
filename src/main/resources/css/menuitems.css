@@ -1,6 +1,46 @@
 /* ============================================================
-    Menu Items Tab Styles
+    Halimaw Burger – Menu Items Styles (Revamped)
     ============================================================ */
+
+/* ── Stat Cards ────────────────────────────────────────── */
+.stat-card {
+    -fx-background-color: #221a0e;
+    -fx-border-color: #4a3820;
+    -fx-border-width: 1;
+    -fx-border-radius: 16;
+    -fx-background-radius: 16;
+    -fx-padding: 20 24 20 24;
+    -fx-effect: dropshadow(gaussian, rgba(0,0,0,0.4), 20, 0, 0, 8);
+    -fx-transition: all 0.3s ease;
+}
+
+.stat-card:hover {
+    -fx-border-color: #c8500a;
+    -fx-background-color: #2a1f0d;
+    -fx-effect: dropshadow(gaussian, rgba(200,80,10,0.2), 30, 0, 0, 10);
+}
+
+/* Specific glows for menu health */
+.stat-card.available {
+    -fx-border-color: rgba(126, 196, 112, 0.2);
+}
+.stat-card.available:hover {
+    -fx-border-color: #7ec470;
+}
+
+.stat-card.low-stock {
+    -fx-border-color: rgba(232, 184, 75, 0.2);
+}
+.stat-card.low-stock:hover {
+    -fx-border-color: #e8b84b;
+}
+
+.stat-card.out-of-stock {
+    -fx-border-color: rgba(224, 112, 112, 0.2);
+}
+.stat-card.out-of-stock:hover {
+    -fx-border-color: #e07070;
+}
 
 /* ── Menu Items Table ─────────────────────────────────── */
 .menu-items-table {
@@ -14,20 +54,23 @@
 }
 
 .menu-items-table .column-header-background {
-    -fx-background-color: #221a0e;
+    -fx-background-color: #1a1208;
+    -fx-padding: 0 0 10 0;
 }
 
 .menu-items-table .filler {
-    -fx-background-color: #221a0e;
+    -fx-background-color: transparent;
 }
 
 .menu-items-table .column-header {
-    -fx-background-color: #221a0e;
-    -fx-background: #221a0e;
-    -fx-text-fill: #8a7055;
-    -fx-font-size: 11px;
+    -fx-background-color: transparent;
+    -fx-text-fill: #5c4828;
+    -fx-font-size: 10px;
     -fx-font-weight: bold;
-    -fx-letter-spacing: 0.08em;
+    -fx-letter-spacing: 0.15em;
+    -fx-padding: 16 0 16 0;
+    -fx-border-color: #332615;
+    -fx-border-width: 0 0 1 0;
 }
 
 .menu-items-table .table-cell {
@@ -35,47 +78,136 @@
     -fx-text-fill: #c4a882;
     -fx-font-size: 13px;
     -fx-border-width: 0;
+    -fx-padding: 14 0 14 0;
 }
 
 .menu-items-table .table-row-cell {
     -fx-background-color: transparent;
-    -fx-border-color: #4a3820;
-    -fx-border-width: 0 0 1 0;
+    -fx-border-width: 0;
 }
 
+/* Zebra Striping with Halimaw Charcoal variance */
 .menu-items-table .table-row-cell:odd {
-    -fx-background-color: transparent;
+    -fx-background-color: #1d150b;
+}
+.menu-items-table .table-row-cell:even {
+    -fx-background-color: #1a1208;
 }
 
 .menu-items-table .table-row-cell:hover {
-    -fx-background-color: #3d2e1a;
+    -fx-background-color: #281e10;
 }
 
 .menu-items-table .table-row-cell:selected {
-    -fx-background-color: rgba(212, 89, 30, 0.12);
+    -fx-background-color: rgba(200, 80, 10, 0.08);
+    -fx-border-color: #c8500a;
+    -fx-border-width: 0 0 0 3;
+}
+
+.cell-price {
+    -fx-font-family: 'DM Mono', monospace;
+    -fx-text-fill: #c8500a;
+    -fx-font-weight: 600;
+}
+
+.cell-name {
+    -fx-font-family: 'DM Sans', sans-serif;
+    -fx-font-weight: 700;
+    -fx-text-fill: #f5ede0;
+}
+
+/* ── Custom Scrollbar (Halimaw Sleek) ───────────────────── */
+.menu-items-table .scroll-bar:vertical {
+    -fx-background-color: transparent;
+    -fx-pref-width: 6;
+    -fx-padding: 0 2 0 0;
+}
+
+.menu-items-table .scroll-bar:horizontal {
+    -fx-background-color: transparent;
+    -fx-pref-height: 6;
+}
+
+.menu-items-table .scroll-bar .track {
+    -fx-background-color: rgba(74, 56, 32, 0.05);
+    -fx-background-radius: 10;
+}
+
+.menu-items-table .scroll-bar .thumb {
+    -fx-background-color: #332615;
+    -fx-background-radius: 10;
+}
+
+.menu-items-table .scroll-bar .thumb:hover {
+    -fx-background-color: #4a3820;
+}
+
+.menu-items-table .scroll-bar .thumb:pressed {
+    -fx-background-color: #c8500a;
+}
+
+.menu-items-table .scroll-bar .increment-button,
+.menu-items-table .scroll-bar .decrement-button {
+    -fx-pref-width: 0;
+    -fx-pref-height: 0;
+    -fx-padding: 0;
 }
 
 /* ── Status Pills ───────────────────────────────────────── */
 .status-pill {
-    -fx-padding: 3 12 3 12;
+    -fx-padding: 4 14 4 14;
     -fx-background-radius: 20;
+    -fx-font-family: 'DM Sans', sans-serif;
     -fx-font-size: 11px;
-    -fx-font-weight: bold;
+    -fx-font-weight: 800;
+    -fx-letter-spacing: 0.02em;
 }
 
-.pill-ok {
-    -fx-background-color: rgba(74, 140, 63, 0.15);
+.pill-available {
+    -fx-background-color: rgba(126, 196, 112, 0.12);
     -fx-text-fill: #7ec470;
 }
 
 .pill-low {
-    -fx-background-color: rgba(176, 122, 24, 0.15);
+    -fx-background-color: rgba(232, 184, 75, 0.12);
     -fx-text-fill: #e8b84b;
 }
 
 .pill-out {
-    -fx-background-color: rgba(140, 48, 48, 0.15);
-    -fx-text-fill: #e07070;
+    -fx-background-color: rgba(224, 112, 112, 0.12);
+    -fx-text-fill: #ff6b6b;
+}
+
+/* ── Search & Actions ────────────────────────────────── */
+.search-field {
+    -fx-background-color: #221a0e;
+    -fx-text-fill: #f5ede0;
+    -fx-prompt-text-fill: #5c4828;
+    -fx-border-color: #4a3820;
+    -fx-border-width: 1.5;
+    -fx-border-radius: 10;
+    -fx-background-radius: 10;
+    -fx-padding: 10 16 10 16;
+    -fx-font-family: 'DM Sans', sans-serif;
+}
+
+.search-field:focused {
+    -fx-border-color: #c8500a;
+    -fx-background-color: #2a1f0d;
+}
+
+.btn-search {
+    -fx-background-color: #c8500a;
+    -fx-text-fill: white;
+    -fx-font-weight: 800;
+    -fx-font-family: 'DM Sans', sans-serif;
+    -fx-padding: 10 20 10 20;
+    -fx-background-radius: 10;
+    -fx-cursor: hand;
+}
+
+.btn-search:hover {
+    -fx-background-color: #e05c0a;
 }
 
 /* ── MenuButton Dots ─────────────────────────────────────── */
@@ -159,12 +291,89 @@
 
 .suggestion-list .list-cell:hover {
     -fx-background-color: #4a3820;
-    -fx-text-fill: #f5ede0;
 }
 
-.suggestion-list .list-cell:selected {
-    -fx-background-color: #5c4828;
+/* ── Dialog & Forms ───────────────────────────────────── */
+.dialog-pane {
+    -fx-background-color: #2e2410;
+    -fx-border-color: #4a3820;
+    -fx-border-width: 1;
+    -fx-border-radius: 12;
+    -fx-background-radius: 12;
+}
+
+.dialog-pane .header-panel {
+    -fx-background-color: transparent;
+}
+
+.dialog-label {
+    -fx-text-fill: #a09070;
+    -fx-font-size: 12px;
+    -fx-font-family: 'DM Sans', sans-serif;
+    -fx-font-weight: bold;
+}
+
+.dialog-field {
+    -fx-background-color: #221a0e;
     -fx-text-fill: #f5ede0;
+    -fx-prompt-text-fill: #8a7055;
+    -fx-border-color: #4a3820;
+    -fx-border-width: 1;
+    -fx-border-radius: 6;
+    -fx-background-radius: 6;
+    -fx-padding: 8 12 8 12;
+    -fx-font-size: 13px;
+}
+
+.dialog-field:focused {
+    -fx-border-color: #c8500a;
+}
+
+.dialog-error {
+    -fx-text-fill: #ff6b6b;
+    -fx-font-size: 11px;
+}
+
+/* ── Category Dropdown / Filter Combo ─────────────────── */
+.filter-combo {
+    -fx-background-color: #221a0e;
+    -fx-border-color: #4a3820;
+    -fx-border-width: 1.5;
+    -fx-border-radius: 10;
+    -fx-background-radius: 10;
+    -fx-padding: 4 12 4 12;
+}
+
+.filter-combo .list-cell {
+    -fx-text-fill: #f5ede0;
+    -fx-background-color: transparent;
+}
+
+.filter-combo .list-view {
+    -fx-background-color: #2e2410;
+    -fx-border-color: #4a3820;
+}
+
+.filter-combo:focused {
+    -fx-border-color: #c8500a;
+}
+
+/* ── Ingredient List Rows ────────────────────────────── */
+.ingredient-row-name {
+    -fx-text-fill: #f5ede0;
+    -fx-font-size: 13px;
+    -fx-font-weight: 500;
+}
+
+.btn-remove-ing {
+    -fx-background-color: transparent;
+    -fx-text-fill: #ff6b6b;
+    -fx-font-weight: bold;
+    -fx-cursor: hand;
+}
+
+.btn-remove-ing:hover {
+    -fx-text-fill: #ff4d4d;
 }
 
 /* ── ComboBox (Category Dropdown) ───────────────────────── */

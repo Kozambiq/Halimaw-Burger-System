@@ -2,6 +2,7 @@
 
 <?import javafx.geometry.Insets?>
 <?import javafx.scene.control.Button?>
+<?import javafx.scene.control.ComboBox?>
 <?import javafx.scene.control.Label?>
 <?import javafx.scene.control.TableColumn?>
 <?import javafx.scene.control.TableView?>
@@ -118,48 +119,87 @@
     </VBox>
 
     <VBox styleClass="main-content" HBox.hgrow="ALWAYS">
-        <HBox styleClass="topbar" prefHeight="56">
+        <HBox styleClass="topbar" prefHeight="64" alignment="CENTER_LEFT">
             <padding><Insets top="16" right="24" bottom="16" left="24"/></padding>
-            <Label styleClass="topbar-title" text="Menu Items"/>
+            <VBox spacing="2">
+                <Label text="MANAGEMENT" styleClass="eyebrow"/>
+                <Label styleClass="topbar-title" text="Menu Items" style="-fx-font-family: 'Playfair Display'; -fx-font-size: 24;"/>
+            </VBox>
             <Region HBox.hgrow="ALWAYS"/>
             <Label styleClass="topbar-date" text=""/>
         </HBox>
 
         <StackPane VBox.vgrow="ALWAYS" maxHeight="Infinity" styleClass="content-area">
-            <VBox spacing="16" VBox.vgrow="ALWAYS">
+            <VBox spacing="24" VBox.vgrow="ALWAYS">
                 <padding><Insets top="24" right="32" bottom="24" left="32"/></padding>
 
                 <HBox spacing="16" alignment="CENTER_LEFT">
-                    <VBox styleClass="stat-card" prefWidth="180">
-                        <Label styleClass="stat-label" text="TOTAL ITEMS"/>
-                        <Label fx:id="lblTotal" styleClass="stat-value" text="0"/>
+                    <VBox styleClass="stat-card" prefWidth="200" spacing="8">
+                        <HBox alignment="CENTER_LEFT" spacing="12">
+                            <StackPane style="-fx-background-color: rgba(200, 80, 10, 0.1); -fx-background-radius: 8; -fx-padding: 8;">
+                                <SVGPath content="M11 9H9V2H7v7H5V2H3v7c0 2.12 1.66 3.84 3.75 3.97V22h2.5v-9.03C11.34 12.84 13 11.12 13 9V2h-2v7zm5-3v8h2.5v8H21V2c-2.76 0-5 2.24-5 4z" fill="#c8500a" scaleX="0.8" scaleY="0.8"/>
+                            </StackPane>
+                            <VBox>
+                                <Label styleClass="stat-label" text="TOTAL ITEMS"/>
+                                <Label fx:id="lblTotal" styleClass="stat-value" text="0"/>
+                            </VBox>
+                        </HBox>
                     </VBox>
-                    <VBox styleClass="stat-card" prefWidth="180">
-                        <Label styleClass="stat-label" text="AVAILABLE"/>
-                        <Label fx:id="lblAvailable" styleClass="stat-value" text="0" style="-fx-text-fill: #7ec470;"/>
+                    <VBox styleClass="stat-card, available" prefWidth="200" spacing="8">
+                        <HBox alignment="CENTER_LEFT" spacing="12">
+                            <StackPane style="-fx-background-color: rgba(126, 196, 112, 0.1); -fx-background-radius: 8; -fx-padding: 8;">
+                                <SVGPath content="M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41L9 16.17z" fill="#7ec470" scaleX="0.8" scaleY="0.8"/>
+                            </StackPane>
+                            <VBox>
+                                <Label styleClass="stat-label" text="AVAILABLE"/>
+                                <Label fx:id="lblAvailable" styleClass="stat-value" text="0" style="-fx-text-fill: #7ec470;"/>
+                            </VBox>
+                        </HBox>
                     </VBox>
-                    <VBox styleClass="stat-card" prefWidth="180">
-                        <Label styleClass="stat-label" text="LOW STOCK"/>
-                        <Label fx:id="lblLowStock" styleClass="stat-value" text="0" style="-fx-text-fill: #e8b84b;"/>
+                    <VBox styleClass="stat-card, low-stock" prefWidth="200" spacing="8">
+                        <HBox alignment="CENTER_LEFT" spacing="12">
+                            <StackPane style="-fx-background-color: rgba(232, 184, 75, 0.1); -fx-background-radius: 8; -fx-padding: 8;">
+                                <SVGPath content="M1 21h22L12 2 1 21zm12-3h-2v-2h2v2zm0-4h-2v-4h2v4z" fill="#e8b84b" scaleX="0.8" scaleY="0.8"/>
+                            </StackPane>
+                            <VBox>
+                                <Label styleClass="stat-label" text="LOW STOCK"/>
+                                <Label fx:id="lblLowStock" styleClass="stat-value" text="0" style="-fx-text-fill: #e8b84b;"/>
+                            </VBox>
+                        </HBox>
                     </VBox>
-                    <VBox styleClass="stat-card" prefWidth="180">
-                        <Label styleClass="stat-label" text="OUT OF STOCK"/>
-                        <Label fx:id="lblOutOfStock" styleClass="stat-value" text="0" style="-fx-text-fill: #e07070;"/>
+                    <VBox styleClass="stat-card, out-of-stock" prefWidth="200" spacing="8">
+                        <HBox alignment="CENTER_LEFT" spacing="12">
+                            <StackPane style="-fx-background-color: rgba(224, 112, 112, 0.1); -fx-background-radius: 8; -fx-padding: 8;">
+                                <SVGPath content="M19 6.41L17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12z" fill="#e07070" scaleX="0.8" scaleY="0.8"/>
+                            </StackPane>
+                            <VBox>
+                                <Label styleClass="stat-label" text="OUT OF STOCK"/>
+                                <Label fx:id="lblOutOfStock" styleClass="stat-value" text="0" style="-fx-text-fill: #e07070;"/>
+                            </VBox>
+                        </HBox>
                     </VBox>
-                    <TextField fx:id="searchField" promptText="Search menu items..." prefWidth="180" style="-fx-background-color: #221a0e; -fx-text-fill: #f5ede0; -fx-prompt-text-fill: #8a7055; -fx-border-color: #4a3820; -fx-border-width: 1; -fx-border-radius: 6; -fx-background-radius: 6; -fx-padding: 8 12 8 12;"/>
-                    <Button fx:id="btnSearch" text="Search" style="-fx-background-color: #c8500a; -fx-text-fill: #f5ede0; -fx-font-weight: bold; -fx-border-radius: 6; -fx-background-radius: 6; -fx-padding: 8 16 8 16; -fx-font-size: 12px; -fx-cursor: hand;" onAction="#onSearchMenuItem"/>
+                    
                     <Region HBox.hgrow="ALWAYS"/>
-                    <Button fx:id="btnAddItem" styleClass="btn-primary" text="+ Add Item" prefWidth="140" onAction="#onAddItem"/>
+                    <Button fx:id="btnAddItem" styleClass="btn-primary" text="+ ADD ITEM" prefWidth="160" onAction="#onAddItem" style="-fx-font-weight: 900; -fx-letter-spacing: 0.05em;"/>
+                </HBox>
+
+                <HBox spacing="12" alignment="CENTER_LEFT">
+                    <HBox styleClass="filter-console" alignment="CENTER_LEFT" style="-fx-background-color: #221a0e; -fx-background-radius: 12; -fx-border-color: #332615; -fx-border-width: 1; -fx-padding: 4;">
+                        <TextField fx:id="searchField" promptText="Search menu items..." prefWidth="300" styleClass="search-field" style="-fx-background-color: transparent; -fx-border-width: 0;"/>
+                        <Region style="-fx-background-color: #332615; -fx-pref-width: 1; -fx-pref-height: 24;"/>
+                        <ComboBox fx:id="cmbCategoryFilter" promptText="Category" prefWidth="160" styleClass="filter-combo" style="-fx-background-color: transparent; -fx-border-width: 0;"/>
+                    </HBox>
+                    <Button fx:id="btnSearch" text="SEARCH" styleClass="btn-search" onAction="#onSearchMenuItem" prefHeight="42"/>
                 </HBox>
 
 <StackPane VBox.vgrow="ALWAYS" maxHeight="Infinity" styleClass="table-wrap">
                     <padding><Insets top="24" bottom="0"/></padding>
                     <TableView fx:id="menuItemsTable" styleClass="menu-items-table" maxHeight="Infinity" VBox.vgrow="ALWAYS">
                         <columns>
-                            <TableColumn text="NAME" fx:id="colName" prefWidth="1" minWidth="140"/>
-                            <TableColumn text="CATEGORY" fx:id="colCategory" prefWidth="1" minWidth="100"/>
-                            <TableColumn text="PRICE" fx:id="colPrice" prefWidth="1" minWidth="80"/>
-                            <TableColumn text="AVAILABILITY" fx:id="colAvailability" prefWidth="1" minWidth="120"/>
+                            <TableColumn text="NAME" fx:id="colName" prefWidth="1" minWidth="240" styleClass="cell-name"/>
+                            <TableColumn text="CATEGORY" fx:id="colCategory" prefWidth="1" minWidth="140" styleClass="cell-cat"/>
+                            <TableColumn text="PRICE" fx:id="colPrice" prefWidth="1" minWidth="100" styleClass="cell-price"/>
+                            <TableColumn text="AVAILABILITY" fx:id="colAvailability" prefWidth="1" minWidth="140"/>
                             <TableColumn text="" fx:id="colActions" prefWidth="1" minWidth="80"/>
                         </columns>
                     </TableView>
