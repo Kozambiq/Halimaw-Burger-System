@@ -171,3 +171,103 @@
 .btn-card:hover {
     -fx-background-color: #e07040;
 }
+
+/* ── Expanded Card Items ─────────────────────────────── */
+.card-items-container {
+    -fx-padding: 8 0 8 0;
+    -fx-border-width: 1 0 1 0;
+    -fx-border-color: #4a3820;
+}
+
+/* ── Quick Popup ─────────────────────────────────────── */
+.order-popup {
+    -fx-background-color: #2e2410;
+    -fx-border-color: #4a3820;
+    -fx-border-width: 1;
+    -fx-border-radius: 12;
+    -fx-background-radius: 12;
+    -fx-padding: 0;
+    -fx-effect: dropshadow(gaussian, rgba(0,0,0,0.3), 10, 0, 0, 4);
+}
+
+.order-popup .popup-header {
+    -fx-border-color: #4a3820;
+    -fx-border-width: 0 0 1 0;
+    -fx-padding: 16 20 16 20;
+}
+
+.order-popup .popup-title {
+    -fx-font-family: 'Playfair Display', serif;
+    -fx-font-size: 18px;
+    -fx-font-weight: bold;
+    -fx-text-fill: #f5ede0;
+}
+
+.order-popup .popup-subtitle {
+    -fx-font-family: 'DM Sans', sans-serif;
+    -fx-font-size: 12px;
+    -fx-text-fill: #8a7055;
+}
+
+.order-popup .popup-scroll {
+    -fx-background-color: transparent;
+    -fx-background: transparent;
+}
+
+.order-popup .popup-scroll .viewport {
+    -fx-background-color: transparent;
+}
+
+.order-popup .popup-items {
+    -fx-padding: 16 20 16 20;
+}
+
+.order-popup .popup-item-qty {
+    -fx-font-family: 'DM Mono', monospace;
+    -fx-text-fill: #d4591e;
+    -fx-font-weight: bold;
+    -fx-min-width: 30;
+}
+
+.order-popup .popup-item-name {
+    -fx-text-fill: #f5ede0;
+    -fx-font-size: 13px;
+}
+
+.order-popup .popup-item-price {
+    -fx-font-family: 'DM Mono', monospace;
+    -fx-text-fill: #c4a882;
+}
+
+.order-popup .popup-notes {
+    -fx-padding: 0 20 16 20;
+}
+
+.order-popup .popup-notes-text {
+    -fx-font-family: 'DM Sans', sans-serif;
+    -fx-font-size: 13px;
+    -fx-font-style: italic;
+    -fx-text-fill: #c4a882;
+    -fx-background-color: rgba(212, 89, 30, 0.05);
+    -fx-padding: 10;
+    -fx-background-radius: 6;
+}
+
+.order-popup .popup-close {
+    -fx-background-color: #332615;
+    -fx-border-color: #4a3820;
+    -fx-border-width: 1;
+    -fx-border-radius: 6;
+    -fx-background-radius: 6;
+    -fx-text-fill: #c4a882;
+    -fx-font-family: 'DM Sans', sans-serif;
+    -fx-font-size: 12px;
+    -fx-font-weight: 600;
+    -fx-padding: 8 20 8 20;
+    -fx-cursor: hand;
+}
+
+.order-popup .popup-close:hover {
+    -fx-border-color: #8a7055;
+    -fx-text-fill: #f5ede0;
+}

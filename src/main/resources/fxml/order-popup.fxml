@@ -1,0 +1,41 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.geometry.Insets?>
+<?import javafx.scene.control.Button?>
+<?import javafx.scene.control.Label?>
+<?import javafx.scene.control.ScrollPane?>
+<?import javafx.scene.layout.HBox?>
+<?import javafx.scene.layout.Region?>
+<?import javafx.scene.layout.VBox?>
+<?import javafx.scene.text.Text?>
+
+<VBox xmlns="http://javafx.com/javafx/17"
+      xmlns:fx="http://javafx.com/fxml/1"
+      fx:controller="com.myapp.halimawburgersystem.OrderPopupController"
+      stylesheets="@../css/common.css, @../css/orders.css"
+      styleClass="order-popup"
+      prefWidth="380"
+      maxHeight="450">
+
+    <HBox styleClass="popup-header" alignment="CENTER_LEFT">
+        <padding><Insets top="16" right="20" bottom="16" left="20"/></padding>
+        <VBox spacing="2">
+            <Label fx:id="popupOrderNum" styleClass="popup-title" text="#0000"/>
+            <Label fx:id="popupDate" styleClass="popup-subtitle" text="April 23, 2026 · 1:32 PM"/>
+        </VBox>
+        <Region HBox.hgrow="ALWAYS"/>
+        <Button styleClass="popup-close" text="Close" onAction="#onClose"/>
+    </HBox>
+    
+    <ScrollPane fitToWidth="true" hbarPolicy="NEVER" styleClass="popup-scroll" VBox.vgrow="ALWAYS">
+        <VBox styleClass="popup-items">
+            <VBox fx:id="popupItemsContainer" spacing="8"/>
+            
+            <VBox spacing="4" fx:id="popupNotesBox" visible="false" managed="false" styleClass="popup-notes">
+                <Label styleClass="popup-subtitle" text="NOTES"/>
+                <Label fx:id="popupNotes" styleClass="popup-notes-text" wrapText="true" text="No notes provided."/>
+            </VBox>
+        </VBox>
+    </ScrollPane>
+
+</VBox>

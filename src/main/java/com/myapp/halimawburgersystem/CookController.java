@@ -2,12 +2,16 @@ package com.myapp.halimawburgersystem;
 
 import com.myapp.dao.OrderDAO;
 import com.myapp.model.Order;
+import com.myapp.model.OrderItem;
 import com.myapp.model.Staff;
 import javafx.application.Platform;
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
+import javafx.fxml.FXMLLoader;
 import javafx.geometry.Insets;
 import javafx.geometry.Pos;
+import javafx.scene.Parent;
+import javafx.scene.Scene;
 import javafx.scene.control.Alert;
 import javafx.scene.control.Button;
 import javafx.scene.control.ButtonType;
@@ -17,9 +21,13 @@ import javafx.scene.layout.HBox;
 import javafx.scene.layout.Priority;
 import javafx.scene.layout.Region;
 import javafx.scene.layout.VBox;
+import javafx.stage.Modality;
+import javafx.stage.Stage;
+import javafx.stage.StageStyle;
 
 import java.time.Duration;
 import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
 import java.util.List;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
@@ -151,9 +159,39 @@ public class CookController {
         type.getStyleClass().add("card-type");
         header.getChildren().addAll(orderNum, spacer, type);
 
-        Label items = new Label(order.getNotes() != null ? order.getNotes() : "No details");
-        items.getStyleClass().add("card-items");
-        items.setWrapText(true);
+        card.getChildren().add(header);
+
+        VBox itemsContainer = new VBox(8);
+        itemsContainer.getStyleClass().add("card-items-container");
+        
+        List<OrderItem> items = orderDAO.findItemsByOrderId(order.getId());
+        for (OrderItem item : items) {
+            HBox itemRow = new HBox(8);
+            itemRow.setAlignment(Pos.CENTER_LEFT);
+            
+            Label qty = new Label(item.getQuantity() + "x");
+            qty.setStyle("-fx-font-family: 'DM Mono', monospace; -fx-text-fill: #d4591e; -fx-font-weight: bold; -fx-min-width: 30;");
+            
+            Label name = new Label(item.getItemName());
+            name.setStyle("-fx-text-fill: #f5ede0; -fx-font-size: 12px;");
+            
+            Region itemSpacer = new Region();
+            HBox.setHgrow(itemSpacer, Priority.ALWAYS);
+            
+            Label price = new Label("₱" + String.format("%.2f", item.getTotalPrice()));
+            price.setStyle("-fx-font-family: 'DM Mono', monospace; -fx-text-fill: #c4a882; -fx-font-size: 12px;");
+            
+            itemRow.getChildren().addAll(qty, name, itemSpacer, price);
+            itemsContainer.getChildren().add(itemRow);
+        }
+        
+        if (order.getNotes() != null && !order.getNotes().isEmpty()) {
+            Label notesLabel = new Label("Note: " + order.getNotes());
+            notesLabel.setStyle("-fx-font-size: 11px; -fx-font-style: italic; -fx-text-fill: #c4a882;");
+            itemsContainer.getChildren().add(notesLabel);
+        }
+        
+        card.getChildren().add(itemsContainer);
 
         HBox footer = new HBox();
         footer.setAlignment(Pos.CENTER_LEFT);
@@ -205,8 +243,8 @@ public class CookController {
         }
 
         footer.getChildren().addAll(timer, footerSpacer, actionBtn);
-        card.getChildren().addAll(header, items, footer);
-        
+        card.getChildren().add(footer);
+
         return card;
     }
 
