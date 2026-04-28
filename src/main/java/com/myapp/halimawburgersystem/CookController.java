@@ -207,20 +207,6 @@ public class CookController {
         footer.getChildren().addAll(timer, footerSpacer, actionBtn);
         card.getChildren().addAll(header, items, footer);
         
-        card.setOnMouseClicked(e -> {
-            if (!"Cancelled".equals(order.getStatus()) && !"Completed".equals(order.getStatus())) {
-                Alert confirm = new Alert(Alert.AlertType.CONFIRMATION);
-                confirm.setTitle("Cancel Kitchen Order");
-                confirm.setHeaderText("Cancel Order #" + String.format("%04d", order.getOrderNumber()) + "?");
-                confirm.setContentText("This will move the order to 'Cancelled' status.");
-                confirm.getDialogPane().setStyle("-fx-background-color: #2e2410; -fx-border-color: #4a3820; -fx-border-width: 1;");
-                
-                if (confirm.showAndWait().get() == ButtonType.OK) {
-                    updateStatus(order, "Cancelled");
-                }
-            }
-        });
-
         return card;
     }
 
