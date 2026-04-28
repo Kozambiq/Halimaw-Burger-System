@@ -1,7 +1,5 @@
 package com.myapp.halimawburgersystem;
 
-import com.myapp.dao.IngredientDAO;
-import com.myapp.dao.MenuItemDAO;
 import com.myapp.dao.OrderDAO;
 import com.myapp.dao.StaffDAO;
 import com.myapp.model.Order;
@@ -10,23 +8,14 @@ import com.myapp.model.Staff;
 import javafx.application.Platform;
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
-import javafx.fxml.FXMLLoader;
-import javafx.geometry.Insets;
 import javafx.geometry.Pos;
-import javafx.scene.Parent;
-import javafx.scene.Scene;
 import javafx.scene.control.Alert;
 import javafx.scene.control.Button;
-import javafx.scene.control.ButtonType;
 import javafx.scene.control.Label;
-import javafx.scene.control.ScrollPane;
 import javafx.scene.layout.HBox;
 import javafx.scene.layout.Priority;
 import javafx.scene.layout.Region;
 import javafx.scene.layout.VBox;
-import javafx.stage.Modality;
-import javafx.stage.Stage;
-import javafx.stage.StageStyle;
 
 import java.time.Duration;
 import java.time.LocalDateTime;
@@ -207,7 +196,7 @@ public class KitchenController {
         
         card.getChildren().add(itemsContainer);
 
-        // Footer: Timer | Action Button
+        // Footer: Timer
         HBox footer = new HBox();
         footer.setAlignment(Pos.CENTER_LEFT);
         
@@ -221,57 +210,13 @@ public class KitchenController {
         if ("Done".equals(order.getStatus())) timer.setStyle("-fx-text-fill: #7ec470;");
         if ("Cancelled".equals(order.getStatus())) timer.setStyle("-fx-text-fill: #e07070;");
 
-        Region footerSpacer = new Region();
-        HBox.setHgrow(footerSpacer, Priority.ALWAYS);
-        
-        Button actionBtn = new Button();
-        actionBtn.getStyleClass().add("btn-card");
-        
-        if ("New".equals(order.getStatus())) {
-            actionBtn.setText("Start");
-            String warning = orderDAO.checkThresholdWarnings(order.getId());
-            if (warning != null) {
-                actionBtn.setStyle("-fx-background-color: #b8860b;");
-            }
-            final String finalWarning = warning;
-            actionBtn.setOnAction(e -> {
-                if (finalWarning != null) {
-                    Alert warn = new Alert(Alert.AlertType.WARNING);
-                    warn.setTitle("Low Stock Warning");
-                    warn.setHeaderText("Starting this order will cause low stock for:");
-                    warn.setContentText(finalWarning);
-                    warn.getDialogPane().setStyle("-fx-background-color: #2e2410; -fx-border-color: #4a3820; -fx-border-width: 1;");
-                    warn.showAndWait();
-                }
-                updateStatus(order, "Preparing");
-            });
-        } else if ("Preparing".equals(order.getStatus())) {
-            actionBtn.setText("Mark Ready");
-            actionBtn.setOnAction(e -> updateStatus(order, "Done"));
-        } else if ("Done".equals(order.getStatus())) {
-            actionBtn.setText("Complete");
-            actionBtn.setStyle("-fx-background-color: #4a8c3f;");
-            actionBtn.setOnAction(e -> updateStatus(order, "Completed")); 
-        } else {
-            actionBtn.setVisible(false);
-            actionBtn.setManaged(false);
-        }
-
-        footer.getChildren().addAll(timer, footerSpacer, actionBtn);
+        footer.getChildren().add(timer);
         card.getChildren().add(footer);
 
         return card;
     }
 
     private void updateStatus(Order order, String newStatus) {
-        if ("Cancelled".equals(newStatus) && "New".equals(order.getStatus())) {
-            orderDAO.releaseReservationsForOrder(order.getId());
-        }
-
-        if ("Preparing".equals(newStatus) && "New".equals(order.getStatus())) {
-            orderDAO.deductIngredientsForOrder(order.getId());
-        }
-        
         if (orderDAO.updateStatus(order.getId(), newStatus)) {
             loadQueue();
         }

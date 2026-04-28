@@ -70,7 +70,7 @@
             <padding><Insets top="16" left="8"/></padding>
         </Label>
 
-        <Button fx:id="btnSales" styleClass="nav-item nav-item-active" text="Sales Reports" onAction="#onNavigate">
+        <Button fx:id="btnSales" styleClass="nav-item" text="Sales Reports" onAction="#onNavigate">
             <graphic><SVGPath content="M16 6l2.29 2.29-4.88 4.88-4-4L2 16.59 3.41 18l6-6 4 4 6.3-6.29L22 12V6z" styleClass="nav-svg"/></graphic>
             <padding><Insets top="8" right="8" bottom="8" left="24"/></padding>
         </Button>
