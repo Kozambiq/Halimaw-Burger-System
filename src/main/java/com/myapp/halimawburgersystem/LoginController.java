@@ -25,6 +25,7 @@ public class LoginController {
     @FXML private SVGPath eyeIcon;
     @FXML private Label emailError;
     @FXML private Label passwordError;
+    @FXML private Label loginError;
 
     private UserDAO userDAO = new UserDAO();
     private StaffDAO staffDAO = new StaffDAO();
@@ -146,6 +147,9 @@ public class LoginController {
             return;
         }
 
+        loginError.setVisible(false);
+        loginError.setManaged(false);
+
         userDAO.authenticate(email, password).ifPresentOrElse(
             user -> {
                 try {
@@ -167,7 +171,8 @@ public class LoginController {
                 }
             },
             () -> {
-                showStyledAlert(AlertType.ERROR, "Wrong email or password.", "");
+                loginError.setVisible(true);
+                loginError.setManaged(true);
             }
         );
     }

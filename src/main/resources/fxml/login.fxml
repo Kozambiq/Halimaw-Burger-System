@@ -29,30 +29,34 @@
 
         <HBox styleClass="card" maxWidth="940" maxHeight="600">
 
-            <VBox styleClass="left-panel" prefWidth="360">
-                <padding><Insets top="52" right="44" bottom="52" left="44"/></padding>
+            <VBox styleClass="left-panel" prefWidth="380">
+                <padding><Insets top="52" right="48" bottom="52" left="48"/></padding>
 
-                <Label text="STAFF PORTAL" styleClass="badge"/>
+                <HBox alignment="CENTER_LEFT">
+                    <Label text="STAFF PORTAL" styleClass="badge"/>
+                </HBox>
 
-                <Label text="Halimaw" styleClass="brand-name-top"/>
-                <Label text="Burger" styleClass="brand-name-bottom"/>
+                <VBox spacing="-5">
+                    <Label text="Halimaw" styleClass="brand-name-top"/>
+                    <Label text="Burger" styleClass="brand-name-bottom"/>
+                </VBox>
 
                 <Region prefHeight="42"/>
 
-                <VBox spacing="6">
-                    <Label text="EMAIL" styleClass="field-label"/>
+                <VBox spacing="8">
+                    <Label text="EMAIL ADDRESS" styleClass="field-label"/>
                     <TextField fx:id="emailField" promptText="you@halimaw.ph" styleClass="text-input"/>
                     <Label fx:id="emailError" styleClass="field-error" text="" visible="false" managed="false"/>
                 </VBox>
 
-                <Region prefHeight="20"/>
+                <Region prefHeight="24"/>
 
-                <VBox spacing="6">
+                <VBox spacing="8">
                     <Label text="PASSWORD" styleClass="field-label"/>
                     <StackPane>
                         <PasswordField fx:id="passwordField" promptText="••••••••" styleClass="text-input"/>
                         <TextField fx:id="passwordVisibleField" promptText="••••••••" styleClass="text-input" visible="false"/>
-<Button fx:id="togglePassword" styleClass="password-toggle" onAction="#onTogglePassword" StackPane.alignment="CENTER_RIGHT">
+                        <Button fx:id="togglePassword" styleClass="password-toggle" onAction="#onTogglePassword" StackPane.alignment="CENTER_RIGHT">
                             <graphic>
                                 <SVGPath fx:id="eyeIcon" content="M12 4.5C7 4.5 2.73 7.61 1 12c1.73 4.39 6 7.5 11 7.5s9.27-3.11 11-7.5c-1.73-4.39-6-7.5-11-7.5zM12 17c-2.76 0-5-2.24-5-5s2.24-5 5-5 5 2.24 5 5-2.24 5-5 5zm0-8c-1.66 0-3 1.34-3 3s1.34 3 3 3 3-1.34 3-3-1.34-3-3-3z" styleClass="eye-svg"/>
                             </graphic>
@@ -61,9 +65,13 @@
                     <Label fx:id="passwordError" styleClass="field-error" text="" visible="false" managed="false"/>
                 </VBox>
 
-                <Region prefHeight="55"/>
+                <Region prefHeight="35"/>
 
-                <Button text="ENTER" styleClass="btn-primary" maxWidth="Infinity" onAction="#onEnter"/>
+                <Label fx:id="loginError" text="Invalid email or password" styleClass="login-error" maxWidth="Infinity" visible="false" managed="false">
+                    <VBox.margin><Insets bottom="20"/></VBox.margin>
+                </Label>
+
+                <Button text="ENTER PORTAL" styleClass="btn-primary" maxWidth="Infinity" onAction="#onEnter"/>
 
                 <Region VBox.vgrow="ALWAYS"/>
             </VBox>
@@ -72,12 +80,12 @@
                 <Region styleClass="glow-overlay" StackPane.alignment="BOTTOM_RIGHT"/>
 
                 <VBox StackPane.alignment="TOP_LEFT">
-                    <padding><Insets top="44" left="40"/></padding>
-                    <Label text="You Can't Buy Happiness" styleClass="eyebrow"/>
-                    <Label wrapText="true" styleClass="headline" maxWidth="280" text="But You Can Buy A Burger"/>
+                    <padding><Insets top="52" left="48"/></padding>
+                    <Label text="You Can't Buy Happiness" styleClass="slogan-top"/>
+                    <Label wrapText="true" styleClass="slogan-bottom" maxWidth="340" text="BUT YOU CAN BUY A BURGER"/>
                 </VBox>
 
-                <ImageView StackPane.alignment="BOTTOM_RIGHT" fitWidth="360" preserveRatio="true">
+                <ImageView StackPane.alignment="BOTTOM_RIGHT" fitWidth="380" preserveRatio="true">
                     <image>
                         <Image url="@../burger-profile.png" preserveRatio="true"/>
                     </image>
