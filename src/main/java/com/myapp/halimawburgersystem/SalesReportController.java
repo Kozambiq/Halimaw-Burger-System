@@ -45,7 +45,7 @@ public class SalesReportController {
 
     @FXML private Label lblAnalysisStatus;
     @FXML private Label lblRecommendationStatus;
-    @FXML private Button btnRefresh;
+    
 
     // WebViews for chart and AI responses
     @FXML private WebView chartWebView;
@@ -127,30 +127,7 @@ public class SalesReportController {
         }
     }
 
-    @FXML
-    private void onRefresh() {
-        loadReport();
-    }
-
-    @FXML
-    private void onTestAI() {
-        System.out.println("Testing Groq...");
-        Task<String> task = new Task<>() {
-            @Override
-            protected String call() throws Exception {
-                return GeminiService.analyze("Say hello in one sentence. Respond in HTML using <b> for emphasis.");
-            }
-        };
-        task.setOnSucceeded(e -> Platform.runLater(() -> {
-            System.out.println("Groq response: " + task.getValue());
-            loadHtml(analysisWebView, task.getValue());
-        }));
-        task.setOnFailed(e -> System.out.println("Groq FAILED: " + task.getException().getMessage()));
-        new Thread(task).start();
-    }
-
     private void loadReport() {
-        if (btnRefresh != null) btnRefresh.setDisable(true);
         setStatus(lblAnalysisStatus, "Loading...");
         setStatus(lblRecommendationStatus, "Loading...");
         loadHtml(analysisWebView, "<i style='color:#c8a97a'>Loading analysis...</i>");
@@ -177,7 +154,6 @@ public class SalesReportController {
         dbTask.setOnFailed(e -> Platform.runLater(() -> {
             setStatus(lblAnalysisStatus, "Database error");
             setStatus(lblRecommendationStatus, "Database error");
-            if (btnRefresh != null) btnRefresh.setDisable(false);
         }));
 
         new Thread(dbTask).start();
@@ -399,13 +375,6 @@ public class SalesReportController {
     }
 
     private void checkAllDone() {
-        boolean analysisDone = lblAnalysisStatus != null &&
-                !lblAnalysisStatus.getText().equals("Analyzing...");
-        boolean recoDone = lblRecommendationStatus != null &&
-                !lblRecommendationStatus.getText().equals("Analyzing...");
-        if (analysisDone && recoDone && btnRefresh != null) {
-            btnRefresh.setDisable(false);
-        }
     }
 
     private void setStatus(Label lbl, String text) {

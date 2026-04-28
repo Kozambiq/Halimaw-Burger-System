@@ -109,12 +109,6 @@
             <Label fx:id="pageTitle" styleClass="topbar-title" text="Sales Reports"/>
             <Region HBox.hgrow="ALWAYS"/>
             <Label fx:id="topbarDate" styleClass="topbar-date" text=""/>
-            <Button fx:id="btnRefresh" text="↻  Refresh" onAction="#onRefresh" style="-fx-cursor:hand;">
-                <padding><Insets top="6" right="14" bottom="6" left="14"/></padding>
-            </Button>
-            <Button text="Test AI" onAction="#onTestAI" style="-fx-cursor:hand;">
-                <padding><Insets top="6" right="14" bottom="6" left="14"/></padding>
-            </Button>
         </HBox>
 
         <ScrollPane fitToWidth="true" VBox.vgrow="ALWAYS" styleClass="content-scroll">
