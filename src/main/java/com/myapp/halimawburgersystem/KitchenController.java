@@ -127,11 +127,13 @@ public class KitchenController {
     }
 
     private VBox createOrderCard(Order order) {
-        VBox card = new VBox(8);
+        VBox card = new VBox(12);
         card.getStyleClass().add("order-card");
         
         if ("Cancelled".equals(order.getStatus())) {
             card.getStyleClass().add("cancelled-card");
+        } else if ("Done".equals(order.getStatus())) {
+            card.getStyleClass().add("done-card");
         }
         
         long mins = Duration.between(order.getCreatedAt(), LocalDateTime.now()).toMinutes();
@@ -146,10 +148,6 @@ public class KitchenController {
         if (isUrgent) {
             card.getStyleClass().add("urgent");
         }
-        
-        if ("Done".equals(order.getStatus())) {
-            card.setStyle("-fx-border-color: #4a8c3f; -fx-background-color: rgba(74, 140, 63, 0.15);");
-        }
 
         // Header: #OrderNumber | Type
         HBox header = new HBox();
@@ -158,7 +156,7 @@ public class KitchenController {
         orderNum.getStyleClass().add("card-order");
         Region spacer = new Region();
         HBox.setHgrow(spacer, Priority.ALWAYS);
-        Label type = new Label(order.getOrderType());
+        Label type = new Label(order.getOrderType().toUpperCase());
         type.getStyleClass().add("card-type");
         header.getChildren().addAll(orderNum, spacer, type);
 
@@ -173,24 +171,23 @@ public class KitchenController {
             itemRow.setAlignment(Pos.CENTER_LEFT);
             
             Label qty = new Label(item.getQuantity() + "x");
-            qty.setStyle("-fx-font-family: 'DM Mono', monospace; -fx-text-fill: #d4591e; -fx-font-weight: bold; -fx-min-width: 30;");
+            qty.getStyleClass().add("item-qty");
             
             Label name = new Label(item.getItemName());
-            name.setStyle("-fx-text-fill: #f5ede0; -fx-font-size: 12px;");
+            name.getStyleClass().add("item-name");
             
             Region itemSpacer = new Region();
             HBox.setHgrow(itemSpacer, Priority.ALWAYS);
             
-            Label price = new Label("₱" + String.format("%.2f", item.getTotalPrice()));
-            price.setStyle("-fx-font-family: 'DM Mono', monospace; -fx-text-fill: #c4a882; -fx-font-size: 12px;");
-            
-            itemRow.getChildren().addAll(qty, name, itemSpacer, price);
+            itemRow.getChildren().addAll(qty, name, itemSpacer);
             itemsContainer.getChildren().add(itemRow);
         }
         
         if (order.getNotes() != null && !order.getNotes().isEmpty()) {
-            Label notesLabel = new Label("Note: " + order.getNotes());
-            notesLabel.setStyle("-fx-font-size: 11px; -fx-font-style: italic; -fx-text-fill: #c4a882;");
+            Label notesLabel = new Label(order.getNotes());
+            notesLabel.getStyleClass().add("card-note");
+            notesLabel.setWrapText(true);
+            notesLabel.setMaxWidth(280);
             itemsContainer.getChildren().add(notesLabel);
         }
         
@@ -199,6 +196,7 @@ public class KitchenController {
         // Footer: Timer
         HBox footer = new HBox();
         footer.setAlignment(Pos.CENTER_LEFT);
+        footer.setSpacing(10);
         
         String timerText = mins + "m ago";
         if ("Cancelled".equals(order.getStatus())) timerText = "CANCELLED";
@@ -207,8 +205,6 @@ public class KitchenController {
         Label timer = new Label(timerText + (isUrgent ? " ⚠" : ""));
         timer.getStyleClass().add("card-timer");
         if (isUrgent) timer.getStyleClass().add("urgent-text");
-        if ("Done".equals(order.getStatus())) timer.setStyle("-fx-text-fill: #7ec470;");
-        if ("Cancelled".equals(order.getStatus())) timer.setStyle("-fx-text-fill: #e07070;");
 
         footer.getChildren().add(timer);
         card.getChildren().add(footer);
