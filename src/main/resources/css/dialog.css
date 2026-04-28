@@ -1,99 +1,79 @@
-.dialog-container {
-    -fx-background-color: #2e2410;
-    -fx-padding: 24;
-}
+/* ============================================================
+    Halimaw Burger – Premium Dialog Styles
+    ============================================================ */
 
-.dialog-header {
-    -fx-spacing: 8;
-}
-
-.dialog-title {
-    -fx-font-family: 'Playfair Display', serif;
-    -fx-font-size: 20px;
-    -fx-font-weight: bold;
-    -fx-text-fill: #f5ede0;
-}
-
-.dialog-subtitle {
-    -fx-font-family: 'DM Sans', sans-serif;
-    -fx-font-size: 13px;
-    -fx-text-fill: #8a7055;
-}
-
-.dialog-content {
-    -fx-padding: 8 0 8 0;
-}
-
-.dialog-label {
-    -fx-font-family: 'DM Sans', sans-serif;
-    -fx-font-size: 12px;
-    -fx-font-weight: 500;
-    -fx-text-fill: #c4a882;
-}
-
-.dialog-input {
+.premium-dialog {
     -fx-background-color: #221a0e;
-    -fx-text-fill: #f5ede0;
-    -fx-prompt-text-fill: #6d5a40;
     -fx-border-color: #4a3820;
-    -fx-border-width: 1;
-    -fx-border-radius: 6;
-    -fx-background-radius: 6;
-    -fx-padding: 10 14 10 14;
-    -fx-font-size: 14px;
-    -fx-font-family: 'DM Sans', sans-serif;
+    -fx-border-width: 1.5;
+    -fx-border-radius: 12;
+    -fx-background-radius: 12;
 }
 
-.dialog-input:focused {
-    -fx-border-color: #d4591e;
-}
-
-.dialog-error {
-    -fx-font-family: 'DM Sans', sans-serif;
-    -fx-font-size: 12px;
-    -fx-text-fill: #e07070;
-}
-
-.dialog-buttons {
-    -fx-padding: 16 0 0 0;
-}
-
-.btn-dialog-cancel {
-    -fx-font-family: 'DM Sans', sans-serif;
-    -fx-font-size: 13px;
-    -fx-font-weight: 600;
-    -fx-padding: 10 20 10 20;
-    -fx-cursor: hand;
-    -fx-border-radius: 6;
-    -fx-background-radius: 6;
+.premium-dialog .header-panel {
     -fx-background-color: transparent;
-    -fx-border-color: #4a3820;
-    -fx-border-width: 1;
-    -fx-text-fill: #c4a882;
 }
 
-.btn-dialog-cancel:hover {
-    -fx-border-color: #d4591e;
-    -fx-text-fill: #d4591e;
+.premium-dialog .button-bar {
+    -fx-padding: 10 20 20 20;
+    -fx-background-color: transparent;
 }
 
-.btn-dialog-primary {
-    -fx-font-family: 'DM Sans', sans-serif;
-    -fx-font-size: 13px;
-    -fx-font-weight: 600;
-    -fx-padding: 10 20 10 20;
-    -fx-cursor: hand;
-    -fx-border-radius: 6;
-    -fx-background-radius: 6;
-    -fx-background-color: #c8500a;
+/* ── Typography ─────────────────────────────────────────── */
+.dialog-badge-danger {
+    -fx-background-color: rgba(255, 107, 107, 0.15);
+    -fx-text-fill: #ff6b6b;
+    -fx-font-size: 10px;
+    -fx-font-weight: 800;
+    -fx-letter-spacing: 0.15em;
+    -fx-padding: 5 12 5 12;
+    -fx-background-radius: 50;
+    -fx-font-family: "DM Sans", sans-serif;
+}
+
+.dialog-header-text {
+    -fx-text-fill: #f5ede0;
+    -fx-font-family: "DM Sans", sans-serif; /* Changed from Playfair for better readability */
+    -fx-font-size: 17px;
+    -fx-font-weight: 700;
+    -fx-line-spacing: 2;
+}
+
+.dialog-content-text {
+    -fx-text-fill: #c4a882; /* Lighter color for better contrast */
+    -fx-font-family: "DM Sans", sans-serif;
+    -fx-font-size: 14px;
+    -fx-font-weight: 400;
+    -fx-line-spacing: 4;
+}
+
+/* ── Buttons ────────────────────────────────────────────── */
+.btn-dialog-danger {
+    -fx-background-color: #ff6b6b;
     -fx-text-fill: white;
+    -fx-font-family: "DM Sans", sans-serif;
+    -fx-font-weight: bold;
+    -fx-padding: 10 20 10 20;
+    -fx-background-radius: 8;
+    -fx-cursor: hand;
 }
 
-.btn-dialog-primary:hover {
-    -fx-background-color: #e05c0a;
+.btn-dialog-danger:hover {
+    -fx-background-color: #ff5252;
 }
 
-.btn-dialog-primary:disabled {
+.btn-dialog-secondary {
+    -fx-background-color: #332615;
+    -fx-text-fill: #f5ede0;
+    -fx-font-family: "DM Sans", sans-serif;
+    -fx-font-weight: bold;
+    -fx-padding: 10 20 10 20;
+    -fx-background-radius: 8;
+    -fx-border-radius: 8;
+    -fx-cursor: hand;
+    -fx-border-color: #4a3820;
+}
+
+.btn-dialog-secondary:hover {
     -fx-background-color: #4a3820;
-    -fx-text-fill: #6d5a40;
 }

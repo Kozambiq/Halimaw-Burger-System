@@ -177,82 +177,84 @@
 
         <!-- Order Details Overlay -->
         <VBox fx:id="detailsOverlay" styleClass="modal-overlay" visible="false" alignment="CENTER">
-            <VBox styleClass="modal-content" maxWidth="500" maxHeight="600" spacing="0">
-                <HBox styleClass="modal-header" alignment="CENTER_LEFT">
-                    <padding><Insets top="20" right="24" bottom="20" left="24"/></padding>
-                    <VBox spacing="4">
-                        <Label fx:id="detailsOrderNum" styleClass="modal-title" text="#0000"/>
-                        <Label fx:id="detailsDate" styleClass="modal-subtitle" text="April 23, 2026 · 1:32 PM"/>
-                    </VBox>
-                    <Region HBox.hgrow="ALWAYS"/>
-                    <Button styleClass="btn-modal-close" onAction="#onCloseDetails">
-                        <graphic>
-                            <SVGPath content="M19 6.41L17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12z" fill="#8a7055"/>
-                        </graphic>
-                    </Button>
-                </HBox>
+            <StackPane maxWidth="500" maxHeight="700">
+                <!-- Watermark Background -->
+                <Label fx:id="watermarkStatus" text="PAID" styleClass="status-watermark" StackPane.alignment="CENTER"/>
                 
-                <ScrollPane fitToWidth="true" hbarPolicy="NEVER" styleClass="modal-scroll" VBox.vgrow="ALWAYS">
-                    <VBox spacing="20">
-                        <padding><Insets top="20" right="24" bottom="24" left="24"/></padding>
-                        
-                        <VBox spacing="12">
-                            <Label styleClass="section-header" text="ORDER ITEMS"/>
-                            <VBox fx:id="detailsItemsContainer" spacing="8"/>
+                <VBox styleClass="modal-content" spacing="0">
+                    <HBox styleClass="modal-header" alignment="TOP_LEFT">
+                        <VBox spacing="4">
+                            <Label text="ORDER RECEIPT" styleClass="section-header" style="-fx-text-fill: #8a7055;"/>
+                            <Label fx:id="detailsOrderNum" styleClass="modal-title" text="#0000"/>
+                            <Label fx:id="detailsDate" styleClass="modal-subtitle" text="April 23, 2026 · 1:32 PM"/>
                         </VBox>
-                        
-                        <VBox spacing="12">
-                            <Label styleClass="section-header" text="ORDER INFO"/>
-                            <GridPane hgap="32" vgap="12">
-                                <Label text="Type" styleClass="info-label" GridPane.columnIndex="0" GridPane.rowIndex="0"/>
-                                <Label fx:id="detailsType" styleClass="info-value" GridPane.columnIndex="1" GridPane.rowIndex="0" text="Dine-in"/>
-                                
-                                <Label text="Payment" styleClass="info-label" GridPane.columnIndex="0" GridPane.rowIndex="1"/>
-                                <Label fx:id="detailsPayment" styleClass="info-value" GridPane.columnIndex="1" GridPane.rowIndex="1" text="GCash"/>
-                                
-                                <Label text="Reference" styleClass="info-label" fx:id="detailsRefLabel" GridPane.columnIndex="0" GridPane.rowIndex="2"/>
-                                <Label fx:id="detailsRef" styleClass="info-value" GridPane.columnIndex="1" GridPane.rowIndex="2" text="-"/>
-                                
-                                <Label text="Staff" styleClass="info-label" GridPane.columnIndex="0" GridPane.rowIndex="3"/>
-                                <Label fx:id="detailsStaff" styleClass="info-value" GridPane.columnIndex="1" GridPane.rowIndex="3" text="Maria G."/>
-                            </GridPane>
-                        </VBox>
+                        <Region HBox.hgrow="ALWAYS"/>
+                        <Button styleClass="btn-modal-close" onAction="#onCloseDetails">
+                            <graphic>
+                                <SVGPath content="M19 6.41L17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12z" fill="#8a7055"/>
+                            </graphic>
+                        </Button>
+                    </HBox>
+                    
+                    <ScrollPane fitToWidth="true" hbarPolicy="NEVER" styleClass="modal-scroll" VBox.vgrow="ALWAYS">
+                        <VBox spacing="24">
+                            <padding><Insets top="24" right="32" bottom="32" left="32"/></padding>
+                            
+                            <VBox spacing="12">
+                                <Label styleClass="section-header" text="ITEMIZED BILL"/>
+                                <VBox fx:id="detailsItemsContainer" spacing="10"/>
+                            </VBox>
+                            
+                            <VBox spacing="16" styleClass="perforated-divider">
+                                <GridPane hgap="32" vgap="12">
+                                    <Label text="SERVICE TYPE" styleClass="section-header" GridPane.columnIndex="0" GridPane.rowIndex="0"/>
+                                    <Label fx:id="detailsType" styleClass="info-value" GridPane.columnIndex="0" GridPane.rowIndex="1" text="Dine-in"/>
+                                    
+                                    <Label text="PAYMENT" styleClass="section-header" GridPane.columnIndex="1" GridPane.rowIndex="0"/>
+                                    <Label fx:id="detailsPayment" styleClass="info-value" GridPane.columnIndex="1" GridPane.rowIndex="1" text="GCash"/>
+                                    
+                                    <Label text="CASHIER" styleClass="section-header" GridPane.columnIndex="0" GridPane.rowIndex="2"/>
+                                    <Label fx:id="detailsStaff" styleClass="info-value" GridPane.columnIndex="0" GridPane.rowIndex="3" text="Maria G."/>
 
-                        <VBox spacing="12" fx:id="detailsNotesBox">
-                            <Label styleClass="section-header" text="NOTES"/>
-                            <Label fx:id="detailsNotes" styleClass="notes-text" wrapText="true" text="No notes provided."/>
-                        </VBox>
+                                    <Label text="REFERENCE" fx:id="detailsRefLabel" styleClass="section-header" GridPane.columnIndex="1" GridPane.rowIndex="2"/>
+                                    <Label fx:id="detailsRef" styleClass="info-value" GridPane.columnIndex="1" GridPane.rowIndex="3" text="-"/>
+                                </GridPane>
+                            </VBox>
 
-                        <VBox spacing="4" styleClass="modal-total-box">
-                            <padding><Insets top="16"/></padding>
-                            <HBox alignment="CENTER_LEFT">
-                                <Label text="Subtotal" styleClass="total-label"/>
-                                <Region HBox.hgrow="ALWAYS"/>
-                                <Label fx:id="detailsSubtotal" styleClass="total-value-small" text="₱0.00"/>
-                            </HBox>
-                            <HBox alignment="CENTER_LEFT">
-                                <Label text="Discount" styleClass="total-label"/>
-                                <Region HBox.hgrow="ALWAYS"/>
-                                <Label fx:id="detailsDiscount" styleClass="total-value-small" text="₱0.00"/>
-                            </HBox>
-                            <HBox alignment="CENTER_LEFT">
-                                <padding><Insets top="8"/></padding>
-                                <Label text="TOTAL AMOUNT" styleClass="total-label-main"/>
-                                <Region HBox.hgrow="ALWAYS"/>
-                                <Label fx:id="detailsTotal" styleClass="total-value-main" text="₱0.00"/>
-                            </HBox>
+                            <VBox spacing="8" fx:id="detailsNotesBox" styleClass="perforated-divider">
+                                <Label styleClass="section-header" text="KITCHEN NOTES"/>
+                                <Label fx:id="detailsNotes" styleClass="notes-text" wrapText="true" text="No notes provided."/>
+                            </VBox>
+
+                            <VBox spacing="6" styleClass="modal-total-box">
+                                <HBox alignment="CENTER_LEFT">
+                                    <Label text="Subtotal" styleClass="total-label"/>
+                                    <Region HBox.hgrow="ALWAYS"/>
+                                    <Label fx:id="detailsSubtotal" styleClass="total-value-small" text="₱0.00"/>
+                                </HBox>
+                                <HBox alignment="CENTER_LEFT">
+                                    <Label text="Discount" styleClass="total-label"/>
+                                    <Region HBox.hgrow="ALWAYS"/>
+                                    <Label fx:id="detailsDiscount" styleClass="total-value-small" text="₱0.00"/>
+                                </HBox>
+                                <HBox alignment="CENTER_LEFT">
+                                    <padding><Insets top="12"/></padding>
+                                    <Label text="TOTAL DUE" styleClass="total-label-main"/>
+                                    <Region HBox.hgrow="ALWAYS"/>
+                                    <Label fx:id="detailsTotal" styleClass="total-value-main" text="₱0.00"/>
+                                </HBox>
+                            </VBox>
                         </VBox>
-                    </VBox>
-                </ScrollPane>
-                
-                <HBox alignment="CENTER_RIGHT" spacing="12" styleClass="modal-footer">
-                    <padding><Insets top="16" right="24" bottom="16" left="24"/></padding>
-                    <Label fx:id="detailsStatus" styleClass="badge badge-green" text="COMPLETED"/>
-                    <Region HBox.hgrow="ALWAYS"/>
-                    <Button fx:id="btnCancelOrder" text="Cancel Order" styleClass="btn-modal-danger" onAction="#onCancelOrder"/>
-                    <Button text="Close" styleClass="btn-modal-secondary" onAction="#onCloseDetails"/>
-                </HBox>
-            </VBox>
+                    </ScrollPane>
+                    
+                    <HBox alignment="CENTER_RIGHT" spacing="16" styleClass="modal-footer">
+                        <Label fx:id="detailsStatus" styleClass="badge badge-completed" text="COMPLETED"/>
+                        <Region HBox.hgrow="ALWAYS"/>
+                        <Button fx:id="btnCancelOrder" text="VOID ORDER" styleClass="btn-modal-danger" onAction="#onCancelOrder"/>
+                        <Button text="DONE" styleClass="btn-modal-secondary" onAction="#onCloseDetails" prefWidth="100"/>
+                    </HBox>
+                </VBox>
+            </StackPane>
         </VBox>
     </StackPane>
 </HBox>

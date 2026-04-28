@@ -1,214 +1,170 @@
-.filter-bar {
-    -fx-padding: 0 0 8 0;
-}
+/* ============================================================
+    Halimaw Burger – Orders Page Styles
+    ============================================================ */
 
+/* ── Filters ─────────────────────────────────────────────── */
 .filter-combo {
     -fx-background-color: #332615;
-    -fx-text-fill: #c4a882;
-    -fx-prompt-text-fill: #8a7055;
+    -fx-text-fill: #f5ede0;
     -fx-border-color: #4a3820;
-    -fx-border-width: 1;
-    -fx-border-radius: 6;
-    -fx-background-radius: 6;
+    -fx-border-width: 1.5;
+    -fx-border-radius: 10;
+    -fx-background-radius: 10;
     -fx-padding: 8 12 8 12;
     -fx-font-size: 13px;
     -fx-font-family: 'DM Sans', sans-serif;
+    -fx-cursor: hand;
+}
+
+.filter-combo:focused {
+    -fx-border-color: #c8500a;
 }
 
 .filter-combo .list-cell {
-    -fx-text-fill: #c4a882;
-    -fx-background-color: #332615;
+    -fx-text-fill: #f5ede0;
+    -fx-background-color: transparent;
 }
 
 .filter-combo .list-view {
     -fx-background-color: #2e2410;
     -fx-border-color: #4a3820;
+    -fx-border-radius: 8;
+    -fx-background-radius: 8;
 }
 
 .filter-date {
     -fx-background-color: #332615;
     -fx-text-fill: #f5ede0;
     -fx-border-color: #4a3820;
-    -fx-border-width: 1;
-    -fx-border-radius: 6;
-    -fx-background-radius: 6;
-    -fx-padding: 4 8 4 8;
+    -fx-border-width: 1.5;
+    -fx-border-radius: 10;
+    -fx-background-radius: 10;
 }
 
-.date-picker-box {
-    -fx-alignment: center-left;
-}
-
-.date-separator {
-    -fx-text-fill: #8a7055;
-    -fx-font-size: 12px;
-}
-
-.stat-grid {
-    -fx-padding: 0 0 16 0;
-}
-
+/* ── Stat Cards ─────────────────────────────────────────── */
 .stat-card {
-    -fx-background-color: #332615;
+    -fx-background-color: #281e10;
     -fx-border-color: #4a3820;
     -fx-border-width: 1;
-    -fx-border-radius: 12;
-    -fx-background-radius: 12;
-    -fx-padding: 16 20 16 20;
-    -fx-pref-width: 150;
+    -fx-border-radius: 16;
+    -fx-background-radius: 16;
+    -fx-padding: 20 24 20 24;
+    -fx-effect: dropshadow(gaussian, rgba(0,0,0,0.2), 15, 0, 0, 4);
 }
 
-.stat-label {
-    -fx-font-family: 'DM Sans', sans-serif;
-    -fx-font-size: 11px;
-    -fx-font-weight: 600;
-    -fx-letter-spacing: 0.08em;
-    -fx-text-fill: #8a7055;
-    -fx-text-transform: uppercase;
+.stat-card:hover {
+    -fx-border-color: #c8500a;
+    -fx-background-color: #2d2214;
 }
 
-.stat-value {
-    -fx-font-family: 'DM Mono', monospace;
-    -fx-font-size: 24px;
-    -fx-font-weight: 500;
-    -fx-text-fill: #f5ede0;
-}
-
-.stat-green {
-    -fx-text-fill: #7ec470;
-}
-
-.stat-blue {
-    -fx-text-fill: #70b4e0;
-}
-
-.stat-red {
-    -fx-text-fill: #e07070;
-}
-
-.table-scroll {
-    -fx-background-color: transparent;
-}
-
-.orders-table {
-    -fx-background-color: #332615;
-    -fx-border-color: #4a3820;
-    -fx-border-width: 1;
-    -fx-border-radius: 12;
-    -fx-background-radius: 12;
-    -fx-table-cell-border-color: #4a3820;
-}
-
-.orders-table .column-header {
-    -fx-background-color: #221a0e;
-    -fx-border-color: #4a3820;
-    -fx-border-width: 0 0 1 0;
-    -fx-padding: 10 14 10 14;
-}
-
-.orders-table .column-header .label {
-    -fx-font-family: 'DM Sans', sans-serif;
-    -fx-font-size: 11px;
-    -fx-font-weight: 600;
-    -fx-letter-spacing: 0.08em;
-    -fx-text-fill: #8a7055;
-    -fx-text-transform: uppercase;
-}
-
-.orders-table .table-cell {
-    -fx-text-fill: #c4a882;
-    -fx-font-size: 13px;
-    -fx-border-color: #4a3820;
-    -fx-border-width: 0 0 1 0;
-    -fx-padding: 10 14 10 14;
-}
-
-.orders-table .table-row-cell:hover {
-    -fx-background-color: #3d2e1a;
-}
-
-.orders-table .table-row-cell:selected {
-    -fx-background-color: rgba(212, 89, 30, 0.12);
-}
-
+/* ── Status Badges (Matching Table Design) ──────────────── */
 .badge {
     -fx-font-family: 'DM Sans', sans-serif;
     -fx-font-size: 11px;
     -fx-font-weight: 600;
     -fx-letter-spacing: 0.04em;
-    -fx-padding: 3 10 3 10;
-    -fx-background-radius: 20;
+    -fx-padding: 3 12 3 12;
+    -fx-background-radius: 20px;
+    -fx-border-radius: 20px;
+    -fx-text-transform: uppercase;
+    -fx-alignment: center;
 }
 
-.badge-green, .badge-completed {
-    -fx-background-color: rgba(74, 140, 63, 0.15);
+.badge-completed, .status-completed, .badge-green {
+    -fx-background-color: rgba(126, 196, 112, 0.15);
     -fx-text-fill: #7ec470;
+    -fx-background-radius: 20px;
 }
 
-.badge-amber {
-    -fx-background-color: rgba(176, 122, 24, 0.15);
+.badge-amber, .status-preparing, .badge-blue {
+    -fx-background-color: rgba(232, 184, 75, 0.15);
     -fx-text-fill: #e8b84b;
+    -fx-background-radius: 20px;
 }
 
-.badge-red {
-    -fx-background-color: rgba(140, 48, 48, 0.15);
-    -fx-text-fill: #e07070;
+.badge-red, .status-cancelled {
+    -fx-background-color: rgba(255, 107, 107, 0.15);
+    -fx-text-fill: #ff6b6b;
+    -fx-background-radius: 20px;
 }
 
-.badge-blue {
-    -fx-background-color: rgba(30, 92, 140, 0.15);
-    -fx-text-fill: #70b4e0;
-}
-
-.order-number {
-    -fx-font-family: 'DM Mono', monospace;
-    -fx-text-fill: #d4591e;
-}
-
-.order-total {
-    -fx-font-family: 'DM Mono', monospace;
-}
-
-/* ── Order Details Modal ────────────────────────────────── */
+/* ── Digital Receipt Aesthetic ───────────────────────────── */
 .modal-overlay {
-    -fx-background-color: rgba(0, 0, 0, 0.7);
+    -fx-background-color: rgba(13, 9, 4, 0.85); /* Darker, more atmospheric */
 }
 
+/* ── Digital Receipt Aesthetic ───────────────────────────── */
 .modal-content {
-    -fx-background-color: #2e2410;
+    -fx-background-color: #221a0e;
     -fx-border-color: #4a3820;
-    -fx-border-width: 1;
-    -fx-border-radius: 16;
-    -fx-background-radius: 16;
+    -fx-border-width: 1.5;
+    -fx-border-radius: 4; /* Sharper edges for receipt feel */
+    -fx-background-radius: 4;
+    -fx-effect: dropshadow(gaussian, rgba(0,0,0,0.6), 50, 0, 0, 20);
 }
 
 .modal-header {
+    -fx-background-color: #2d2410;
     -fx-border-color: #4a3820;
     -fx-border-width: 0 0 1 0;
+    -fx-border-style: segments(5, 5) phase 2; /* Perforated look */
+    -fx-padding: 32;
+    -fx-background-radius: 4 4 0 0;
 }
 
 .modal-title {
-    -fx-font-family: 'Playfair Display', serif;
-    -fx-font-size: 24px;
-    -fx-font-weight: bold;
-    -fx-text-fill: #f5ede0;
+    -fx-font-family: 'DM Mono', monospace; /* Stamped look */
+    -fx-font-size: 32px;
+    -fx-font-weight: 900;
+    -fx-text-fill: #c8500a;
+    -fx-letter-spacing: -0.05em;
 }
 
 .modal-subtitle {
     -fx-font-family: 'DM Sans', sans-serif;
     -fx-font-size: 13px;
+    -fx-text-fill: #c4a882; /* Brightened for readability */
+}
+
+.perforated-divider {
+    -fx-border-color: #4a3820;
+    -fx-border-width: 1 0 0 0;
+    -fx-border-style: segments(5, 5) phase 2;
+    -fx-padding: 16 0 0 0;
+}
+
+.receipt-item-qty {
+    -fx-text-fill: #c8500a;
+    -fx-font-weight: 800;
+    -fx-font-family: 'DM Mono', monospace;
+    -fx-padding: 0 12 0 0;
+}
+
+.receipt-item-name {
+    -fx-text-fill: #f5ede0;
+    -fx-font-size: 14px;
+    -fx-font-weight: 600;
+}
+
+.receipt-item-price {
     -fx-text-fill: #8a7055;
+    -fx-font-family: 'DM Mono', monospace;
 }
 
-.btn-modal-close {
+.modal-total-box {
     -fx-background-color: transparent;
-    -fx-cursor: hand;
-    -fx-padding: 8;
-    -fx-background-radius: 20;
+    -fx-border-color: #4a3820;
+    -fx-border-width: 2 0 0 0;
+    -fx-border-style: solid;
+    -fx-padding: 24 0 0 0;
+    -fx-margin: 24 0 0 0;
 }
 
-.btn-modal-close:hover {
-    -fx-background-color: rgba(212, 89, 30, 0.1);
+.total-value-main {
+    -fx-font-family: 'DM Mono', monospace;
+    -fx-font-size: 28px;
+    -fx-font-weight: 900;
+    -fx-text-fill: #f5ede0;
 }
 
 .modal-scroll {
@@ -220,193 +176,55 @@
     -fx-background-color: transparent;
 }
 
-.section-header {
-    -fx-font-family: 'DM Sans', sans-serif;
-    -fx-font-size: 11px;
-    -fx-font-weight: bold;
-    -fx-letter-spacing: 0.12em;
-    -fx-text-fill: #8a7055;
-    -fx-text-transform: uppercase;
-}
-
-.info-label {
-    -fx-font-family: 'DM Sans', sans-serif;
-    -fx-font-size: 13px;
-    -fx-text-fill: #8a7055;
-}
-
-.info-value {
-    -fx-font-family: 'DM Sans', sans-serif;
-    -fx-font-size: 13px;
-    -fx-font-weight: 500;
-    -fx-text-fill: #f5ede0;
-}
-
-.notes-text {
-    -fx-font-family: 'DM Sans', sans-serif;
-    -fx-font-size: 13px;
-    -fx-font-style: italic;
-    -fx-text-fill: #c4a882;
-    -fx-background-color: rgba(212, 89, 30, 0.05);
-    -fx-padding: 12;
-    -fx-background-radius: 8;
-}
-
-.modal-total-box {
-    -fx-border-color: #4a3820;
-    -fx-border-width: 1 0 0 0;
-}
-
-.total-label {
-    -fx-font-family: 'DM Sans', sans-serif;
-    -fx-font-size: 13px;
-    -fx-text-fill: #8a7055;
-}
-
-.total-label-main {
-    -fx-font-family: 'DM Sans', sans-serif;
-    -fx-font-size: 14px;
-    -fx-font-weight: bold;
-    -fx-text-fill: #f5ede0;
-}
-
-.total-value-small {
-    -fx-font-family: 'DM Mono', monospace;
-    -fx-font-size: 14px;
-    -fx-text-fill: #c4a882;
-}
-
-.total-value-main {
-    -fx-font-family: 'DM Mono', monospace;
-    -fx-font-size: 20px;
-    -fx-font-weight: bold;
-    -fx-text-fill: #d4591e;
+.modal-scroll .content {
+    -fx-background-color: transparent;
 }
 
 .modal-footer {
-    -fx-border-color: #4a3820;
-    -fx-border-width: 1 0 0 0;
-    -fx-background-color: rgba(34, 26, 14, 0.5);
-    -fx-background-radius: 0 0 16 16;
+    -fx-padding: 24 32 32 32;
+    -fx-border-width: 0;
+    -fx-background-color: #221a0e;
+    -fx-background-radius: 0 0 4 4;
 }
 
-.btn-modal-secondary {
-    -fx-background-color: transparent;
-    -fx-border-color: #4a3820;
-    -fx-border-width: 1;
-    -fx-border-radius: 6;
-    -fx-background-radius: 6;
-    -fx-text-fill: #c4a882;
-    -fx-font-family: 'DM Sans', sans-serif;
-    -fx-font-size: 13px;
-    -fx-font-weight: 600;
-    -fx-padding: 10 20 10 20;
-    -fx-cursor: hand;
+/* ── Status Watermark ───────────────────────────────────── */
+.status-watermark {
+    -fx-font-family: 'Playfair Display', serif;
+    -fx-font-size: 60px;
+    -fx-font-weight: 900;
+    -fx-text-fill: rgba(200, 80, 10, 0.05);
+    -fx-rotate: -15;
 }
 
-.btn-modal-secondary:hover {
-    -fx-border-color: #8a7055;
-    -fx-text-fill: #f5ede0;
-}
-
+/* ── Modal Buttons ────────────────────────────────────────── */
 .btn-modal-danger {
-    -fx-background-color: transparent;
-    -fx-border-color: #8a3838;
-    -fx-border-width: 1;
-    -fx-border-radius: 6;
-    -fx-background-radius: 6;
-    -fx-text-fill: #e07070;
-    -fx-font-family: 'DM Sans', sans-serif;
-    -fx-font-size: 13px;
-    -fx-font-weight: 600;
+    -fx-background-color: rgba(255, 107, 107, 0.1);
+    -fx-border-color: #ff6b6b;
+    -fx-text-fill: #ff6b6b;
+    -fx-background-radius: 8;
+    -fx-border-radius: 8;
+    -fx-font-weight: bold;
     -fx-padding: 10 20 10 20;
     -fx-cursor: hand;
 }
 
 .btn-modal-danger:hover {
-    -fx-background-color: rgba(224, 112, 112, 0.1);
-    -fx-border-color: #e07070;
+    -fx-background-color: #ff6b6b;
+    -fx-text-fill: white;
 }
 
-.btn-modal-primary {
-    -fx-background-color: #d4591e;
-    -fx-border-radius: 6;
-    -fx-background-radius: 6;
-    -fx-text-fill: white;
-    -fx-font-family: 'DM Sans', sans-serif;
-    -fx-font-size: 13px;
-    -fx-font-weight: 600;
+.btn-modal-secondary {
+    -fx-background-color: #332615;
+    -fx-border-color: #4a3820;
+    -fx-text-fill: #c4a882;
+    -fx-background-radius: 8;
+    -fx-border-radius: 8;
+    -fx-font-weight: bold;
     -fx-padding: 10 20 10 20;
     -fx-cursor: hand;
 }
 
-.btn-modal-primary:hover {
-    -fx-background-color: #e07040;
-}
-
-/* ── Order Popup Window ──────────────────────────────── */
-.order-popup {
-    -fx-background-color: #2e2410;
-}
-
-.order-popup .popup-header {
-    -fx-border-color: #4a3820;
-    -fx-border-width: 0 0 1 0;
-    -fx-background-color: #2e2410;
-}
-
-.order-popup .popup-title {
-    -fx-font-family: 'Playfair Display', serif;
-    -fx-font-size: 20px;
-    -fx-font-weight: bold;
-    -fx-text-fill: #f5ede0;
-}
-
-.order-popup .popup-subtitle {
-    -fx-font-family: 'DM Sans', sans-serif;
-    -fx-font-size: 12px;
-    -fx-text-fill: #8a7055;
-}
-
-.order-popup .popup-scroll {
-    -fx-background-color: #2e2410;
-}
-
-.order-popup .popup-items {
-    -fx-padding: 16 20 16 20;
-    -fx-background-color: #2e2410;
-}
-
-.order-popup .popup-notes {
-    -fx-padding: 0 20 16 20;
-    -fx-background-color: #2e2410;
-}
-
-.order-popup .popup-notes-text {
-    -fx-font-family: 'DM Sans', sans-serif;
-    -fx-font-size: 13px;
-    -fx-font-style: italic;
-    -fx-text-fill: #c4a882;
-    -fx-background-color: rgba(212, 89, 30, 0.08);
-    -fx-padding: 10;
-    -fx-background-radius: 6;
-}
-
-.order-popup .popup-close {
-    -fx-background-color: #332615;
-    -fx-border-color: #4a3820;
-    -fx-border-width: 1;
-    -fx-border-radius: 6;
-    -fx-background-radius: 6;
-    -fx-text-fill: #c4a882;
-    -fx-font-family: 'DM Sans', sans-serif;
-    -fx-font-size: 12px;
-    -fx-font-weight: 600;
-    -fx-padding: 8 16 8 16;
-    -fx-cursor: hand;
-}
-
-.order-popup .popup-close:hover {
-    -fx-border-color: #8a7055;
+.btn-modal-secondary:hover {
+    -fx-background-color: #4a3820;
     -fx-text-fill: #f5ede0;
 }

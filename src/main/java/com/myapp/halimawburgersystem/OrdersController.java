@@ -349,19 +349,61 @@ public class OrdersController {
     @FXML
     private void onCancelOrder() {
         if (selectedOrder != null) {
-            Alert confirm = new Alert(Alert.AlertType.CONFIRMATION);
-            confirm.setTitle("Cancel Order");
-            confirm.setHeaderText("Cancel Order #" + String.format("%04d", selectedOrder.getOrderNumber()) + "?");
-            confirm.setContentText("This action cannot be undone.");
-            confirm.getDialogPane().setStyle("-fx-background-color: #2e2410; -fx-border-color: #4a3820; -fx-border-width: 1;");
+            boolean confirmed = showStyledConfirm(
+                "VOID ORDER", 
+                "Are you sure you want to void Order #" + String.format("%04d", selectedOrder.getOrderNumber()) + "?",
+                "This will mark the order as cancelled and cannot be undone."
+            );
             
-            if (confirm.showAndWait().get() == ButtonType.OK) {
+            if (confirmed) {
                 if (orderDAO.updateStatus(selectedOrder.getId(), "Cancelled")) {
                     loadOrders();
                     onCloseDetails();
                 }
             }
         }
+    }
+
+    private boolean showStyledConfirm(String title, String header, String content) {
+        Alert alert = new Alert(Alert.AlertType.CONFIRMATION);
+        alert.setTitle(title);
+        alert.setHeaderText(null);
+        alert.setGraphic(null);
+        
+        // Style the DialogPane
+        DialogPane dialogPane = alert.getDialogPane();
+        dialogPane.getStylesheets().add(getClass().getResource("/css/common.css").toExternalForm());
+        dialogPane.getStylesheets().add(getClass().getResource("/css/dialog.css").toExternalForm());
+        dialogPane.getStyleClass().add("premium-dialog");
+        
+        VBox layout = new VBox(15);
+        layout.setPadding(new Insets(20));
+        layout.setAlignment(Pos.CENTER_LEFT);
+        
+        Label lblTitle = new Label(title);
+        lblTitle.getStyleClass().add("dialog-badge-danger");
+        
+        Label lblHeader = new Label(header);
+        lblHeader.getStyleClass().add("dialog-header-text");
+        lblHeader.setWrapText(true);
+        
+        Label lblContent = new Label(content);
+        lblContent.getStyleClass().add("dialog-content-text");
+        lblContent.setWrapText(true);
+        
+        layout.getChildren().addAll(lblTitle, lblHeader, lblContent);
+        dialogPane.setContent(layout);
+        
+        // Custom Buttons
+        Button okButton = (Button) dialogPane.lookupButton(ButtonType.OK);
+        okButton.setText("CONFIRM VOID");
+        okButton.getStyleClass().addAll("btn-dialog-danger");
+        
+        Button cancelButton = (Button) dialogPane.lookupButton(ButtonType.CANCEL);
+        cancelButton.setText("KEEP ORDER");
+        cancelButton.getStyleClass().addAll("btn-dialog-secondary");
+        
+        return alert.showAndWait().filter(response -> response == ButtonType.OK).isPresent();
     }
 
     @FXML
