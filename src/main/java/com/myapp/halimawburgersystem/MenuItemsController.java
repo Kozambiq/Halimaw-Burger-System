@@ -192,13 +192,15 @@ public class MenuItemsController {
         dialog.getDialogPane().setHeader(headerLabel);
 
         // --- Main Layout (Two Columns) ---
-        HBox mainLayout = new HBox(0);
-        mainLayout.setPadding(new Insets(20, 20, 20, 20));
+        HBox mainLayout = new HBox(32); // Use fixed spacing between cards
+        mainLayout.setPadding(new Insets(30, 40, 30, 40)); // Increased overall padding
+        mainLayout.setAlignment(javafx.geometry.Pos.TOP_CENTER);
 
         // LEFT COLUMN: Identity
-        VBox colLeft = new VBox(24);
+        VBox colLeft = new VBox(28); // Increased internal spacing
         colLeft.getStyleClass().addAll("dialog-col-left", "dialog-section-card");
-        colLeft.setPrefWidth(320);
+        colLeft.setPrefWidth(340);
+        colLeft.setFillWidth(true); // Ensure children fill width
 
         // Name Field
         VBox nameBox = new VBox(8);
@@ -207,6 +209,7 @@ public class MenuItemsController {
         TextField nameField = new TextField();
         nameField.setPromptText("e.g. Halimaw Signature Burger");
         nameField.getStyleClass().add("premium-field");
+        nameField.setMaxWidth(Double.MAX_VALUE);
         nameBox.getChildren().addAll(nameEyebrow, nameField);
 
         // Category Field
@@ -215,7 +218,7 @@ public class MenuItemsController {
         catEyebrow.getStyleClass().add("dialog-eyebrow");
         ComboBox<String> categoryCombo = new ComboBox<>();
         categoryCombo.getStyleClass().add("premium-combo");
-        categoryCombo.setPrefWidth(300);
+        categoryCombo.setMaxWidth(Double.MAX_VALUE); // Fill width
         categoryCombo.setPromptText("Select Category");
         categoryCombo.getItems().addAll(menuItemDAO.getAllCategories());
         catBox.getChildren().addAll(catEyebrow, categoryCombo);
@@ -227,17 +230,16 @@ public class MenuItemsController {
         TextField priceField = new TextField();
         priceField.setPromptText("0.00");
         priceField.getStyleClass().add("premium-field");
+        priceField.setMaxWidth(Double.MAX_VALUE);
         priceBox.getChildren().addAll(priceEyebrow, priceField);
 
         colLeft.getChildren().addAll(nameBox, catBox, priceBox);
 
-        Region colSpacer = new Region();
-        HBox.setHgrow(colSpacer, javafx.scene.layout.Priority.ALWAYS);
-
         // RIGHT COLUMN: Recipe Builder
         VBox colRight = new VBox(24);
         colRight.getStyleClass().addAll("dialog-col-right", "dialog-section-card");
-        colRight.setPrefWidth(380);
+        colRight.setPrefWidth(400);
+        colRight.setFillWidth(true);
 
         Label recipeEyebrow = new Label("RECIPE CONSTRUCTION");
         recipeEyebrow.getStyleClass().add("dialog-eyebrow");
@@ -254,12 +256,11 @@ public class MenuItemsController {
 
         TextField qtyField = new TextField();
         qtyField.getStyleClass().add("premium-field");
-        qtyField.setPrefWidth(60);
+        qtyField.setPrefWidth(70);
         qtyField.setPromptText("Qty");
 
         Button addBtn = new Button("ADD");
-        addBtn.getStyleClass().add("btn-primary");
-        addBtn.setStyle("-fx-padding: 8 16 8 16; -fx-font-size: 11px;");
+        addBtn.getStyleClass().add("btn-recipe-add");
 
         searchInputs.getChildren().addAll(ingSearch, qtyField, addBtn);
         searchArea.getChildren().addAll(recipeEyebrow, searchInputs);
@@ -267,7 +268,7 @@ public class MenuItemsController {
         // Current Recipe List (Chips)
         javafx.scene.control.ScrollPane recipeScroll = new javafx.scene.control.ScrollPane();
         recipeScroll.setFitToWidth(true);
-        recipeScroll.setPrefHeight(200);
+        recipeScroll.setPrefHeight(220);
         recipeScroll.setStyle("-fx-background-color: transparent; -fx-background: transparent; -fx-border-width: 0;");
         
         VBox ingredientChipContainer = new VBox(10);
@@ -276,7 +277,7 @@ public class MenuItemsController {
 
         colRight.getChildren().addAll(searchArea, recipeScroll);
 
-        mainLayout.getChildren().addAll(colLeft, colSpacer, colRight);
+        mainLayout.getChildren().addAll(colLeft, colRight);
 
         // --- Logic & Events ---
         List<MenuItemIngredient> ingredientDataList = new ArrayList<>();
@@ -334,9 +335,13 @@ public class MenuItemsController {
         dialog.getDialogPane().setContent(mainLayout);
         dialog.getDialogPane().getButtonTypes().addAll(javafx.scene.control.ButtonType.CANCEL, javafx.scene.control.ButtonType.OK);
 
+        // Styling Dialog Buttons
         Button okButton = (Button) dialog.getDialogPane().lookupButton(javafx.scene.control.ButtonType.OK);
         okButton.setText("SAVE ITEM");
-        okButton.getStyleClass().add("btn-primary");
+        okButton.getStyleClass().add("dialog-button-save");
+
+        Button cancelButton = (Button) dialog.getDialogPane().lookupButton(javafx.scene.control.ButtonType.CANCEL);
+        cancelButton.getStyleClass().add("dialog-button-cancel");
         
         dialog.setResultConverter(btn -> btn == javafx.scene.control.ButtonType.OK);
 

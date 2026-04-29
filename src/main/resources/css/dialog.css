@@ -27,7 +27,7 @@
     -fx-font-family: "DM Sans", sans-serif;
     -fx-font-size: 24px;
     -fx-font-weight: 800;
-    -fx-text-fill: #f5ede0;
+    -fx-text-fill: #c4a882; /* Softened from pure white to matches dashboard titles */
     -fx-letter-spacing: 0.02em;
 }
 
@@ -43,8 +43,8 @@
 .dialog-section-card {
     -fx-background-color: rgba(255, 255, 255, 0.02);
     -fx-background-radius: 12;
-    -fx-padding: 24;
-    -fx-border-color: rgba(200, 169, 122, 0.05);
+    -fx-padding: 24 32 24 32; /* Increased horizontal padding */
+    -fx-border-color: rgba(200, 169, 122, 0.1);
     -fx-border-width: 1;
     -fx-border-radius: 12;
 }
@@ -66,8 +66,7 @@
     -fx-text-fill: #f5ede0;
     -fx-font-size: 15px;
     -fx-padding: 10 4 10 4;
-    -fx-prompt-text-fill: #5c4828;
-    -fx-transition: 0.3s;
+    -fx-prompt-text-fill: #8a7055; /* Darkened from #5c4828 for better visibility */
 }
 
 .premium-field:focused {
@@ -77,12 +76,58 @@
 
 .premium-combo {
     -fx-background-color: #221a0e;
-    -fx-border-color: rgba(200, 169, 122, 0.1);
+    -fx-border-color: rgba(200, 169, 122, 0.2);
     -fx-border-width: 1;
     -fx-border-radius: 8;
     -fx-background-radius: 8;
     -fx-text-fill: white;
     -fx-padding: 4 8 4 8;
+}
+
+/* ── Dialog Action Buttons ── */
+.dialog-button-save {
+    -fx-background-color: #c8500a;
+    -fx-text-fill: white;
+    -fx-font-weight: 900;
+    -fx-letter-spacing: 0.05em;
+    -fx-padding: 12 32 12 32;
+    -fx-background-radius: 8;
+    -fx-cursor: hand;
+}
+
+.dialog-button-save:hover {
+    -fx-background-color: #e05c0a;
+    -fx-effect: dropshadow(gaussian, rgba(200, 80, 10, 0.4), 10, 0, 0, 0);
+}
+
+.dialog-button-cancel {
+    -fx-background-color: transparent;
+    -fx-text-fill: #8a7055;
+    -fx-font-weight: bold;
+    -fx-padding: 12 24 12 24;
+    -fx-border-color: #4a3820;
+    -fx-border-width: 1;
+    -fx-border-radius: 8;
+    -fx-cursor: hand;
+}
+
+.dialog-button-cancel:hover {
+    -fx-background-color: rgba(255, 255, 255, 0.03);
+    -fx-text-fill: #f5ede0;
+}
+
+.btn-recipe-add {
+    -fx-background-color: #c8500a;
+    -fx-text-fill: white;
+    -fx-font-weight: 800;
+    -fx-font-size: 11px;
+    -fx-padding: 8 16 8 16;
+    -fx-background-radius: 6;
+    -fx-cursor: hand;
+}
+
+.btn-recipe-add:hover {
+    -fx-background-color: #e05c0a;
 }
 
 /* ── Ingredient Chips ── */
