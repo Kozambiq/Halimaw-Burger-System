@@ -184,25 +184,67 @@
                 </HBox>
 
                 <HBox spacing="12" alignment="CENTER_LEFT">
-                    <HBox styleClass="filter-console" alignment="CENTER_LEFT" style="-fx-background-color: #221a0e; -fx-background-radius: 12; -fx-border-color: #332615; -fx-border-width: 1; -fx-padding: 4;">
-                        <TextField fx:id="searchField" promptText="Search menu items..." prefWidth="300" styleClass="search-field" style="-fx-background-color: transparent; -fx-border-width: 0;"/>
-                        <Region style="-fx-background-color: #332615; -fx-pref-width: 1; -fx-pref-height: 24;"/>
-                        <ComboBox fx:id="cmbCategoryFilter" promptText="Category" prefWidth="160" styleClass="filter-combo" style="-fx-background-color: transparent; -fx-border-width: 0;"/>
+                    <HBox styleClass="filter-console" alignment="CENTER_LEFT" prefHeight="42" spacing="8">
+                        <SVGPath content="M15.5 14h-.79l-.28-.27C15.41 12.59 16 11.11 16 9.5 16 5.91 13.09 3 9.5 3S3 5.91 3 9.5 5.91 16 9.5 16c1.61 0 3.09-.59 4.23-1.57l.27.28v.79l5 4.99L20.49 19l-4.99-5zm-6 0C7.01 14 5 11.99 5 9.5S7.01 5 9.5 5 14 7.01 14 9.5 11.99 14 9.5 14z" styleClass="search-icon-svg"/>
+                        <TextField fx:id="searchField" promptText="Search menu items..." prefWidth="300" styleClass="search-field" style="-fx-background-color: transparent; -fx-border-width: 0; -fx-padding: 0 0 0 4;"/>
+                        <Region style="-fx-background-color: #332615; -fx-pref-width: 1.5; -fx-pref-height: 20;"/>
+                        <ComboBox fx:id="cmbCategoryFilter" promptText="Category" prefWidth="150" styleClass="filter-combo" style="-fx-background-color: transparent; -fx-border-width: 0;"/>
                     </HBox>
                     <Button fx:id="btnSearch" text="SEARCH" styleClass="btn-search" onAction="#onSearchMenuItem" prefHeight="42"/>
                 </HBox>
 
-<StackPane VBox.vgrow="ALWAYS" maxHeight="Infinity" styleClass="table-wrap">
-                    <padding><Insets top="24" bottom="0"/></padding>
-                    <TableView fx:id="menuItemsTable" styleClass="menu-items-table" maxHeight="Infinity" VBox.vgrow="ALWAYS">
-                        <columns>
-                            <TableColumn text="NAME" fx:id="colName" prefWidth="1" minWidth="240" styleClass="cell-name"/>
-                            <TableColumn text="CATEGORY" fx:id="colCategory" prefWidth="1" minWidth="140" styleClass="cell-cat"/>
-                            <TableColumn text="PRICE" fx:id="colPrice" prefWidth="1" minWidth="100" styleClass="cell-price"/>
-                            <TableColumn text="AVAILABILITY" fx:id="colAvailability" prefWidth="1" minWidth="140"/>
-                            <TableColumn text="" fx:id="colActions" prefWidth="1" minWidth="80"/>
-                        </columns>
-                    </TableView>
+                <StackPane VBox.vgrow="ALWAYS" maxHeight="Infinity">
+                    <!-- Main Content Table -->
+                    <VBox spacing="0" styleClass="table-wrap">
+                        <TableView fx:id="menuItemsTable" styleClass="menu-items-table" maxHeight="Infinity" VBox.vgrow="ALWAYS">
+                            <columns>
+                                <TableColumn text="" fx:id="colThumbnail" prefWidth="64" minWidth="64" styleClass="cell-thumbnail"/>
+                                <TableColumn text="NAME" fx:id="colName" prefWidth="1" minWidth="240" styleClass="cell-name"/>
+                                <TableColumn text="CATEGORY" fx:id="colCategory" prefWidth="1" minWidth="140" styleClass="cell-cat"/>
+                                <TableColumn text="PRICE" fx:id="colPrice" prefWidth="1" minWidth="100" styleClass="cell-price"/>
+                                <TableColumn text="AVAILABILITY" fx:id="colAvailability" prefWidth="1" minWidth="140"/>
+                                <TableColumn text="" fx:id="colActions" prefWidth="1" minWidth="80"/>
+                            </columns>
+                        </TableView>
+                    </VBox>
+
+                    <!-- Slide-out Detail Panel (Hidden by default via managed/translateX) -->
+                    <HBox alignment="TOP_RIGHT" pickOnBounds="false">
+                        <VBox fx:id="detailPanel" styleClass="detail-drawer" prefWidth="400" managed="false" visible="false">
+                            <padding><Insets top="32" right="32" bottom="32" left="32"/></padding>
+                            <HBox alignment="CENTER_LEFT" spacing="12">
+                                <Button styleClass="btn-back" onAction="#onCloseDetails">
+                                    <graphic><SVGPath content="M20 11H7.83l5.59-5.59L12 4l-8 8 8 8 1.41-1.41L7.83 13H20v-2z" fill="#8a7055"/></graphic>
+                                </Button>
+                                <Label text="ITEM DETAILS" styleClass="eyebrow"/>
+                                <Region HBox.hgrow="ALWAYS"/>
+                                <Button styleClass="btn-drawer-edit" text="EDIT"/>
+                            </HBox>
+                            
+                            <VBox spacing="24" alignment="TOP_CENTER" style="-fx-padding: 32 0 0 0;">
+                                <StackPane styleClass="drawer-image-wrap" prefWidth="200" prefHeight="200">
+                                    <SVGPath content="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm0 18c-4.41 0-8-3.59-8-8s3.59-8 8-8 8 3.59 8 8-3.59 8-8 8zm-5-9h10v2H7z" scaleX="3" scaleY="3" fill="#332615"/>
+                                </StackPane>
+                                
+                                <VBox spacing="8" alignment="CENTER">
+                                    <Label fx:id="detailName" text="Halimaw Burger" styleClass="drawer-title"/>
+                                    <Label fx:id="detailCategory" text="Burgers" styleClass="badge badge-amber"/>
+                                </VBox>
+                                
+                                <VBox spacing="16" alignment="TOP_LEFT" styleClass="drawer-info-box" fillWidth="true">
+                                    <HBox alignment="CENTER_LEFT">
+                                        <Label text="BASE PRICE" styleClass="field-label"/>
+                                        <Region HBox.hgrow="ALWAYS"/>
+                                        <Label fx:id="detailPrice" text="₱150.00" styleClass="drawer-price"/>
+                                    </HBox>
+                                    <VBox spacing="8">
+                                        <Label text="INGREDIENTS" styleClass="field-label"/>
+                                        <VBox fx:id="detailIngredientsList" spacing="4"/>
+                                    </VBox>
+                                </VBox>
+                            </VBox>
+                        </VBox>
+                    </HBox>
                 </StackPane>
             </VBox>
         </StackPane>

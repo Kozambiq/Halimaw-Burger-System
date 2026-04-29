@@ -156,6 +156,10 @@ public class MenuItemsController {
     }
 
     @FXML
+    private void onCloseDetails() {
+    }
+
+    @FXML
     private void onSearchMenuItem() {
         applyFilters();
     }
@@ -591,7 +595,7 @@ javafx.scene.control.ListView<String> suggestionList = new javafx.scene.control.
         VBox ingredientList = new VBox(5);
         final List<MenuItemIngredient> ingredientDataList = new ArrayList<>(currentIngredients);
         for (MenuItemIngredient ing : currentIngredients) {
-            addIngredientRow(ingredientList, ing, ingredientDataList);
+            addIngredientRow(ingredientList, ing, ingredientDataList, fieldStyle);
         }
 
         List<String> allIngredientNames = menuItemDAO.searchIngredients("").stream()
