@@ -22,6 +22,7 @@ import javafx.scene.control.cell.PropertyValueFactory;
 import javafx.scene.control.MenuItem;
 import javafx.scene.layout.GridPane;
 import javafx.scene.layout.HBox;
+import javafx.scene.layout.Region;
 import javafx.scene.layout.VBox;
 import javafx.scene.paint.Color;
 import javafx.scene.layout.StackPane;
@@ -60,6 +61,7 @@ public class MenuItemsController {
     // Category Sidebar Buttons
     @FXML private Button catAll;
     @FXML private Button catBurgers;
+    @FXML private Button catChicken;
     @FXML private Button catSides;
     @FXML private Button catDrinks;
 
@@ -103,6 +105,7 @@ public class MenuItemsController {
         // Update button highlights
         catAll.getStyleClass().remove("cat-nav-item-active");
         catBurgers.getStyleClass().remove("cat-nav-item-active");
+        catChicken.getStyleClass().remove("cat-nav-item-active");
         catSides.getStyleClass().remove("cat-nav-item-active");
         catDrinks.getStyleClass().remove("cat-nav-item-active");
         
@@ -176,108 +179,133 @@ public class MenuItemsController {
     @FXML
     private void onAddItem() {
         Dialog<Boolean> dialog = new Dialog<>();
-        dialog.setTitle("Add Menu Item");
+        dialog.setTitle("CREATE NEW ITEM");
         dialog.getDialogPane().getStyleClass().add("dialog-pane");
 
-        GridPane grid = new GridPane();
-        grid.setHgap(16);
-        grid.setVgap(8);
-        grid.setPadding(new Insets(20, 0, 0, 0));
+        // Load Stylesheets
+        dialog.getDialogPane().getStylesheets().add(getClass().getResource("/css/common.css").toExternalForm());
+        dialog.getDialogPane().getStylesheets().add(getClass().getResource("/css/dialog.css").toExternalForm());
 
+        // --- Header Setup ---
+        Label headerLabel = new Label("Create New Item");
+        headerLabel.getStyleClass().add("dialog-header-text");
+        dialog.getDialogPane().setHeader(headerLabel);
+
+        // --- Main Layout (Two Columns) ---
+        HBox mainLayout = new HBox(0);
+        mainLayout.setPadding(new Insets(20, 20, 20, 20));
+
+        // LEFT COLUMN: Identity
+        VBox colLeft = new VBox(24);
+        colLeft.getStyleClass().addAll("dialog-col-left", "dialog-section-card");
+        colLeft.setPrefWidth(320);
+
+        // Name Field
+        VBox nameBox = new VBox(8);
+        Label nameEyebrow = new Label("ITEM NAME");
+        nameEyebrow.getStyleClass().add("dialog-eyebrow");
         TextField nameField = new TextField();
-        nameField.setPromptText("Item name (e.g. Halimaw Burger)");
-        nameField.getStyleClass().add("dialog-field");
-        nameField.setPrefWidth(300);
-        Label nameError = new Label("");
-        nameError.getStyleClass().add("dialog-error");
-        nameError.setVisible(false);
-        nameError.setManaged(false);
+        nameField.setPromptText("e.g. Halimaw Signature Burger");
+        nameField.getStyleClass().add("premium-field");
+        nameBox.getChildren().addAll(nameEyebrow, nameField);
 
+        // Category Field
+        VBox catBox = new VBox(8);
+        Label catEyebrow = new Label("CATEGORY");
+        catEyebrow.getStyleClass().add("dialog-eyebrow");
         ComboBox<String> categoryCombo = new ComboBox<>();
-        categoryCombo.getStyleClass().add("dialog-field");
+        categoryCombo.getStyleClass().add("premium-combo");
         categoryCombo.setPrefWidth(300);
-        categoryCombo.setPromptText("Select category");
+        categoryCombo.setPromptText("Select Category");
         categoryCombo.getItems().addAll(menuItemDAO.getAllCategories());
+        catBox.getChildren().addAll(catEyebrow, categoryCombo);
 
+        // Price Field
+        VBox priceBox = new VBox(8);
+        Label priceEyebrow = new Label("BASE PRICE (PHP)");
+        priceEyebrow.getStyleClass().add("dialog-eyebrow");
         TextField priceField = new TextField();
         priceField.setPromptText("0.00");
-        priceField.getStyleClass().add("dialog-field");
-        priceField.setPrefWidth(300);
-        Label priceError = new Label("");
-        priceError.getStyleClass().add("dialog-error");
-        priceError.setVisible(false);
-        priceError.setManaged(false);
+        priceField.getStyleClass().add("premium-field");
+        priceBox.getChildren().addAll(priceEyebrow, priceField);
 
-        grid.add(new Label("NAME") {{ getStyleClass().add("dialog-label"); }}, 0, 0);
-        grid.add(nameField, 1, 0);
-        grid.add(nameError, 1, 1);
-        grid.add(new Label("CATEGORY") {{ getStyleClass().add("dialog-label"); }}, 0, 2);
-        grid.add(categoryCombo, 1, 2);
-        grid.add(new Label("PRICE") {{ getStyleClass().add("dialog-label"); }}, 0, 3);
-        grid.add(priceField, 1, 3);
-        grid.add(priceError, 1, 4);
+        colLeft.getChildren().addAll(nameBox, catBox, priceBox);
 
-        VBox content = new VBox(20);
-        content.getChildren().add(grid);
+        Region colSpacer = new Region();
+        HBox.setHgrow(colSpacer, javafx.scene.layout.Priority.ALWAYS);
 
-        Label ingredientsLabel = new Label("RECIPE INGREDIENTS");
-        ingredientsLabel.getStyleClass().add("dialog-label");
+        // RIGHT COLUMN: Recipe Builder
+        VBox colRight = new VBox(24);
+        colRight.getStyleClass().addAll("dialog-col-right", "dialog-section-card");
+        colRight.setPrefWidth(380);
 
-        HBox searchBox = new HBox(10);
-        searchBox.setAlignment(javafx.geometry.Pos.CENTER_LEFT);
+        Label recipeEyebrow = new Label("RECIPE CONSTRUCTION");
+        recipeEyebrow.getStyleClass().add("dialog-eyebrow");
+
+        // Ingredient Search & Add
+        VBox searchArea = new VBox(12);
+        HBox searchInputs = new HBox(10);
+        searchInputs.setAlignment(javafx.geometry.Pos.CENTER_LEFT);
 
         TextField ingSearch = new TextField();
-        ingSearch.getStyleClass().add("dialog-field");
-        ingSearch.setPrefWidth(200);
-        ingSearch.setPromptText("Search ingredient...");
-
-        javafx.scene.control.ListView<String> ingSuggestionList = new javafx.scene.control.ListView<>();
-        ingSuggestionList.getStyleClass().add("suggestion-list");
-        ingSuggestionList.setFixedCellSize(36);
-        ingSuggestionList.setMaxHeight(160);
-        ingSuggestionList.setPrefWidth(220);
-
-        javafx.stage.Popup ingSuggestionPopup = new javafx.stage.Popup();
-        ingSuggestionPopup.setAutoHide(true);
-        ingSuggestionPopup.getContent().add(ingSuggestionList);
+        ingSearch.getStyleClass().add("premium-field");
+        ingSearch.setPromptText("Search Ingredient...");
+        HBox.setHgrow(ingSearch, javafx.scene.layout.Priority.ALWAYS);
 
         TextField qtyField = new TextField();
-        qtyField.getStyleClass().add("dialog-field");
-        qtyField.setPrefWidth(80);
+        qtyField.getStyleClass().add("premium-field");
+        qtyField.setPrefWidth(60);
         qtyField.setPromptText("Qty");
 
         Button addBtn = new Button("ADD");
-        addBtn.getStyleClass().addAll("btn-primary");
+        addBtn.getStyleClass().add("btn-primary");
         addBtn.setStyle("-fx-padding: 8 16 8 16; -fx-font-size: 11px;");
+
+        searchInputs.getChildren().addAll(ingSearch, qtyField, addBtn);
+        searchArea.getChildren().addAll(recipeEyebrow, searchInputs);
+
+        // Current Recipe List (Chips)
+        javafx.scene.control.ScrollPane recipeScroll = new javafx.scene.control.ScrollPane();
+        recipeScroll.setFitToWidth(true);
+        recipeScroll.setPrefHeight(200);
+        recipeScroll.setStyle("-fx-background-color: transparent; -fx-background: transparent; -fx-border-width: 0;");
         
-        Label qtyError = new Label("");
-        qtyError.getStyleClass().add("dialog-error");
-        qtyError.setVisible(false);
-        qtyError.setManaged(false);
+        VBox ingredientChipContainer = new VBox(10);
+        ingredientChipContainer.setPadding(new Insets(4, 0, 0, 0));
+        recipeScroll.setContent(ingredientChipContainer);
 
-        searchBox.getChildren().addAll(ingSearch, qtyField, addBtn, qtyError);
+        colRight.getChildren().addAll(searchArea, recipeScroll);
 
-        VBox ingredientList = new VBox(8);
+        mainLayout.getChildren().addAll(colLeft, colSpacer, colRight);
+
+        // --- Logic & Events ---
         List<MenuItemIngredient> ingredientDataList = new ArrayList<>();
-
         List<String> allIngredientNames = menuItemDAO.searchIngredients("").stream().map(Ingredient::getName).collect(Collectors.toList());
+
+        // Ingredient Autocomplete (Reusing logic but with new UI)
+        javafx.scene.control.ListView<String> ingSuggestionList = new javafx.scene.control.ListView<>();
+        ingSuggestionList.getStyleClass().add("suggestion-list");
+        ingSuggestionList.setFixedCellSize(36);
+        javafx.stage.Popup suggestionPopup = new javafx.stage.Popup();
+        suggestionPopup.setAutoHide(true);
+        suggestionPopup.getContent().add(ingSuggestionList);
 
         ingSearch.textProperty().addListener(obs -> {
             String q = ingSearch.getText().trim().toLowerCase();
-            if (q.isEmpty()) { ingSuggestionPopup.hide(); return; }
+            if (q.isEmpty()) { suggestionPopup.hide(); return; }
             List<String> matches = allIngredientNames.stream().filter(n -> n.toLowerCase().contains(q)).collect(Collectors.toList());
             if (!matches.isEmpty()) {
                 ingSuggestionList.setItems(FXCollections.observableArrayList(matches));
                 ingSuggestionList.setPrefHeight(Math.min(matches.size(), 5) * 36 + 2);
                 javafx.geometry.Bounds bounds = ingSearch.localToScreen(ingSearch.getBoundsInLocal());
-                ingSuggestionPopup.show(ingSearch, bounds.getMinX(), bounds.getMaxY());
-            } else { ingSuggestionPopup.hide(); }
+                suggestionPopup.show(ingSearch, bounds.getMinX(), bounds.getMaxY());
+            } else { suggestionPopup.hide(); }
         });
 
         ingSuggestionList.setOnMouseClicked(e -> {
             if (!ingSuggestionList.getSelectionModel().isEmpty()) {
                 ingSearch.setText(ingSuggestionList.getSelectionModel().getSelectedItem());
-                ingSuggestionPopup.hide();
+                suggestionPopup.hide();
             }
         });
 
@@ -285,12 +313,7 @@ public class MenuItemsController {
             String txt = ingSearch.getText().trim();
             String qtxt = qtyField.getText().trim();
             if (txt.isEmpty() || qtxt.isEmpty()) return;
-            if (!menuItemDAO.ingredientExistsByName(txt)) return;
             
-            for (MenuItemIngredient ex : ingredientDataList) {
-                if (ex.getIngredientName().equalsIgnoreCase(txt)) return;
-            }
-
             try {
                 double q = Double.parseDouble(qtxt);
                 List<Ingredient> res = menuItemDAO.searchIngredients(txt);
@@ -298,16 +321,17 @@ public class MenuItemsController {
                     Ingredient i = res.get(0);
                     MenuItemIngredient mi = new MenuItemIngredient(i.getId(), i.getName(), i.getUnit(), q);
                     ingredientDataList.add(mi);
-                    addIngredientRow(ingredientList, mi, ingredientDataList, "");
-                    ingSearch.clear(); qtyField.clear(); qtyError.setVisible(false);
+                    
+                    // Add Chip UI
+                    HBox chip = createIngredientChip(mi, ingredientDataList, ingredientChipContainer);
+                    ingredientChipContainer.getChildren().add(chip);
+                    
+                    ingSearch.clear(); qtyField.clear();
                 }
             } catch (Exception ex) {}
         });
 
-        content.getChildren().addAll(ingredientsLabel, searchBox, ingredientList);
-        dialog.getDialogPane().setContent(content);
-        dialog.getDialogPane().setMinWidth(550);
-        dialog.getDialogPane().setMinHeight(400);
+        dialog.getDialogPane().setContent(mainLayout);
         dialog.getDialogPane().getButtonTypes().addAll(javafx.scene.control.ButtonType.CANCEL, javafx.scene.control.ButtonType.OK);
 
         Button okButton = (Button) dialog.getDialogPane().lookupButton(javafx.scene.control.ButtonType.OK);
@@ -336,6 +360,34 @@ public class MenuItemsController {
         });
 
         dialog.showAndWait();
+    }
+
+    private HBox createIngredientChip(MenuItemIngredient mi, List<MenuItemIngredient> dataList, VBox container) {
+        HBox chip = new HBox(12);
+        chip.setAlignment(javafx.geometry.Pos.CENTER_LEFT);
+        chip.getStyleClass().add("ingredient-chip");
+
+        Label name = new Label(mi.getIngredientName().toUpperCase());
+        name.getStyleClass().add("chip-name");
+
+        Region spacer = new Region();
+        HBox.setHgrow(spacer, javafx.scene.layout.Priority.ALWAYS);
+
+        StackPane qtyPill = new StackPane();
+        qtyPill.getStyleClass().add("chip-qty-pill");
+        Label qtyText = new Label(mi.getQuantity() + " " + mi.getUnit());
+        qtyText.getStyleClass().add("chip-qty-text");
+        qtyPill.getChildren().add(qtyText);
+
+        Button removeBtn = new Button("✕");
+        removeBtn.getStyleClass().add("btn-chip-remove");
+        removeBtn.setOnAction(e -> {
+            dataList.remove(mi);
+            container.getChildren().remove(chip);
+        });
+
+        chip.getChildren().addAll(name, spacer, qtyPill, removeBtn);
+        return chip;
     }
 
     public void setActiveNav(String navName) {
