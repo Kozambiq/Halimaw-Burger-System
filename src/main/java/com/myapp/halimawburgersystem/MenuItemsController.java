@@ -24,6 +24,7 @@ import javafx.scene.layout.GridPane;
 import javafx.scene.layout.HBox;
 import javafx.scene.layout.Region;
 import javafx.scene.layout.VBox;
+import javafx.scene.shape.SVGPath;
 import javafx.scene.paint.Color;
 import javafx.scene.layout.StackPane;
 import javafx.util.Callback;
@@ -98,6 +99,9 @@ public class MenuItemsController {
     }
 
     @FXML
+    private HBox searchBarContainer;
+
+    @FXML
     private void onCategorySelect(javafx.event.ActionEvent event) {
         Button source = (Button) event.getSource();
         selectedCategory = source.getText().trim();
@@ -117,8 +121,9 @@ public class MenuItemsController {
     private void setupSearchAutocomplete() {
         javafx.scene.control.ListView<String> suggestionList = new javafx.scene.control.ListView<>();
         suggestionList.getStyleClass().add("suggestion-list");
-        suggestionList.setFixedCellSize(36);
-        suggestionList.setMaxHeight(200);
+        suggestionList.getStylesheets().add(getClass().getResource("/css/common.css").toExternalForm());
+        suggestionList.setFixedCellSize(40);
+        suggestionList.setMaxHeight(240);
         suggestionList.setPrefWidth(280);
 
         javafx.stage.Popup suggestionPopup = new javafx.stage.Popup();
@@ -142,9 +147,10 @@ public class MenuItemsController {
             if (!matches.isEmpty()) {
                 int rowCount = Math.min(matches.size(), 6);
                 suggestionList.setItems(FXCollections.observableArrayList(matches));
-                suggestionList.setPrefHeight(rowCount * 36 + 2);
-                javafx.geometry.Bounds bounds = searchField.localToScreen(searchField.getBoundsInLocal());
-                suggestionPopup.show(searchField, bounds.getMinX(), bounds.getMaxY());
+                suggestionList.setPrefHeight(rowCount * 40 + 8);
+                suggestionList.setPrefWidth(searchBarContainer.getWidth());
+                javafx.geometry.Bounds bounds = searchBarContainer.localToScreen(searchBarContainer.getBoundsInLocal());
+                suggestionPopup.show(searchBarContainer, bounds.getMinX(), bounds.getMaxY() + 4);
             } else {
                 suggestionPopup.hide();
             }
@@ -246,13 +252,29 @@ public class MenuItemsController {
 
         // Ingredient Search & Add
         VBox searchArea = new VBox(12);
+        
+        // Wrapped Search Bar
         HBox searchInputs = new HBox(10);
         searchInputs.setAlignment(javafx.geometry.Pos.CENTER_LEFT);
 
+        HBox ingSearchWrapper = new HBox(10);
+        ingSearchWrapper.getStyleClass().add("search-bar-group");
+        ingSearchWrapper.setAlignment(javafx.geometry.Pos.CENTER_LEFT);
+        HBox.setHgrow(ingSearchWrapper, javafx.scene.layout.Priority.ALWAYS);
+
+        SVGPath searchIcon = new SVGPath();
+        searchIcon.setContent("M15.5 14h-.79l-.28-.27C15.41 12.59 16 11.11 16 9.5 16 5.91 13.09 3 9.5 3S3 5.91 3 9.5 5.91 16 9.5 16c1.61 0 3.09-.59 4.23-1.57l.27.28v.79l5 4.99L20.49 19l-4.99-5zm-6 0C7.01 14 5 11.99 5 9.5S7.01 5 9.5 5 14 7.01 14 9.5 11.99 14 9.5 14z");
+        searchIcon.getStyleClass().add("search-icon-svg");
+        searchIcon.setScaleX(0.7);
+        searchIcon.setScaleY(0.7);
+
         TextField ingSearch = new TextField();
         ingSearch.getStyleClass().add("premium-field");
+        ingSearch.setStyle("-fx-background-color: transparent; -fx-border-width: 0; -fx-padding: 8 0 8 0;");
         ingSearch.setPromptText("Search Ingredient...");
         HBox.setHgrow(ingSearch, javafx.scene.layout.Priority.ALWAYS);
+        
+        ingSearchWrapper.getChildren().addAll(searchIcon, ingSearch);
 
         TextField qtyField = new TextField();
         qtyField.getStyleClass().add("premium-field");
@@ -262,7 +284,7 @@ public class MenuItemsController {
         Button addBtn = new Button("ADD");
         addBtn.getStyleClass().add("btn-recipe-add");
 
-        searchInputs.getChildren().addAll(ingSearch, qtyField, addBtn);
+        searchInputs.getChildren().addAll(ingSearchWrapper, qtyField, addBtn);
         searchArea.getChildren().addAll(recipeEyebrow, searchInputs);
 
         // Current Recipe List (Chips)
@@ -286,7 +308,8 @@ public class MenuItemsController {
         // Ingredient Autocomplete (Reusing logic but with new UI)
         javafx.scene.control.ListView<String> ingSuggestionList = new javafx.scene.control.ListView<>();
         ingSuggestionList.getStyleClass().add("suggestion-list");
-        ingSuggestionList.setFixedCellSize(36);
+        ingSuggestionList.getStylesheets().add(getClass().getResource("/css/common.css").toExternalForm());
+        ingSuggestionList.setFixedCellSize(40);
         javafx.stage.Popup suggestionPopup = new javafx.stage.Popup();
         suggestionPopup.setAutoHide(true);
         suggestionPopup.getContent().add(ingSuggestionList);
@@ -297,9 +320,10 @@ public class MenuItemsController {
             List<String> matches = allIngredientNames.stream().filter(n -> n.toLowerCase().contains(q)).collect(Collectors.toList());
             if (!matches.isEmpty()) {
                 ingSuggestionList.setItems(FXCollections.observableArrayList(matches));
-                ingSuggestionList.setPrefHeight(Math.min(matches.size(), 5) * 36 + 2);
-                javafx.geometry.Bounds bounds = ingSearch.localToScreen(ingSearch.getBoundsInLocal());
-                suggestionPopup.show(ingSearch, bounds.getMinX(), bounds.getMaxY());
+                ingSuggestionList.setPrefHeight(Math.min(matches.size(), 5) * 40 + 8);
+                ingSuggestionList.setPrefWidth(ingSearchWrapper.getWidth());
+                javafx.geometry.Bounds bounds = ingSearchWrapper.localToScreen(ingSearchWrapper.getBoundsInLocal());
+                suggestionPopup.show(ingSearchWrapper, bounds.getMinX(), bounds.getMaxY() + 4);
             } else { suggestionPopup.hide(); }
         });
 
@@ -615,24 +639,15 @@ public class MenuItemsController {
         searchField.setPromptText("Search ingredient...");
 
 javafx.scene.control.ListView<String> suggestionList = new javafx.scene.control.ListView<>();
-        suggestionList.getStyleClass().add("suggestion-list");
-        suggestionList.setFixedCellSize(32);
-        suggestionList.setMaxHeight(160);
-        suggestionList.setPrefWidth(220);
-        suggestionList.setStyle("-fx-background-color: #2e2410; -fx-border-color: #4a3820; -fx-border-width: 1; -fx-border-radius: 6; -fx-background-radius: 6;");
-        suggestionList.setCellFactory(list -> new javafx.scene.control.ListCell<String>() {
-            @Override
-            protected void updateItem(String item, boolean empty) {
-                super.updateItem(item, empty);
-                if (empty || item == null) { setText(null); setGraphic(null); }
-                else { setText(item); setStyle("-fx-background-color: transparent; -fx-text-fill: #f5ede0; -fx-font-size: 13px; -fx-padding: 8 16 8 16; -fx-wrap-text: true;"); }
-            }
-        });
+suggestionList.getStyleClass().add("suggestion-list");
+suggestionList.getStylesheets().add(getClass().getResource("/css/common.css").toExternalForm());
+suggestionList.setFixedCellSize(40);
+suggestionList.setMaxHeight(200);
+suggestionList.setPrefWidth(220);
 
-        javafx.stage.Popup suggestionPopup = new javafx.stage.Popup();
-        suggestionPopup.setAutoHide(true);
-        suggestionPopup.getContent().add(suggestionList);
-
+javafx.stage.Popup suggestionPopup = new javafx.stage.Popup();
+suggestionPopup.setAutoHide(true);
+suggestionPopup.getContent().add(suggestionList);
         suggestionList.setOnMousePressed(e -> {
             if (!suggestionList.getSelectionModel().isEmpty()) {
                 searchField.setText(suggestionList.getSelectionModel().getSelectedItem());
@@ -683,9 +698,9 @@ javafx.scene.control.ListView<String> suggestionList = new javafx.scene.control.
             if (!matches.isEmpty()) {
                 int rowCount = Math.min(matches.size(), 5);
                 suggestionList.setItems(FXCollections.observableArrayList(matches));
-                suggestionList.setPrefHeight(rowCount * 32 + 4);
+                suggestionList.setPrefHeight(rowCount * 40 + 8);
                 javafx.geometry.Bounds bounds = searchField.localToScreen(searchField.getBoundsInLocal());
-                suggestionPopup.show(searchField, bounds.getMinX(), bounds.getMaxY());
+                suggestionPopup.show(searchField, bounds.getMinX(), bounds.getMaxY() + 4);
             } else {
                 suggestionPopup.hide();
             }

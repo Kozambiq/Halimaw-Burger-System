@@ -50,3 +50,49 @@
 .text-light {
     -fx-text-fill: #f5ede0;
 }
+
+/* ── Autocomplete / Suggestion List ───────────────────────── */
+.suggestion-list {
+    -fx-background-color: #2e2410;
+    -fx-border-color: #c8500a;
+    -fx-border-width: 1;
+    -fx-border-radius: 12;
+    -fx-background-radius: 12;
+    -fx-padding: 4;
+    -fx-effect: dropshadow(gaussian, rgba(0,0,0,0.6), 30, 0, 0, 15);
+}
+
+.suggestion-list .list-cell {
+    -fx-background-color: transparent;
+    -fx-text-fill: #f5ede0;
+    -fx-font-size: 13px;
+    -fx-font-family: "DM Sans", sans-serif;
+    -fx-padding: 10 16 10 16;
+    -fx-cursor: hand;
+    -fx-background-radius: 8;
+}
+
+.suggestion-list .list-cell:hover {
+    -fx-background-color: rgba(200, 80, 10, 0.15);
+    -fx-text-fill: #f5ede0;
+}
+
+.suggestion-list .list-cell:selected {
+    -fx-background-color: #c8500a;
+    -fx-text-fill: white;
+    -fx-font-weight: bold;
+}
+
+/* ── Standard Search Bar ──────────────────────────────────── */
+.search-bar-group {
+    -fx-background-color: #221a0e;
+    -fx-background-radius: 12;
+    -fx-border-color: #332615;
+    -fx-border-width: 1.5;
+    -fx-padding: 4 12 4 12;
+}
+
+.search-bar-group:focused-within {
+    -fx-border-color: #c8500a;
+    -fx-background-color: #281e10;
+}
