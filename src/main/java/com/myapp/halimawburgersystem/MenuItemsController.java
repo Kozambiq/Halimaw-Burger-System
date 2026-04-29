@@ -38,6 +38,7 @@ public class MenuItemsController {
     @FXML private Label lblLowStock;
     @FXML private Label lblOutOfStock;
     @FXML private TableView<MenuItemModel> menuItemsTable;
+    @FXML private TableColumn<MenuItemModel, String> colThumbnail;
     @FXML private TableColumn<MenuItemModel, String> colName;
     @FXML private TableColumn<MenuItemModel, String> colCategory;
     @FXML private TableColumn<MenuItemModel, String> colPrice;
@@ -54,13 +55,20 @@ public class MenuItemsController {
     @FXML private Button btnStaff;
 
     @FXML private TextField searchField;
-    @FXML private ComboBox<String> cmbCategoryFilter;
     @FXML private Button btnSearch;
     @FXML private Button btnAddItem;
+
+    // Category Sidebar Buttons
+    @FXML private Button catAll;
+    @FXML private Button catBurgers;
+    @FXML private Button catChicken;
+    @FXML private Button catSides;
+    @FXML private Button catDrinks;
 
     private MenuItemDAO menuItemDAO = new MenuItemDAO();
     private boolean alreadyLoaded = false;
     private List<MenuItemModel> allMenuItems;
+    private String selectedCategory = "All Items";
 
     @FXML
     public void initialize() {
@@ -68,38 +76,42 @@ public class MenuItemsController {
         alreadyLoaded = true;
 
         setActiveNav("Menu Items");
-        setupCategoryFilter();
         setupTableColumns();
         setupSearchAutocomplete();
         loadMenuItems();
     }
 
-    private void setupCategoryFilter() {
-        if (cmbCategoryFilter == null) return;
-        List<String> categories = new ArrayList<>();
-        categories.add("All Categories");
-        categories.addAll(menuItemDAO.getAllCategories());
-        cmbCategoryFilter.setItems(FXCollections.observableArrayList(categories));
-        cmbCategoryFilter.getSelectionModel().select(0);
-        
-        cmbCategoryFilter.setOnAction(e -> applyFilters());
-    }
-
     private void applyFilters() {
         String query = searchField.getText().trim().toLowerCase();
-        String category = cmbCategoryFilter.getValue();
         
         if (allMenuItems == null) return;
         
         List<MenuItemModel> filtered = allMenuItems.stream()
             .filter(item -> {
                 boolean matchesSearch = query.isEmpty() || item.getName().toLowerCase().contains(query);
-                boolean matchesCat = category == null || "All Categories".equals(category) || item.getCategory().equals(category);
+                boolean matchesCat = selectedCategory.equals("All Items") || item.getCategory().equalsIgnoreCase(selectedCategory);
                 return matchesSearch && matchesCat;
             })
             .collect(Collectors.toList());
             
         menuItemsTable.setItems(FXCollections.observableArrayList(filtered));
+    }
+
+    @FXML
+    private void onCategorySelect(javafx.event.ActionEvent event) {
+        Button source = (Button) event.getSource();
+        selectedCategory = source.getText().trim();
+        
+        // Update button highlights
+        catAll.getStyleClass().remove("cat-nav-item-active");
+        catBurgers.getStyleClass().remove("cat-nav-item-active");
+        catChicken.getStyleClass().remove("cat-nav-item-active");
+        catSides.getStyleClass().remove("cat-nav-item-active");
+        catDrinks.getStyleClass().remove("cat-nav-item-active");
+        
+        source.getStyleClass().add("cat-nav-item-active");
+        
+        applyFilters();
     }
 
     private void setupSearchAutocomplete() {
@@ -370,6 +382,44 @@ public class MenuItemsController {
     }
 
     private void setupTableColumns() {
+        colThumbnail.setCellFactory(col -> new TableCell<MenuItemModel, String>() {
+            @Override
+            protected void updateItem(String item, boolean empty) {
+                super.updateItem(item, empty);
+                if (empty) {
+                    setGraphic(null);
+                } else {
+                    MenuItemModel model = getTableView().getItems().get(getIndex());
+                    String name = model.getName();
+                    String initials = name.substring(0, Math.min(2, name.length())).toUpperCase();
+                    
+                    StackPane badge = new StackPane();
+                    badge.getStyleClass().add("thumbnail-wrap");
+                    badge.setPrefSize(36, 36);
+                    badge.setMaxSize(36, 36);
+                    
+                    // Category-based colors for the placeholder
+                    String color = switch (model.getCategory().toLowerCase()) {
+                        case "burgers" -> "#c8500a";
+                        case "drinks" -> "#70b4e0";
+                        case "sides" -> "#7ec470";
+                        case "chicken" -> "#e8b84b";
+                        default -> "#8a7055";
+                    };
+                    
+                    badge.setStyle("-fx-background-color: rgba(" + hexToRgb(color) + ", 0.15); " +
+                                  "-fx-border-color: " + color + "; " +
+                                  "-fx-background-radius: 50; -fx-border-radius: 50; -fx-border-width: 1.5;");
+                    
+                    Label text = new Label(initials);
+                    text.setStyle("-fx-text-fill: " + color + "; -fx-font-size: 11px; -fx-font-weight: 800; -fx-font-family: 'DM Sans';");
+                    badge.getChildren().add(text);
+                    
+                    setGraphic(badge);
+                }
+            }
+        });
+
         colName.setCellValueFactory(new PropertyValueFactory<>("name"));
         colName.setCellFactory(col -> new TableCell<MenuItemModel, String>() {
             @Override protected void updateItem(String item, boolean empty) {
@@ -987,6 +1037,14 @@ javafx.scene.control.ListView<String> suggestionList = new javafx.scene.control.
         } catch (Exception e) {
             System.err.println("Error loading menu items: " + e.getMessage());
         }
+    }
+
+    private String hexToRgb(String hex) {
+        hex = hex.replace("#", "");
+        int r = Integer.parseInt(hex.substring(0, 2), 16);
+        int g = Integer.parseInt(hex.substring(2, 4), 16);
+        int b = Integer.parseInt(hex.substring(4, 6), 16);
+        return r + "," + g + "," + b;
     }
 
     @FXML

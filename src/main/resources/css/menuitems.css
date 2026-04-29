@@ -77,6 +77,102 @@
     -fx-border-width: 1;
 }
 
+/* ── Table Polish & Dividers ────────────────────────────── */
+.menu-items-table {
+    -fx-background-color: transparent;
+    -fx-border-width: 0;
+}
+
+.menu-items-table .column-header-background {
+    -fx-background-color: transparent;
+    -fx-padding: 0 0 12 0;
+}
+
+.menu-items-table .column-header {
+    -fx-background-color: transparent;
+    -fx-text-fill: #5c4828;
+    -fx-font-size: 11px;
+    -fx-font-weight: 800;
+    -fx-letter-spacing: 0.1em;
+    -fx-border-color: #4a3820;
+    -fx-border-width: 0 0 1 0;
+    -fx-padding: 0 0 12 0;
+}
+
+.menu-items-table .table-row-cell {
+    -fx-background-color: transparent;
+    -fx-border-color: #332615;
+    -fx-border-width: 0 0 1 0;
+    -fx-border-style: segments(4, 4); /* Perforated/Dashed look */
+}
+
+/* Zebra Striping */
+.menu-items-table .table-row-cell:odd {
+    -fx-background-color: rgba(255, 255, 255, 0.015);
+}
+
+.menu-items-table .table-row-cell:hover {
+    -fx-background-color: rgba(200, 80, 10, 0.04);
+    -fx-border-color: #c8500a;
+    -fx-border-style: solid;
+    -fx-border-width: 0 0 1 4; /* Highlight left side on hover */
+}
+
+.menu-items-table .table-cell {
+    -fx-padding: 16 8 16 8;
+    -fx-text-fill: #c4a882;
+    -fx-font-size: 14px;
+}
+
+.cell-name {
+    -fx-text-fill: #f5ede0 !important;
+    -fx-font-weight: 600;
+}
+
+.cell-price {
+    -fx-font-family: 'DM Mono', monospace;
+    -fx-text-fill: #c8500a !important;
+    -fx-font-weight: bold;
+}
+
+/* ── Category Sidebar ────────────────────────────────── */
+.category-sidebar {
+    -fx-background-color: #1a1208;
+    -fx-padding: 0 16 0 0;
+}
+
+.cat-nav-item {
+    -fx-background-color: transparent;
+    -fx-text-fill: #8a7055;
+    -fx-font-size: 13px;
+    -fx-font-family: 'DM Sans', sans-serif;
+    -fx-padding: 10 16 10 16;
+    -fx-cursor: hand;
+    -fx-alignment: CENTER_LEFT;
+    -fx-max-width: INFINITY;
+    -fx-background-radius: 8;
+}
+
+.cat-nav-item:hover {
+    -fx-background-color: #221a0e;
+    -fx-text-fill: #f5ede0;
+}
+
+.cat-nav-item-active {
+    -fx-background-color: rgba(200, 80, 10, 0.1);
+    -fx-text-fill: #c8500a;
+    -fx-font-weight: bold;
+}
+
+.cat-icon-svg {
+    -fx-fill: #5c4828;
+}
+
+.cat-nav-item:hover .cat-icon-svg,
+.cat-nav-item-active .cat-icon-svg {
+    -fx-fill: #c8500a;
+}
+
 /* ── Visual Thumbnails in Table ────────────────────────── */
 .cell-thumbnail {
     -fx-alignment: center;
