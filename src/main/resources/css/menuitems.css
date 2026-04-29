@@ -144,9 +144,9 @@
 .cat-nav-item {
     -fx-background-color: transparent;
     -fx-text-fill: #8a7055;
-    -fx-font-size: 13px;
+    -fx-font-size: 14px; /* Increased font size */
     -fx-font-family: 'DM Sans', sans-serif;
-    -fx-padding: 10 16 10 16;
+    -fx-padding: 10 16 10 16; /* Increased padding */
     -fx-cursor: hand;
     -fx-alignment: CENTER_LEFT;
     -fx-max-width: INFINITY;
@@ -165,12 +165,16 @@
 }
 
 .cat-icon-svg {
-    -fx-fill: #5c4828;
+    -fx-background-color: #5c4828;
+    -fx-min-width: 20; /* Increased icon size */
+    -fx-max-width: 20;
+    -fx-min-height: 20;
+    -fx-max-height: 20;
 }
 
 .cat-nav-item:hover .cat-icon-svg,
 .cat-nav-item-active .cat-icon-svg {
-    -fx-fill: #c8500a;
+    -fx-background-color: #c8500a;
 }
 
 /* ── Visual Thumbnails in Table ────────────────────────── */

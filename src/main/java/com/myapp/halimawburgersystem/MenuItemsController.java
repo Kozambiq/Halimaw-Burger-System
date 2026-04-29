@@ -38,7 +38,6 @@ public class MenuItemsController {
     @FXML private Label lblLowStock;
     @FXML private Label lblOutOfStock;
     @FXML private TableView<MenuItemModel> menuItemsTable;
-    @FXML private TableColumn<MenuItemModel, String> colThumbnail;
     @FXML private TableColumn<MenuItemModel, String> colName;
     @FXML private TableColumn<MenuItemModel, String> colCategory;
     @FXML private TableColumn<MenuItemModel, String> colPrice;
@@ -61,7 +60,6 @@ public class MenuItemsController {
     // Category Sidebar Buttons
     @FXML private Button catAll;
     @FXML private Button catBurgers;
-    @FXML private Button catChicken;
     @FXML private Button catSides;
     @FXML private Button catDrinks;
 
@@ -105,7 +103,6 @@ public class MenuItemsController {
         // Update button highlights
         catAll.getStyleClass().remove("cat-nav-item-active");
         catBurgers.getStyleClass().remove("cat-nav-item-active");
-        catChicken.getStyleClass().remove("cat-nav-item-active");
         catSides.getStyleClass().remove("cat-nav-item-active");
         catDrinks.getStyleClass().remove("cat-nav-item-active");
         
@@ -382,44 +379,6 @@ public class MenuItemsController {
     }
 
     private void setupTableColumns() {
-        colThumbnail.setCellFactory(col -> new TableCell<MenuItemModel, String>() {
-            @Override
-            protected void updateItem(String item, boolean empty) {
-                super.updateItem(item, empty);
-                if (empty) {
-                    setGraphic(null);
-                } else {
-                    MenuItemModel model = getTableView().getItems().get(getIndex());
-                    String name = model.getName();
-                    String initials = name.substring(0, Math.min(2, name.length())).toUpperCase();
-                    
-                    StackPane badge = new StackPane();
-                    badge.getStyleClass().add("thumbnail-wrap");
-                    badge.setPrefSize(36, 36);
-                    badge.setMaxSize(36, 36);
-                    
-                    // Category-based colors for the placeholder
-                    String color = switch (model.getCategory().toLowerCase()) {
-                        case "burgers" -> "#c8500a";
-                        case "drinks" -> "#70b4e0";
-                        case "sides" -> "#7ec470";
-                        case "chicken" -> "#e8b84b";
-                        default -> "#8a7055";
-                    };
-                    
-                    badge.setStyle("-fx-background-color: rgba(" + hexToRgb(color) + ", 0.15); " +
-                                  "-fx-border-color: " + color + "; " +
-                                  "-fx-background-radius: 50; -fx-border-radius: 50; -fx-border-width: 1.5;");
-                    
-                    Label text = new Label(initials);
-                    text.setStyle("-fx-text-fill: " + color + "; -fx-font-size: 11px; -fx-font-weight: 800; -fx-font-family: 'DM Sans';");
-                    badge.getChildren().add(text);
-                    
-                    setGraphic(badge);
-                }
-            }
-        });
-
         colName.setCellValueFactory(new PropertyValueFactory<>("name"));
         colName.setCellFactory(col -> new TableCell<MenuItemModel, String>() {
             @Override protected void updateItem(String item, boolean empty) {
