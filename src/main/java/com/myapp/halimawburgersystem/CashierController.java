@@ -59,7 +59,6 @@ public class CashierController {
     @FXML private Label lblStaffInitials;
     @FXML private Button btnCatAll;
     @FXML private Button btnCatBurgers;
-    @FXML private Button btnCatChicken;
     @FXML private Button btnCatSides;
     @FXML private Button btnCatDrinks;
     @FXML private Button btnCatOthers;
@@ -153,7 +152,7 @@ public class CashierController {
             }
 
             Map<String, List<MenuItemModel>> byCategory = new java.util.LinkedHashMap<>();
-            String[] categoryOrder = {"Burgers", "Chicken", "Sides", "Drinks", "Others"};
+            String[] categoryOrder = {"Burgers", "Sides", "Drinks", "Others"};
             for (String cat : categoryOrder) {
                 byCategory.put(cat, new ArrayList<>());
             }
@@ -504,7 +503,6 @@ public class CashierController {
         Button clickedBtn = (Button) event.getSource();
         btnCatAll.getStyleClass().remove("cat-btn-active");
         btnCatBurgers.getStyleClass().remove("cat-btn-active");
-        btnCatChicken.getStyleClass().remove("cat-btn-active");
         btnCatSides.getStyleClass().remove("cat-btn-active");
         btnCatDrinks.getStyleClass().remove("cat-btn-active");
         btnCatOthers.getStyleClass().remove("cat-btn-active");

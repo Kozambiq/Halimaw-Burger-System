@@ -62,9 +62,9 @@ public class MenuItemsController {
     // Category Sidebar Buttons
     @FXML private Button catAll;
     @FXML private Button catBurgers;
-    @FXML private Button catChicken;
     @FXML private Button catSides;
     @FXML private Button catDrinks;
+    @FXML private Button catOthers;
 
     private MenuItemDAO menuItemDAO = new MenuItemDAO();
     private boolean alreadyLoaded = false;
@@ -109,9 +109,9 @@ public class MenuItemsController {
         // Update button highlights
         catAll.getStyleClass().remove("cat-nav-item-active");
         catBurgers.getStyleClass().remove("cat-nav-item-active");
-        catChicken.getStyleClass().remove("cat-nav-item-active");
         catSides.getStyleClass().remove("cat-nav-item-active");
         catDrinks.getStyleClass().remove("cat-nav-item-active");
+        catOthers.getStyleClass().remove("cat-nav-item-active");
         
         source.getStyleClass().add("cat-nav-item-active");
         

@@ -38,7 +38,6 @@ stylesheets="@../css/cashier.css, @../css/common.css, @../css/login.css, @../css
         <HBox styleClass="cat-filters" prefHeight="48" spacing="4">
             <Button fx:id="btnCatAll" styleClass="cat-btn" text="All" onAction="#onFilterCategory"/>
             <Button fx:id="btnCatBurgers" styleClass="cat-btn" text="Burgers" onAction="#onFilterCategory"/>
-            <Button fx:id="btnCatChicken" styleClass="cat-btn" text="Chicken" onAction="#onFilterCategory"/>
             <Button fx:id="btnCatSides" styleClass="cat-btn" text="Sides" onAction="#onFilterCategory"/>
             <Button fx:id="btnCatDrinks" styleClass="cat-btn" text="Drinks" onAction="#onFilterCategory"/>
             <Button fx:id="btnCatOthers" styleClass="cat-btn" text="Others" onAction="#onFilterCategory"/>

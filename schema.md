@@ -9,6 +9,9 @@ USE burgerhq;
 
 ### Migration (for existing databases)
 ```sql
+-- Remove Chicken category, add Others category
+DELETE FROM menu_items WHERE category = 'Chicken';
+ALTER TABLE menu_ingredients MODIFY COLUMN category ENUM('Burgers','Sides','Drinks','Others') NOT NULL;
 ALTER TABLE ingredients ADD COLUMN max_stock DECIMAL(10,2) NOT NULL DEFAULT 0 AFTER min_threshold;
 ALTER TABLE ingredients ADD COLUMN status ENUM('Available','Unavailable') NOT NULL DEFAULT 'Available' AFTER max_stock;
 ALTER TABLE staff ADD COLUMN email VARCHAR(100) AFTER name;
@@ -45,7 +48,7 @@ CREATE TABLE IF NOT EXISTS users (
 CREATE TABLE IF NOT EXISTS menu_items (
     id           INT AUTO_INCREMENT PRIMARY KEY,
     name         VARCHAR(100)   NOT NULL,
-    category     ENUM('Burgers','Chicken','Sides','Drinks','Others') NOT NULL,
+    category     ENUM('Burgers','Sides','Drinks','Others') NOT NULL,
     price        DECIMAL(10,2)  NOT NULL,
     availability ENUM('Available','Low Stock','Out of Stock','Unavailable') NOT NULL DEFAULT 'Available',
     created_at   DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
@@ -140,7 +143,6 @@ INSERT INTO menu_items (name, category, price, availability) VALUES
 ('Double Smash',     'Burgers', 195.00, 'Available'),
 ('Classic Burger',   'Burgers', 145.00, 'Low Stock'),
 ('BBQ Bacon Burger', 'Burgers', 210.00, 'Hidden'),
-('Crispy Chicken',   'Chicken', 160.00, 'Available'),
 ('Classic Fries',    'Sides',    65.00, 'Available'),
 ('Onion Rings',      'Sides',    75.00, 'Available'),
 ('Iced Tea',         'Drinks',   55.00, 'Available'),
