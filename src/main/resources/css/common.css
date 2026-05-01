@@ -97,6 +97,50 @@
     -fx-background-color: #281e10;
 }
 
+/* ── Global Filter Console ────────────────────────────── */
+.filter-console {
+    -fx-background-color: #221a0e;
+    -fx-background-radius: 12;
+    -fx-border-color: #332615;
+    -fx-border-width: 1.5;
+    -fx-padding: 6 12 6 12;
+    -fx-effect: dropshadow(gaussian, rgba(0,0,0,0.1), 10, 0, 0, 4);
+}
+
+.filter-console:focused-within {
+    -fx-border-color: #c8500a;
+    -fx-background-color: #281e10;
+}
+
+.search-icon-svg {
+    -fx-fill: #5c4828;
+}
+
+.filter-console:focused-within .search-icon-svg {
+    -fx-fill: #c8500a;
+}
+
+.search-field {
+    -fx-text-fill: #f5ede0;
+    -fx-prompt-text-fill: #8a7055;
+    -fx-font-family: "DM Sans", sans-serif;
+    -fx-font-size: 13px;
+}
+
+.btn-search {
+    -fx-background-color: #c8500a;
+    -fx-text-fill: white;
+    -fx-font-weight: 800;
+    -fx-font-family: 'DM Sans', sans-serif;
+    -fx-padding: 10 20 10 20;
+    -fx-background-radius: 10;
+    -fx-cursor: hand;
+}
+
+.btn-search:hover {
+    -fx-background-color: #e05c0a;
+}
+
 /* ── Standardized Action Button (Dots) ─────────────────── */
 .menu-btn-dots {
     -fx-background-color: #332615;
