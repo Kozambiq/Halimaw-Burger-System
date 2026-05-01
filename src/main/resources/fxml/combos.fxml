@@ -130,18 +130,39 @@
                 <padding><Insets top="24" right="32" bottom="24" left="32"/></padding>
 
                 <HBox spacing="16" alignment="CENTER_LEFT">
-                    <VBox styleClass="stat-card" prefWidth="180">
-                        <Label styleClass="stat-label" text="TOTAL COMBOS"/>
-                        <Label fx:id="lblTotal" styleClass="stat-value" text="0"/>
+                    <VBox styleClass="stat-card" prefWidth="220">
+                        <HBox alignment="CENTER_LEFT" spacing="12">
+                            <StackPane style="-fx-background-color: rgba(200, 80, 10, 0.1); -fx-background-radius: 8; -fx-padding: 8;">
+                                <SVGPath content="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-2 14.5v-9l6 4.5-6 4.5z" fill="#c8500a" scaleX="0.8" scaleY="0.8"/>
+                            </StackPane>
+                            <VBox>
+                                <Label styleClass="stat-label" text="TOTAL COMBOS"/>
+                                <Label fx:id="lblTotal" styleClass="stat-value" text="0"/>
+                            </VBox>
+                        </HBox>
                     </VBox>
-                    <VBox styleClass="stat-card" prefWidth="180">
-                        <Label styleClass="stat-label" text="ACTIVE"/>
-                        <Label fx:id="lblActive" styleClass="stat-value" text="0" style="-fx-text-fill: #7ec470;"/>
+                    <VBox styleClass="stat-card, active" prefWidth="220">
+                        <HBox alignment="CENTER_LEFT" spacing="12">
+                            <StackPane style="-fx-background-color: rgba(126, 196, 112, 0.1); -fx-background-radius: 8; -fx-padding: 8;">
+                                <SVGPath content="M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41L9 16.17z" fill="#7ec470" scaleX="0.8" scaleY="0.8"/>
+                            </StackPane>
+                            <VBox>
+                                <Label styleClass="stat-label" text="ACTIVE NOW"/>
+                                <Label fx:id="lblActive" styleClass="stat-value" text="0" style="-fx-text-fill: #7ec470;"/>
+                            </VBox>
+                        </HBox>
                     </VBox>
-                    <TextField fx:id="searchField" promptText="Search combos..." prefWidth="180" style="-fx-background-color: #221a0e; -fx-text-fill: #f5ede0; -fx-prompt-text-fill: #8a7055; -fx-border-color: #4a3820; -fx-border-width: 1; -fx-border-radius: 6; -fx-background-radius: 6; -fx-padding: 8 12 8 12;"/>
-                    <Button fx:id="btnSearch" text="Search" style="-fx-background-color: #c8500a; -fx-text-fill: #f5ede0; -fx-font-weight: bold; -fx-border-radius: 6; -fx-background-radius: 6; -fx-padding: 8 16 8 16; -fx-font-size: 12px; -fx-cursor: hand;" onAction="#onSearchCombo"/>
+                    
                     <Region HBox.hgrow="ALWAYS"/>
-                    <Button styleClass="btn-primary" text="+ Add Promo" prefWidth="140" onAction="#onAddPromo"/>
+                    <Button styleClass="btn-primary" text="+ ADD PROMO" prefWidth="160" onAction="#onAddPromo" style="-fx-font-weight: 900; -fx-letter-spacing: 0.05em;"/>
+                </HBox>
+
+                <HBox spacing="12" alignment="CENTER_LEFT">
+                    <HBox fx:id="searchBarContainer" styleClass="filter-console" alignment="CENTER_LEFT" prefHeight="42" spacing="8" HBox.hgrow="ALWAYS">
+                        <SVGPath content="M15.5 14h-.79l-.28-.27C15.41 12.59 16 11.11 16 9.5 16 5.91 13.09 3 9.5 3S3 5.91 3 9.5 5.91 16 9.5 16c1.61 0 3.09-.59 4.23-1.57l.27.28v.79l5 4.99L20.49 19l-4.99-5zm-6 0C7.01 14 5 11.99 5 9.5S7.01 5 9.5 5 14 7.01 14 9.5 11.99 14 9.5 14z" styleClass="search-icon-svg"/>
+                        <TextField fx:id="searchField" promptText="Search combos and promos..." styleClass="search-field" style="-fx-background-color: transparent; -fx-border-width: 0; -fx-padding: 0 0 0 4;" HBox.hgrow="ALWAYS"/>
+                    </HBox>
+                    <Button fx:id="btnSearch" text="SEARCH" styleClass="btn-search" onAction="#onSearchCombo" prefHeight="42"/>
                 </HBox>
 
 <StackPane VBox.vgrow="ALWAYS" maxHeight="Infinity" styleClass="table-wrap">
