@@ -24,7 +24,9 @@ import javafx.scene.layout.BackgroundFill;
 import javafx.scene.layout.CornerRadii;
 import javafx.scene.layout.HBox;
 import javafx.scene.layout.Pane;
+import javafx.scene.layout.Region;
 import javafx.scene.layout.StackPane;
+import javafx.scene.layout.VBox;
 import javafx.geometry.Pos;
 import javafx.util.Callback;
 import javafx.scene.paint.Color;
@@ -192,8 +194,15 @@ public class InventoryController {
         }
     }
 
-private void setupTableColumns() {
+    private void setupTableColumns() {
         colName.setCellValueFactory(new PropertyValueFactory<>("name"));
+        colName.setCellFactory(col -> new TableCell<Ingredient, String>() {
+            @Override protected void updateItem(String item, boolean empty) {
+                super.updateItem(item, empty);
+                if (empty || item == null) setText(null);
+                else { setText(item); getStyleClass().add("cell-name"); }
+            }
+        });
 
         colStockLevel.setCellValueFactory(cellData ->
             new javafx.beans.property.SimpleObjectProperty<>(
@@ -205,64 +214,50 @@ private void setupTableColumns() {
             protected void updateItem(Integer percentage, boolean empty) {
                 super.updateItem(percentage, empty);
                 if (empty || percentage == null) {
-                    setGraphic(null);
-                    setText(null);
-                    return;
+                    setGraphic(null); setText(null); return;
                 }
 
                 Ingredient ing = getTableView().getItems().get(getIndex());
                 String status = ing.getStatus();
-                final double BAR_WIDTH = 180.0;
+                final double BAR_WIDTH = 160.0;
                 double maxStock = ing.getMaxStock();
                 double minThreshold = ing.getMinThreshold();
 
-                Pane container = new Pane();
-                container.setPrefHeight(10);
+                StackPane container = new StackPane();
+                container.setAlignment(Pos.CENTER_LEFT);
                 container.setPrefWidth(BAR_WIDTH);
+                container.setMaxWidth(BAR_WIDTH);
 
-                Pane barTrack = new Pane();
-                barTrack.setPrefHeight(6);
+                Region barTrack = new Region();
+                barTrack.getStyleClass().add("stock-bar-track");
+                barTrack.setPrefHeight(8);
                 barTrack.setPrefWidth(BAR_WIDTH);
-                barTrack.setLayoutY(2);
-                barTrack.setBackground(new Background(
-                    new BackgroundFill(Color.web("#2d2010"), new CornerRadii(3.0), Insets.EMPTY)
-                ));
 
-                Pane barFill = new Pane();
-                barFill.setPrefHeight(6);
-                barFill.setLayoutY(2);
+                Region barFill = new Region();
+                barFill.setPrefHeight(8);
                 double fillWidth = Math.min(percentage * (BAR_WIDTH / 100.0), BAR_WIDTH);
                 barFill.setPrefWidth(fillWidth);
+                barFill.setMaxWidth(fillWidth);
 
-                Color barColor;
                 if ("OK".equals(status)) {
-                    barColor = Color.web("#4CAF50");
+                    barFill.getStyleClass().add("stock-bar-fill-ok");
                 } else if ("Low".equals(status)) {
-                    barColor = Color.web("#FFA726");
+                    barFill.getStyleClass().add("stock-bar-fill-low");
                 } else {
-                    barColor = Color.web("#F44336");
+                    barFill.getStyleClass().add("stock-bar-fill-out");
                 }
-                barFill.setBackground(new Background(
-                    new BackgroundFill(barColor, new CornerRadii(3.0), Insets.EMPTY)
-                ));
 
-                javafx.scene.shape.Rectangle lowMarker = new javafx.scene.shape.Rectangle(2, 10);
-                lowMarker.setFill(Color.web("#EF9F27"));
-
-                javafx.scene.shape.Rectangle criticalMarker = new javafx.scene.shape.Rectangle(2, 10);
-                criticalMarker.setFill(Color.web("#E24B4A"));
-
+                Pane markerLayer = new Pane();
+                markerLayer.setPrefSize(BAR_WIDTH, 8);
+                
                 if (maxStock > 0) {
+                    javafx.scene.shape.Rectangle lowMarker = new javafx.scene.shape.Rectangle(1.5, 8);
+                    lowMarker.getStyleClass().add("stock-marker");
                     lowMarker.setLayoutX((minThreshold / maxStock) * BAR_WIDTH);
-                    criticalMarker.setLayoutX((minThreshold * 0.5 / maxStock) * BAR_WIDTH);
-                } else {
-                    lowMarker.setLayoutX(0);
-                    criticalMarker.setLayoutX(0);
+                    markerLayer.getChildren().add(lowMarker);
                 }
-                lowMarker.setLayoutY(0);
-                criticalMarker.setLayoutY(0);
 
-                container.getChildren().addAll(barTrack, barFill, criticalMarker, lowMarker);
+                container.getChildren().addAll(barTrack, barFill, markerLayer);
                 setGraphic(container);
                 setText(null);
             }
@@ -275,14 +270,29 @@ private void setupTableColumns() {
                 : String.format("%.1f", qty);
             return new javafx.beans.property.SimpleStringProperty(formatted);
         });
+        colQuantity.setCellFactory(col -> new TableCell<Ingredient, String>() {
+            @Override protected void updateItem(String item, boolean empty) {
+                super.updateItem(item, empty);
+                if (empty || item == null) setText(null);
+                else { setText(item); getStyleClass().add("cell-mono"); }
+            }
+        });
+
         colUnit.setCellValueFactory(new PropertyValueFactory<>("unit"));
+        colUnit.setCellFactory(col -> new TableCell<Ingredient, String>() {
+            @Override protected void updateItem(String item, boolean empty) {
+                super.updateItem(item, empty);
+                if (empty || item == null) setText(null);
+                else { setText(item.toLowerCase()); getStyleClass().add("cell-mono"); }
+            }
+        });
         
         inventoryTable.setColumnResizePolicy(TableView.CONSTRAINED_RESIZE_POLICY);
         
         colStatus.setCellValueFactory(cellData -> {
             String availabilityStatus = cellData.getValue().getAvailabilityStatus();
             if ("Unavailable".equals(availabilityStatus)) {
-                return new javafx.beans.property.SimpleStringProperty("Unavailable");
+                return new javafx.beans.property.SimpleStringProperty("Disabled");
             }
             return new javafx.beans.property.SimpleStringProperty(cellData.getValue().getStatus());
         });
@@ -292,21 +302,19 @@ private void setupTableColumns() {
             protected void updateItem(String status, boolean empty) {
                 super.updateItem(status, empty);
                 if (empty || status == null) {
-                    setGraphic(null);
-                    setText(null);
-                    return;
+                    setGraphic(null); setText(null); return;
                 }
 
-                Label pill = new Label(status);
+                Label pill = new Label(status.toUpperCase());
                 pill.getStyleClass().add("status-pill");
 
-                if ("Unavailable".equals(status)) {
-                    pill.getStyleClass().add("pill-out");
+                if ("Disabled".equals(status)) {
+                    pill.getStyleClass().add("pill-disabled");
                 } else if ("OK".equals(status)) {
                     pill.getStyleClass().add("pill-ok");
                 } else if ("Low".equals(status)) {
                     pill.getStyleClass().add("pill-low");
-                } else if ("Out".equals(status)) {
+                } else {
                     pill.getStyleClass().add("pill-out");
                 }
 
@@ -319,49 +327,37 @@ private void setupTableColumns() {
             @Override
             protected void updateItem(String item, boolean empty) {
                 super.updateItem(item, empty);
-                if (empty) {
-                    setGraphic(null);
-                    setText(null);
-                    return;
-                }
+                if (empty) { setGraphic(null); setText(null); return; }
 
-                int rowIndex = getIndex();
-                if (rowIndex < 0 || rowIndex >= getTableView().getItems().size()) {
-                    setGraphic(null);
-                    return;
-                }
-
-                final Ingredient ingredient = getTableView().getItems().get(rowIndex);
-                if (ingredient == null) {
-                    setGraphic(null);
-                    return;
-                }
+                final Ingredient ingredient = getTableView().getItems().get(getIndex());
+                if (ingredient == null) { setGraphic(null); return; }
 
                 MenuButton menuBtn = new MenuButton("...");
                 menuBtn.getStyleClass().add("menu-btn-dots");
 
-                MenuItem addStock = new MenuItem("Add Stock");
-                addStock.setStyle("-fx-text-fill: #f5ede0; -fx-font-size: 13px; -fx-padding: 8 16 8 16;");
+                MenuItem addStock = new MenuItem("Restock Item");
                 addStock.setOnAction(e -> showAddStockDialog(ingredient));
 
                 MenuItem reduceStock = new MenuItem("Reduce Stock");
-                reduceStock.setStyle("-fx-text-fill: #f5ede0; -fx-font-size: 13px; -fx-padding: 8 16 8 16;");
                 reduceStock.setOnAction(e -> showReduceStockDialog(ingredient));
 
-                MenuItem editThreshold = new MenuItem("Edit Threshold");
-                editThreshold.setStyle("-fx-text-fill: #f5ede0; -fx-font-size: 13px; -fx-padding: 8 16 8 16;");
+                MenuItem editThreshold = new MenuItem("Threshold Config");
                 editThreshold.setOnAction(e -> showEditThresholdDialog(ingredient));
 
                 String availabilityStatus = ingredient.getAvailabilityStatus();
                 if ("Unavailable".equals(availabilityStatus)) {
-                    MenuItem enable = new MenuItem("Enable");
-                    enable.setStyle("-fx-text-fill: #4CAF50; -fx-font-size: 13px; -fx-padding: 8 16 8 16;");
-                    enable.setOnAction(e -> showEnableConfirmation(ingredient));
+                    MenuItem enable = new MenuItem("Enable Item");
+                    enable.setOnAction(e -> {
+                        ingredientDAO.updateAvailabilityStatus(ingredient.getId(), "Available");
+                        loadInventory();
+                    });
                     menuBtn.getItems().addAll(addStock, reduceStock, editThreshold, enable);
                 } else {
-                    MenuItem disable = new MenuItem("Disable");
-                    disable.setStyle("-fx-text-fill: #e07070; -fx-font-size: 13px; -fx-padding: 8 16 8 16;");
-                    disable.setOnAction(e -> showDisableConfirmation(ingredient));
+                    MenuItem disable = new MenuItem("Disable Item");
+                    disable.setOnAction(e -> {
+                        ingredientDAO.updateAvailabilityStatus(ingredient.getId(), "Unavailable");
+                        loadInventory();
+                    });
                     menuBtn.getItems().addAll(addStock, reduceStock, editThreshold, disable);
                 }
 
@@ -441,107 +437,101 @@ private void setupTableColumns() {
 
     private void showAddStockDialog(Ingredient ingredient) {
         Dialog<Double> dialog = new Dialog<>();
-        dialog.setTitle("Add Stock");
-        dialog.setHeaderText(null);
+        dialog.setTitle("RESTOCK INGREDIENT");
         dialog.getDialogPane().getStyleClass().add("dialog-pane");
-        dialog.getDialogPane().setStyle("-fx-background-color: #2e2410; -fx-border-color: #4a3820; -fx-border-width: 1; -fx-border-radius: 12; -fx-background-radius: 12;");
+        
+        dialog.getDialogPane().getStylesheets().add(getClass().getResource("/css/common.css").toExternalForm());
+        dialog.getDialogPane().getStylesheets().add(getClass().getResource("/css/dialog.css").toExternalForm());
 
-        javafx.scene.layout.VBox addContent = new javafx.scene.layout.VBox(8);
-        javafx.scene.control.Label addTitle = new javafx.scene.control.Label("Add stock to: " + ingredient.getName());
-        addTitle.setStyle("-fx-text-fill: #f5ede0; -fx-font-size: 14px; -fx-font-weight: bold;");
-        addContent.getChildren().add(addTitle);
+        Label headerLabel = new Label("Restock Ingredient");
+        headerLabel.getStyleClass().add("dialog-header-text");
+        dialog.getDialogPane().setHeader(headerLabel);
 
-        String fieldStyle = "-fx-background-color: #221a0e; -fx-text-fill: #f5ede0; -fx-prompt-text-fill: #8a7055; -fx-border-color: #4a3820; -fx-border-width: 1; -fx-border-radius: 6; -fx-background-radius: 6; -fx-padding: 8 12 8 12; -fx-font-size: 13px;";
+        VBox content = new VBox(24);
+        content.setPadding(new Insets(30, 40, 30, 40));
+        content.setAlignment(Pos.TOP_CENTER);
+        content.setPrefWidth(400);
 
+        VBox infoBox = new VBox(20);
+        infoBox.getStyleClass().add("dialog-section-card");
+
+        VBox nameBox = new VBox(8);
+        Label nameEyebrow = new Label("ITEM BEING RESTOCKED");
+        nameEyebrow.getStyleClass().add("dialog-eyebrow");
+        Label nameLabel = new Label(ingredient.getName().toUpperCase());
+        nameLabel.getStyleClass().add("chip-name");
+        nameBox.getChildren().addAll(nameEyebrow, nameLabel);
+
+        VBox qtyBox = new VBox(8);
+        Label qtyEyebrow = new Label("QUANTITY TO ADD (" + ingredient.getUnit().toLowerCase() + ")");
+        qtyEyebrow.getStyleClass().add("dialog-eyebrow");
         TextField quantityField = new TextField();
-        quantityField.setStyle(fieldStyle);
-        quantityField.setPromptText("Enter quantity");
-
-        javafx.scene.control.Label qtyError = new javafx.scene.control.Label();
-        qtyError.setStyle("-fx-text-fill: #e07070; -fx-font-size: 11px;");
+        quantityField.setPromptText("0.00");
+        quantityField.getStyleClass().add("premium-field");
+        Label qtyError = new Label("");
+        qtyError.getStyleClass().add("dialog-error");
         qtyError.setVisible(false);
+        qtyError.setManaged(false);
+        qtyBox.getChildren().addAll(qtyEyebrow, quantityField, qtyError);
 
-        addContent.getChildren().addAll(quantityField, qtyError);
-        dialog.getDialogPane().setContent(addContent);
+        infoBox.getChildren().addAll(nameBox, qtyBox);
+        content.getChildren().add(infoBox);
+
+        dialog.getDialogPane().setContent(content);
         dialog.getDialogPane().getButtonTypes().addAll(
             javafx.scene.control.ButtonType.CANCEL,
             javafx.scene.control.ButtonType.OK
         );
 
-        javafx.scene.control.Button okButton = (javafx.scene.control.Button) dialog.getDialogPane().lookupButton(javafx.scene.control.ButtonType.OK);
-        okButton.setStyle("-fx-background-color: #5c4828; -fx-text-fill: #8a7055; -fx-border-radius: 6; -fx-padding: 8 16 8 16; -fx-font-size: 12px; -fx-font-weight: bold;");
-        okButton.setDisable(true);
+        Button okButton = (Button) dialog.getDialogPane().lookupButton(javafx.scene.control.ButtonType.OK);
+        okButton.setText("CONFIRM RESTOCK");
+        okButton.getStyleClass().add("dialog-button-save");
 
-        dialog.getDialogPane().lookupButton(javafx.scene.control.ButtonType.CANCEL).setStyle(
-            "-fx-background-color: #4a3820; -fx-text-fill: #a09070; -fx-border-color: #4a3820; -fx-border-width: 1; -fx-border-radius: 6; -fx-padding: 8 16 8 16; -fx-font-size: 12px;");
+        Button cancelButton = (Button) dialog.getDialogPane().lookupButton(javafx.scene.control.ButtonType.CANCEL);
+        cancelButton.getStyleClass().add("dialog-button-cancel");
 
         boolean isPcs = "pcs".equalsIgnoreCase(ingredient.getUnit());
-        double maxStock = ingredient.getMaxStock();
-
         String numberPattern = isPcs ? "^\\d+$" : "^\\d*\\.?\\d+$";
 
-        javafx.beans.InvalidationListener qtyValidator = obs -> {
+        quantityField.textProperty().addListener(obs -> {
             String qtyText = quantityField.getText().trim();
-            boolean valid = true;
             String errorMsg = null;
-
             if (qtyText.isEmpty()) {
-                valid = false;
+                okButton.setDisable(true);
             } else if (!qtyText.matches(numberPattern)) {
-                if (isPcs) {
-                    errorMsg = "Whole numbers only";
-                } else {
-                    errorMsg = "Enter valid number";
-                }
-                valid = false;
+                errorMsg = isPcs ? "Whole numbers only" : "Invalid number format";
             } else {
                 try {
                     double qty = Double.parseDouble(qtyText);
-                    if (ingredient.getQuantity() + qty > maxStock) {
-                        errorMsg = "Max stock limit would be exceeded";
-                        valid = false;
+                    if (ingredient.getQuantity() + qty > ingredient.getMaxStock()) {
+                        errorMsg = "Exceeds capacity (" + ingredient.getMaxStock() + ")";
+                    } else {
+                        okButton.setDisable(false);
                     }
-                } catch (NumberFormatException ex) {
-                    errorMsg = "Enter valid number";
-                    valid = false;
-                }
+                } catch (Exception ex) { errorMsg = "Invalid number"; }
             }
 
             if (errorMsg != null) {
                 qtyError.setText(errorMsg);
                 qtyError.setVisible(true);
-                quantityField.setStyle(fieldStyle + "-fx-border-color: #e07070;");
+                qtyError.setManaged(true);
+                okButton.setDisable(true);
             } else {
                 qtyError.setVisible(false);
-                quantityField.setStyle(fieldStyle);
+                qtyError.setManaged(false);
             }
-
-            if (valid && !qtyText.isEmpty()) {
-                okButton.setStyle("-fx-background-color: #c8500a; -fx-text-fill: #f5ede0; -fx-border-radius: 6; -fx-padding: 8 16 8 16; -fx-font-size: 12px; -fx-font-weight: bold;");
-                okButton.setDisable(false);
-            } else {
-                okButton.setStyle("-fx-background-color: #5c4828; -fx-text-fill: #8a7055; -fx-border-radius: 6; -fx-padding: 8 16 8 16; -fx-font-size: 12px; -fx-font-weight: bold;");
-                okButton.setDisable(true);
-            }
-        };
-
-        quantityField.textProperty().addListener(qtyValidator);
+        });
 
         dialog.setResultConverter(btn -> {
             if (btn == javafx.scene.control.ButtonType.OK) {
-                try {
-                    return Double.parseDouble(quantityField.getText());
-                } catch (NumberFormatException ex) {
-                    return null;
-                }
+                try { return Double.parseDouble(quantityField.getText()); } catch (Exception ex) { return null; }
             }
             return null;
         });
 
         dialog.showAndWait().ifPresent(qty -> {
             if (qty != null && qty > 0) {
-                double newQty = ingredient.getQuantity() + qty;
-                ingredientDAO.updateQuantity(ingredient.getId(), newQty);
+                ingredientDAO.updateQuantity(ingredient.getId(), ingredient.getQuantity() + qty);
                 loadInventory();
             }
         });
@@ -549,246 +539,225 @@ private void setupTableColumns() {
 
     private void showReduceStockDialog(Ingredient ingredient) {
         Dialog<Double> dialog = new Dialog<>();
-        dialog.setTitle("Reduce Stock");
-        dialog.setHeaderText(null);
+        dialog.setTitle("REDUCE STOCK");
         dialog.getDialogPane().getStyleClass().add("dialog-pane");
-        dialog.getDialogPane().setStyle("-fx-background-color: #2e2410; -fx-border-color: #4a3820; -fx-border-width: 1; -fx-border-radius: 12; -fx-background-radius: 12;");
+        
+        dialog.getDialogPane().getStylesheets().add(getClass().getResource("/css/common.css").toExternalForm());
+        dialog.getDialogPane().getStylesheets().add(getClass().getResource("/css/dialog.css").toExternalForm());
 
-        javafx.scene.layout.VBox reduceContent = new javafx.scene.layout.VBox(8);
-        javafx.scene.control.Label reduceTitle = new javafx.scene.control.Label("Reduce stock from: " + ingredient.getName());
-        reduceTitle.setStyle("-fx-text-fill: #f5ede0; -fx-font-size: 14px; -fx-font-weight: bold;");
-        reduceContent.getChildren().add(reduceTitle);
+        Label headerLabel = new Label("Reduce Stock Level");
+        headerLabel.getStyleClass().add("dialog-header-text");
+        dialog.getDialogPane().setHeader(headerLabel);
 
-        String fieldStyle = "-fx-background-color: #221a0e; -fx-text-fill: #f5ede0; -fx-prompt-text-fill: #8a7055; -fx-border-color: #4a3820; -fx-border-width: 1; -fx-border-radius: 6; -fx-background-radius: 6; -fx-padding: 8 12 8 12; -fx-font-size: 13px;";
+        VBox content = new VBox(24);
+        content.setPadding(new Insets(30, 40, 30, 40));
+        content.setAlignment(Pos.TOP_CENTER);
+        content.setPrefWidth(400);
 
+        VBox infoBox = new VBox(20);
+        infoBox.getStyleClass().add("dialog-section-card");
+
+        VBox nameBox = new VBox(8);
+        Label nameEyebrow = new Label("ITEM BEING REDUCED");
+        nameEyebrow.getStyleClass().add("dialog-eyebrow");
+        Label nameLabel = new Label(ingredient.getName().toUpperCase());
+        nameLabel.getStyleClass().add("chip-name");
+        nameBox.getChildren().addAll(nameEyebrow, nameLabel);
+
+        VBox qtyBox = new VBox(8);
+        Label qtyEyebrow = new Label("QUANTITY TO REMOVE (" + ingredient.getUnit().toLowerCase() + ")");
+        qtyEyebrow.getStyleClass().add("dialog-eyebrow");
         TextField quantityField = new TextField();
-        quantityField.setStyle(fieldStyle);
-        quantityField.setPromptText("Enter quantity to reduce");
-
-        javafx.scene.control.Label qtyError = new javafx.scene.control.Label();
-        qtyError.setStyle("-fx-text-fill: #e07070; -fx-font-size: 11px;");
+        quantityField.setPromptText("0.00");
+        quantityField.getStyleClass().add("premium-field");
+        Label qtyError = new Label("");
+        qtyError.getStyleClass().add("dialog-error");
         qtyError.setVisible(false);
+        qtyError.setManaged(false);
+        qtyBox.getChildren().addAll(qtyEyebrow, quantityField, qtyError);
 
-        reduceContent.getChildren().addAll(quantityField, qtyError);
-        dialog.getDialogPane().setContent(reduceContent);
+        infoBox.getChildren().addAll(nameBox, qtyBox);
+        content.getChildren().add(infoBox);
+
+        dialog.getDialogPane().setContent(content);
         dialog.getDialogPane().getButtonTypes().addAll(
             javafx.scene.control.ButtonType.CANCEL,
             javafx.scene.control.ButtonType.OK
         );
 
-        javafx.scene.control.Button okButton = (javafx.scene.control.Button) dialog.getDialogPane().lookupButton(javafx.scene.control.ButtonType.OK);
-        okButton.setStyle("-fx-background-color: #5c4828; -fx-text-fill: #8a7055; -fx-border-radius: 6; -fx-padding: 8 16 8 16; -fx-font-size: 12px; -fx-font-weight: bold;");
-        okButton.setDisable(true);
+        Button okButton = (Button) dialog.getDialogPane().lookupButton(javafx.scene.control.ButtonType.OK);
+        okButton.setText("CONFIRM REDUCTION");
+        okButton.getStyleClass().add("dialog-button-save");
 
-        dialog.getDialogPane().lookupButton(javafx.scene.control.ButtonType.CANCEL).setStyle(
-            "-fx-background-color: transparent; -fx-text-fill: #a09070; -fx-border-color: #4a3820; -fx-border-width: 1; -fx-border-radius: 6; -fx-padding: 8 16 8 16; -fx-font-size: 12px;");
+        Button cancelButton = (Button) dialog.getDialogPane().lookupButton(javafx.scene.control.ButtonType.CANCEL);
+        cancelButton.getStyleClass().add("dialog-button-cancel");
 
         boolean isPcs = "pcs".equalsIgnoreCase(ingredient.getUnit());
-        double currentQty = ingredient.getQuantity();
-
         String numberPattern = isPcs ? "^\\d+$" : "^\\d*\\.?\\d+$";
 
-        javafx.beans.InvalidationListener qtyValidator = obs -> {
+        quantityField.textProperty().addListener(obs -> {
             String qtyText = quantityField.getText().trim();
-            boolean valid = true;
             String errorMsg = null;
-
             if (qtyText.isEmpty()) {
-                valid = false;
+                okButton.setDisable(true);
             } else if (!qtyText.matches(numberPattern)) {
-                if (isPcs) {
-                    errorMsg = "Whole numbers only";
-                } else {
-                    errorMsg = "Enter valid number";
-                }
-                valid = false;
+                errorMsg = isPcs ? "Whole numbers only" : "Invalid number format";
             } else {
                 try {
                     double qty = Double.parseDouble(qtyText);
-                    if (qty > currentQty) {
-                        errorMsg = "Not enough stock";
-                        valid = false;
+                    if (qty > ingredient.getQuantity()) {
+                        errorMsg = "Not enough stock (" + ingredient.getQuantity() + ")";
+                    } else {
+                        okButton.setDisable(false);
                     }
-                } catch (NumberFormatException ex) {
-                    errorMsg = "Enter valid number";
-                    valid = false;
-                }
+                } catch (Exception ex) { errorMsg = "Invalid number"; }
             }
 
             if (errorMsg != null) {
                 qtyError.setText(errorMsg);
                 qtyError.setVisible(true);
-                quantityField.setStyle(fieldStyle + "-fx-border-color: #e07070;");
+                qtyError.setManaged(true);
+                okButton.setDisable(true);
             } else {
                 qtyError.setVisible(false);
-                quantityField.setStyle(fieldStyle);
+                qtyError.setManaged(false);
             }
-
-            if (valid && !qtyText.isEmpty()) {
-                okButton.setStyle("-fx-background-color: #c8500a; -fx-text-fill: #f5ede0; -fx-border-radius: 6; -fx-padding: 8 16 8 16; -fx-font-size: 12px; -fx-font-weight: bold;");
-                okButton.setDisable(false);
-            } else {
-                okButton.setStyle("-fx-background-color: #5c4828; -fx-text-fill: #8a7055; -fx-border-radius: 6; -fx-padding: 8 16 8 16; -fx-font-size: 12px; -fx-font-weight: bold;");
-                okButton.setDisable(true);
-            }
-        };
-
-        quantityField.textProperty().addListener(qtyValidator);
+        });
 
         dialog.setResultConverter(btn -> {
             if (btn == javafx.scene.control.ButtonType.OK) {
-                try {
-                    return Double.parseDouble(quantityField.getText());
-                } catch (NumberFormatException ex) {
-                    return null;
-                }
+                try { return Double.parseDouble(quantityField.getText()); } catch (Exception ex) { return null; }
             }
             return null;
         });
 
         dialog.showAndWait().ifPresent(qty -> {
-            if (qty != null && qty > 0 && qty <= ingredient.getQuantity()) {
-                double newQty = ingredient.getQuantity() - qty;
-                ingredientDAO.updateQuantity(ingredient.getId(), newQty);
+            if (qty != null && qty > 0) {
+                ingredientDAO.updateQuantity(ingredient.getId(), ingredient.getQuantity() - qty);
                 loadInventory();
             }
         });
     }
 
     private void showEditThresholdDialog(Ingredient ingredient) {
-        Dialog<Double> dialog = new Dialog<>();
-        dialog.setTitle("Edit Threshold");
-        dialog.setHeaderText(null);
+        Dialog<Boolean> dialog = new Dialog<>();
+        dialog.setTitle("THRESHOLD CONFIG");
         dialog.getDialogPane().getStyleClass().add("dialog-pane");
-        dialog.getDialogPane().setStyle("-fx-background-color: #2e2410; -fx-border-color: #4a3820; -fx-border-width: 1; -fx-border-radius: 12; -fx-background-radius: 12;");
+        
+        dialog.getDialogPane().getStylesheets().add(getClass().getResource("/css/common.css").toExternalForm());
+        dialog.getDialogPane().getStylesheets().add(getClass().getResource("/css/dialog.css").toExternalForm());
 
-        String labelStyle = "-fx-text-fill: #a09070; -fx-font-size: 12px;";
-        String fieldStyle = "-fx-background-color: #221a0e; -fx-text-fill: #f5ede0; -fx-prompt-text-fill: #8a7055; -fx-border-color: #4a3820; -fx-border-width: 1; -fx-border-radius: 6; -fx-background-radius: 6; -fx-padding: 8 12 8 12; -fx-font-size: 13px;";
+        Label headerLabel = new Label("Threshold Configuration");
+        headerLabel.getStyleClass().add("dialog-header-text");
+        dialog.getDialogPane().setHeader(headerLabel);
 
-        javafx.scene.layout.VBox vbox = new javafx.scene.layout.VBox(8);
-        javafx.scene.control.Label minLabel = new javafx.scene.control.Label("Min Threshold:");
-        minLabel.setStyle(labelStyle);
+        HBox mainLayout = new HBox(32);
+        mainLayout.setPadding(new Insets(30, 40, 30, 40));
+        mainLayout.setAlignment(Pos.TOP_CENTER);
+
+        // LEFT COLUMN: Alert Limits
+        VBox colLeft = new VBox(28);
+        colLeft.getStyleClass().addAll("dialog-col-left", "dialog-section-card");
+        colLeft.setPrefWidth(300);
+
+        VBox minBox = new VBox(8);
+        Label minEyebrow = new Label("LOW STOCK ALERT (MIN)");
+        minEyebrow.getStyleClass().add("dialog-eyebrow");
         TextField minField = new TextField(String.valueOf(ingredient.getMinThreshold()));
-        minField.setStyle(fieldStyle);
-        javafx.scene.control.Label minError = new javafx.scene.control.Label();
-        minError.setStyle("-fx-text-fill: #e07070; -fx-font-size: 11px;");
+        minField.getStyleClass().add("premium-field");
+        Label minError = new Label("");
+        minError.getStyleClass().add("dialog-error");
         minError.setVisible(false);
+        minError.setManaged(false);
+        minBox.getChildren().addAll(minEyebrow, minField, minError);
 
-        javafx.scene.control.Label maxLabel = new javafx.scene.control.Label("Max Stock:");
-        maxLabel.setStyle(labelStyle);
+        VBox maxBox = new VBox(8);
+        Label maxEyebrow = new Label("MAXIMUM CAPACITY (MAX)");
+        maxEyebrow.getStyleClass().add("dialog-eyebrow");
         TextField maxField = new TextField(String.valueOf(ingredient.getMaxStock()));
-        maxField.setStyle(fieldStyle);
-        javafx.scene.control.Label maxError = new javafx.scene.control.Label();
-        maxError.setStyle("-fx-text-fill: #e07070; -fx-font-size: 11px;");
+        maxField.getStyleClass().add("premium-field");
+        Label maxError = new Label("");
+        maxError.getStyleClass().add("dialog-error");
         maxError.setVisible(false);
+        maxError.setManaged(false);
+        maxBox.getChildren().addAll(maxEyebrow, maxField, maxError);
 
-        vbox.getChildren().addAll(minLabel, minField, minError, maxLabel, maxField, maxError);
-        dialog.getDialogPane().setContent(vbox);
+        colLeft.getChildren().addAll(minBox, maxBox);
+
+        // RIGHT COLUMN: Context Info
+        VBox colRight = new VBox(24);
+        colRight.getStyleClass().addAll("dialog-col-right", "dialog-section-card");
+        colRight.setPrefWidth(260);
+
+        VBox infoBox = new VBox(12);
+        Label infoEyebrow = new Label("CURRENT STATUS");
+        infoEyebrow.getStyleClass().add("dialog-eyebrow");
+        
+        Label nameLbl = new Label(ingredient.getName().toUpperCase());
+        nameLbl.getStyleClass().add("chip-name");
+        
+        HBox stockRow = new HBox(8);
+        Label stockVal = new Label(String.valueOf(ingredient.getQuantity()));
+        stockVal.getStyleClass().add("cell-mono");
+        stockVal.setStyle("-fx-font-size: 18px; -fx-text-fill: #c8500a;");
+        Label unitVal = new Label(ingredient.getUnit().toLowerCase());
+        unitVal.getStyleClass().add("text-muted");
+        stockRow.setAlignment(Pos.BASELINE_LEFT);
+        stockRow.getChildren().addAll(stockVal, unitVal);
+
+        infoBox.getChildren().addAll(infoEyebrow, nameLbl, stockRow);
+        colRight.getChildren().add(infoBox);
+
+        mainLayout.getChildren().addAll(colLeft, colRight);
+
+        dialog.getDialogPane().setContent(mainLayout);
         dialog.getDialogPane().getButtonTypes().addAll(
             javafx.scene.control.ButtonType.CANCEL,
             javafx.scene.control.ButtonType.OK
         );
 
-        javafx.scene.control.Button okButton = (javafx.scene.control.Button) dialog.getDialogPane().lookupButton(javafx.scene.control.ButtonType.OK);
-        okButton.setStyle("-fx-background-color: #5c4828; -fx-text-fill: #8a7055; -fx-border-radius: 6; -fx-padding: 8 16 8 16; -fx-font-size: 12px; -fx-font-weight: bold;");
-        okButton.setDisable(true);
+        Button okButton = (Button) dialog.getDialogPane().lookupButton(javafx.scene.control.ButtonType.OK);
+        okButton.setText("UPDATE CONFIG");
+        okButton.getStyleClass().add("dialog-button-save");
 
-        dialog.getDialogPane().lookupButton(javafx.scene.control.ButtonType.CANCEL).setStyle(
-            "-fx-background-color: transparent; -fx-text-fill: #a09070; -fx-border-color: #4a3820; -fx-border-width: 1; -fx-border-radius: 6; -fx-padding: 8 16 8 16; -fx-font-size: 12px;");
+        Button cancelButton = (Button) dialog.getDialogPane().lookupButton(javafx.scene.control.ButtonType.CANCEL);
+        cancelButton.getStyleClass().add("dialog-button-cancel");
 
-        double currentQty = ingredient.getQuantity();
-
-        javafx.beans.InvalidationListener minValidator = obs -> {
-            String minText = minField.getText().trim();
+        javafx.beans.InvalidationListener validator = obs -> {
             boolean valid = true;
-            String errorMsg = null;
-
-            if (minText.isEmpty()) {
-                valid = false;
-            } else {
-                try {
-                    double min = Double.parseDouble(minText);
-                    if (min < 0) {
-                        errorMsg = "Must be at least 1";
-                        valid = false;
-                    }
-                } catch (NumberFormatException ex) {
-                    errorMsg = "Enter valid number";
+            try {
+                double min = Double.parseDouble(minField.getText().trim());
+                if (min < 0) {
+                    minError.setText("Cannot be negative");
+                    minError.setVisible(true); minError.setManaged(true);
                     valid = false;
-                }
-            }
+                } else { minError.setVisible(false); minError.setManaged(false); }
+            } catch (Exception ex) { valid = false; }
 
-            if (errorMsg != null) {
-                minError.setText(errorMsg);
-                minError.setVisible(true);
-                minField.setStyle(fieldStyle + "-fx-border-color: #e07070;");
-            } else {
-                minError.setVisible(false);
-                minField.setStyle(fieldStyle);
-            }
+            try {
+                double max = Double.parseDouble(maxField.getText().trim());
+                if (max < ingredient.getQuantity()) {
+                    maxError.setText("Below current stock");
+                    maxError.setVisible(true); maxError.setManaged(true);
+                    valid = false;
+                } else { maxError.setVisible(false); maxError.setManaged(false); }
+            } catch (Exception ex) { valid = false; }
 
-            updateOkButtonState(okButton, minField, maxField, fieldStyle, currentQty);
+            okButton.setDisable(!valid);
         };
 
-        javafx.beans.InvalidationListener maxValidator = obs -> {
-            String maxText = maxField.getText().trim();
-            boolean valid = true;
-            String errorMsg = null;
+        minField.textProperty().addListener(validator);
+        maxField.textProperty().addListener(validator);
 
-            if (maxText.isEmpty()) {
-                valid = false;
-            } else {
-                try {
-                    double max = Double.parseDouble(maxText);
-                    if (max < currentQty) {
-                        errorMsg = "Must be higher than current stock";
-                        valid = false;
-                    }
-                } catch (NumberFormatException ex) {
-                    errorMsg = "Enter valid number";
-                    valid = false;
-                }
-            }
-
-            if (errorMsg != null) {
-                maxError.setText(errorMsg);
-                maxError.setVisible(true);
-                maxField.setStyle(fieldStyle + "-fx-border-color: #e07070;");
-            } else {
-                maxError.setVisible(false);
-                maxField.setStyle(fieldStyle);
-            }
-
-            updateOkButtonState(okButton, minField, maxField, fieldStyle, currentQty);
-        };
-
-        minField.textProperty().addListener(minValidator);
-        maxField.textProperty().addListener(maxValidator);
-
-        updateOkButtonState(okButton, minField, maxField, fieldStyle, currentQty);
-
-        dialog.setResultConverter(btn -> {
-            if (btn == javafx.scene.control.ButtonType.OK) {
-                try {
-                    return Double.parseDouble(minField.getText());
-                } catch (NumberFormatException ex) {
-                    return null;
-                }
-            }
-            return null;
-        });
+        dialog.setResultConverter(btn -> btn == javafx.scene.control.ButtonType.OK);
 
         dialog.showAndWait().ifPresent(result -> {
-            try {
-                double newMin = Double.parseDouble(minField.getText());
-                double newMax = Double.parseDouble(maxField.getText());
-                if (newMin > 0 && newMax > 0) {
-                    ingredientDAO.updateThreshold(ingredient.getId(), newMin);
-                    ingredientDAO.updateMaxStock(ingredient.getId(), newMax);
+            if (result) {
+                try {
+                    ingredientDAO.updateThreshold(ingredient.getId(), Double.parseDouble(minField.getText()));
+                    ingredientDAO.updateMaxStock(ingredient.getId(), Double.parseDouble(maxField.getText()));
                     loadInventory();
-                }
-            } catch (NumberFormatException ex) {
-                System.err.println("Invalid input: " + ex.getMessage());
+                } catch (Exception ex) {}
             }
         });
     }
@@ -929,223 +898,139 @@ private void setupTableColumns() {
     }
 
 @FXML
-    private void onAddIngredient() {
-        Dialog<Boolean> dialog = new Dialog<>();
-        dialog.setTitle("Add New Ingredient");
-        dialog.setHeaderText(null);
-        dialog.getDialogPane().getStyleClass().add("dialog-pane");
-        dialog.getDialogPane().setStyle("-fx-background-color: #2e2410; -fx-border-color: #4a3820; -fx-border-width: 1; -fx-border-radius: 12; -fx-background-radius: 12;");
+private void onAddIngredient() {
+    Dialog<Boolean> dialog = new Dialog<>();
+    dialog.setTitle("NEW INGREDIENT");
+    dialog.getDialogPane().getStyleClass().add("dialog-pane");
 
-        String labelStyle = "-fx-text-fill: #a09070; -fx-font-size: 12px;";
-        String fieldStyle = "-fx-background-color: #221a0e; -fx-text-fill: #f5ede0; -fx-prompt-text-fill: #8a7055; -fx-border-color: #4a3820; -fx-border-width: 1; -fx-border-radius: 6; -fx-background-radius: 6; -fx-padding: 8 12 8 12; -fx-font-size: 13px;";
-        String errorStyle = "-fx-text-fill: #e07070; -fx-font-size: 11px;";
+    dialog.getDialogPane().getStylesheets().add(getClass().getResource("/css/common.css").toExternalForm());
+    dialog.getDialogPane().getStylesheets().add(getClass().getResource("/css/dialog.css").toExternalForm());
 
-        javafx.scene.layout.GridPane grid = new javafx.scene.layout.GridPane();
-        grid.setHgap(10);
-        grid.setVgap(5);
+    Label headerLabel = new Label("Add New Ingredient");
+    headerLabel.getStyleClass().add("dialog-header-text");
+    dialog.getDialogPane().setHeader(headerLabel);
 
-        TextField nameField = new TextField();
-        nameField.setStyle(fieldStyle);
-        nameField.setPromptText("Ingredient name");
+    HBox mainLayout = new HBox(32);
+    mainLayout.setPadding(new Insets(30, 40, 30, 40));
+    mainLayout.setAlignment(Pos.TOP_CENTER);
 
-        TextField unitField = new TextField();
-        unitField.setStyle(fieldStyle);
-        unitField.setPromptText("e.g., pcs, g, L");
+    // LEFT COLUMN: Basic Identity
+    VBox colLeft = new VBox(28);
+    colLeft.getStyleClass().addAll("dialog-col-left", "dialog-section-card");
+    colLeft.setPrefWidth(340);
 
-        TextField quantityField = new TextField();
-        quantityField.setStyle(fieldStyle);
-        quantityField.setPromptText("Initial quantity");
+    VBox nameBox = new VBox(8);
+    Label nameEyebrow = new Label("INGREDIENT NAME");
+    nameEyebrow.getStyleClass().add("dialog-eyebrow");
+    TextField nameField = new TextField();
+    nameField.setPromptText("e.g. Ground Beef");
+    nameField.getStyleClass().add("premium-field");
+    Label nameError = new Label("");
+    nameError.getStyleClass().add("dialog-error");
+    nameError.setVisible(false); nameError.setManaged(false);
+    nameBox.getChildren().addAll(nameEyebrow, nameField, nameError);
 
-        TextField minThresholdField = new TextField();
-        minThresholdField.setStyle(fieldStyle);
-        minThresholdField.setPromptText("Low stock alert threshold");
+    VBox unitBox = new VBox(8);
+    Label unitEyebrow = new Label("MEASUREMENT UNIT");
+    unitEyebrow.getStyleClass().add("dialog-eyebrow");
+    TextField unitField = new TextField();
+    unitField.setPromptText("e.g. grams, pcs, kg");
+    unitField.getStyleClass().add("premium-field");
+    Label unitError = new Label("");
+    unitError.getStyleClass().add("dialog-error");
+    unitError.setVisible(false); unitError.setManaged(false);
+    unitBox.getChildren().addAll(unitEyebrow, unitField, unitError);
 
-        TextField maxStockField = new TextField();
-        maxStockField.setStyle(fieldStyle);
-        maxStockField.setPromptText("Maximum stock capacity");
+    colLeft.getChildren().addAll(nameBox, unitBox);
 
-        Label nameLabel = new Label("Name:");
-        nameLabel.setStyle(labelStyle);
-        Label unitLabel = new Label("Unit:");
-        unitLabel.setStyle(labelStyle);
-        Label qtyLabel = new Label("Quantity:");
-        qtyLabel.setStyle(labelStyle);
-        Label minLabel = new Label("Min Threshold:");
-        minLabel.setStyle(labelStyle);
-        Label maxLabel = new Label("Max Stock:");
-        maxLabel.setStyle(labelStyle);
+    // RIGHT COLUMN: Stock Configuration
+    VBox colRight = new VBox(28);
+    colRight.getStyleClass().addAll("dialog-col-right", "dialog-section-card");
+    colRight.setPrefWidth(340);
 
-        Label nameError = new Label("");
-        nameError.setStyle(errorStyle);
-        nameError.setVisible(false);
-        Label unitError = new Label("");
-        unitError.setStyle(errorStyle);
-        unitError.setVisible(false);
-        Label qtyError = new Label("");
-        qtyError.setStyle(errorStyle);
-        qtyError.setVisible(false);
-        Label minError = new Label("");
-        minError.setStyle(errorStyle);
-        minError.setVisible(false);
-        Label maxError = new Label("");
-        maxError.setStyle(errorStyle);
-        maxError.setVisible(false);
+    VBox qtyBox = new VBox(8);
+    Label qtyEyebrow = new Label("INITIAL QUANTITY");
+    qtyEyebrow.getStyleClass().add("dialog-eyebrow");
+    TextField qtyField = new TextField();
+    qtyField.setPromptText("0.00");
+    qtyField.getStyleClass().add("premium-field");
+    Label qtyError = new Label("");
+    qtyError.getStyleClass().add("dialog-error");
+    qtyError.setVisible(false); qtyError.setManaged(false);
+    qtyBox.getChildren().addAll(qtyEyebrow, qtyField, qtyError);
 
-        grid.add(nameLabel, 0, 0);
-        grid.add(nameField, 1, 0);
-        grid.add(nameError, 1, 1);
-        grid.add(unitLabel, 0, 2);
-        grid.add(unitField, 1, 2);
-        grid.add(unitError, 1, 3);
-        grid.add(qtyLabel, 0, 4);
-        grid.add(quantityField, 1, 4);
-        grid.add(qtyError, 1, 5);
-        grid.add(minLabel, 0, 6);
-        grid.add(minThresholdField, 1, 6);
-        grid.add(minError, 1, 7);
-        grid.add(maxLabel, 0, 8);
-        grid.add(maxStockField, 1, 8);
-        grid.add(maxError, 1, 9);
+    HBox limitsBox = new HBox(20);
+    VBox minBox = new VBox(8);
+    Label minEyebrow = new Label("MIN ALERT");
+    minEyebrow.getStyleClass().add("dialog-eyebrow");
+    TextField minField = new TextField();
+    minField.getStyleClass().add("premium-field");
+    minBox.getChildren().addAll(minEyebrow, minField);
 
-        dialog.getDialogPane().setContent(grid);
-        dialog.getDialogPane().getButtonTypes().addAll(
-            javafx.scene.control.ButtonType.CANCEL,
-            javafx.scene.control.ButtonType.OK
-        );
+    VBox maxBox = new VBox(8);
+    Label maxEyebrow = new Label("MAX CAPACITY");
+    maxEyebrow.getStyleClass().add("dialog-eyebrow");
+    TextField maxField = new TextField();
+    maxField.getStyleClass().add("premium-field");
+    maxBox.getChildren().addAll(maxEyebrow, maxField);
 
-        javafx.scene.control.Button okButton = (javafx.scene.control.Button) dialog.getDialogPane().lookupButton(javafx.scene.control.ButtonType.OK);
-        okButton.setStyle("-fx-background-color: #5c4828; -fx-text-fill: #8a7055; -fx-border-radius: 6; -fx-padding: 8 16 8 16; -fx-font-size: 12px; -fx-font-weight: bold; -fx-cursor: hand;");
-        okButton.setDisable(true);
+    limitsBox.getChildren().addAll(minBox, maxBox);
+    HBox.setHgrow(minBox, javafx.scene.layout.Priority.ALWAYS);
+    HBox.setHgrow(maxBox, javafx.scene.layout.Priority.ALWAYS);
 
-        dialog.getDialogPane().lookupButton(javafx.scene.control.ButtonType.CANCEL).setStyle(
-            "-fx-background-color: transparent; -fx-text-fill: #a09070; -fx-border-color: #4a3820; -fx-border-width: 1; -fx-border-radius: 6; -fx-padding: 8 16 8 16; -fx-font-size: 12px;");
+    colRight.getChildren().addAll(qtyBox, limitsBox);
+    mainLayout.getChildren().addAll(colLeft, colRight);
 
-        javafx.beans.InvalidationListener nameValidator = obs -> {
-            String name = nameField.getText().trim();
-            if (!name.isEmpty() && !name.matches("^[a-zA-Z\\s]+$")) {
-                nameError.setText("Only letters and spaces allowed");
-                nameError.setVisible(true);
-                nameField.setStyle(fieldStyle + "-fx-border-color: #e07070;");
-            } else if (name.isEmpty()) {
-                nameError.setText("Required");
-                nameError.setVisible(true);
-                nameField.setStyle(fieldStyle + "-fx-border-color: #e07070;");
-            } else if (ingredientDAO.existsByName(name)) {
-                nameError.setText("Already exists");
-                nameError.setVisible(true);
-                nameField.setStyle(fieldStyle + "-fx-border-color: #e07070;");
-            } else {
-                nameError.setVisible(false);
-                nameField.setStyle(fieldStyle);
-            }
-            checkAllValid(okButton, nameField, unitField, quantityField, minThresholdField, maxStockField, fieldStyle);
-        };
+    dialog.getDialogPane().setContent(mainLayout);
+    dialog.getDialogPane().getButtonTypes().addAll(javafx.scene.control.ButtonType.CANCEL, javafx.scene.control.ButtonType.OK);
 
-        javafx.beans.InvalidationListener unitValidator = obs -> {
-            String unit = unitField.getText().trim();
-            if (!unit.isEmpty() && !unit.matches("^[a-zA-Z]+$")) {
-                unitError.setText("Only letters allowed");
-                unitError.setVisible(true);
-                unitField.setStyle(fieldStyle + "-fx-border-color: #e07070;");
-            } else if (unit.isEmpty()) {
-                unitError.setText("Required");
-                unitError.setVisible(true);
-                unitField.setStyle(fieldStyle + "-fx-border-color: #e07070;");
-            } else {
-                unitError.setVisible(false);
-                unitField.setStyle(fieldStyle);
-            }
-            checkAllValid(okButton, nameField, unitField, quantityField, minThresholdField, maxStockField, fieldStyle);
-        };
+    Button okButton = (Button) dialog.getDialogPane().lookupButton(javafx.scene.control.ButtonType.OK);
+    okButton.setText("SAVE INGREDIENT");
+    okButton.getStyleClass().add("dialog-button-save");
+    okButton.setDisable(true);
 
-        javafx.beans.InvalidationListener qtyValidator = obs -> {
+    Button cancelButton = (Button) dialog.getDialogPane().lookupButton(javafx.scene.control.ButtonType.CANCEL);
+    cancelButton.getStyleClass().add("dialog-button-cancel");
+
+    javafx.beans.InvalidationListener validator = obs -> {
+        boolean valid = true;
+        String name = nameField.getText().trim();
+        if (name.isEmpty()) valid = false;
+        else if (ingredientDAO.existsByName(name)) {
+            nameError.setText("Already exists");
+            nameError.setVisible(true); nameError.setManaged(true);
+            valid = false;
+        } else { nameError.setVisible(false); nameError.setManaged(false); }
+
+        if (unitField.getText().trim().isEmpty()) valid = false;
+
+        try { Double.parseDouble(qtyField.getText().trim()); } catch (Exception e) { valid = false; }
+        try { Double.parseDouble(minField.getText().trim()); } catch (Exception e) { valid = false; }
+        try { Double.parseDouble(maxField.getText().trim()); } catch (Exception e) { valid = false; }
+
+        okButton.setDisable(!valid);
+    };
+
+    nameField.textProperty().addListener(validator);
+    unitField.textProperty().addListener(validator);
+    qtyField.textProperty().addListener(validator);
+    minField.textProperty().addListener(validator);
+    maxField.textProperty().addListener(validator);
+
+    dialog.setResultConverter(btn -> btn == javafx.scene.control.ButtonType.OK);
+
+    dialog.showAndWait().ifPresent(result -> {
+        if (result) {
             try {
-                double qty = Double.parseDouble(quantityField.getText().trim());
-                qtyError.setVisible(false);
-                quantityField.setStyle(fieldStyle);
-            } catch (NumberFormatException ex) {
-                qtyError.setText("Enter valid number");
-                qtyError.setVisible(true);
-                quantityField.setStyle(fieldStyle + "-fx-border-color: #e07070;");
-            }
-            checkAllValid(okButton, nameField, unitField, quantityField, minThresholdField, maxStockField, fieldStyle);
-        };
-
-        javafx.beans.InvalidationListener minValidator = obs -> {
-            try {
-                double min = Double.parseDouble(minThresholdField.getText().trim());
-                double qty = Double.parseDouble(quantityField.getText().trim());
-                if (min > qty) {
-                    minError.setText("Must be lower than Quantity");
-                    minError.setVisible(true);
-                    minThresholdField.setStyle(fieldStyle + "-fx-border-color: #e07070;");
-                } else {
-                    minError.setVisible(false);
-                    minThresholdField.setStyle(fieldStyle);
-                }
-            } catch (NumberFormatException ex) {
-                minError.setText("Enter valid number");
-                minError.setVisible(true);
-                minThresholdField.setStyle(fieldStyle + "-fx-border-color: #e07070;");
-            }
-            checkAllValid(okButton, nameField, unitField, quantityField, minThresholdField, maxStockField, fieldStyle);
-        };
-
-        javafx.beans.InvalidationListener maxValidator = obs -> {
-            try {
-                double max = Double.parseDouble(maxStockField.getText().trim());
-                double qty = Double.parseDouble(quantityField.getText().trim());
-                if (max < qty) {
-                    maxError.setText("Must be higher than Quantity");
-                    maxError.setVisible(true);
-                    maxStockField.setStyle(fieldStyle + "-fx-border-color: #e07070;");
-                } else {
-                    maxError.setVisible(false);
-                    maxStockField.setStyle(fieldStyle);
-                }
-            } catch (NumberFormatException ex) {
-                maxError.setText("Enter valid number");
-                maxError.setVisible(true);
-                maxStockField.setStyle(fieldStyle + "-fx-border-color: #e07070;");
-            }
-            checkAllValid(okButton, nameField, unitField, quantityField, minThresholdField, maxStockField, fieldStyle);
-        };
-
-        nameField.textProperty().addListener(nameValidator);
-        unitField.textProperty().addListener(unitValidator);
-        quantityField.textProperty().addListener(qtyValidator);
-        minThresholdField.textProperty().addListener(minValidator);
-        maxStockField.textProperty().addListener(maxValidator);
-
-        dialog.setResultConverter(btn -> {
-            if (btn == javafx.scene.control.ButtonType.OK) {
-                return true;
-            }
-            return false;
-        });
-
-        dialog.showAndWait().filter(result -> result).ifPresent(result -> {
-            try {
-                String name = nameField.getText().trim();
-                String unit = unitField.getText().trim();
-                double quantity = Double.parseDouble(quantityField.getText().trim());
-                double minThreshold = Double.parseDouble(minThresholdField.getText().trim());
-                double maxStock = Double.parseDouble(maxStockField.getText().trim());
-
-                if (!name.isEmpty() && !unit.isEmpty()) {
-                    ingredientDAO.insert(name, unit, quantity, minThreshold, maxStock);
-                    loadInventory();
-                }
-            } catch (NumberFormatException ex) {
-                Alert err = new Alert(Alert.AlertType.ERROR);
-                err.setTitle("Error");
-                err.setHeaderText("Invalid input");
-                err.setContentText("Please enter valid numbers for quantity, threshold, and max stock.");
-                err.showAndWait();
-            }
-        });
-    }
-
+                ingredientDAO.insert(nameField.getText().trim(), unitField.getText().trim(),
+                    Double.parseDouble(qtyField.getText().trim()),
+                    Double.parseDouble(minField.getText().trim()),
+                    Double.parseDouble(maxField.getText().trim()));
+                loadInventory();
+            } catch (Exception ex) {}
+        }
+    });
+}
     @FXML
     private void onRestock() {
         Alert alert = new Alert(Alert.AlertType.INFORMATION);

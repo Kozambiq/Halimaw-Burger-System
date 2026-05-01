@@ -128,7 +128,7 @@
                                 <SVGPath content="M20 6h-2.18c.07-.44.18-.88.18-1.36C18 2.06 15.94 0 13.36 0c-1.46 0-2.68.75-3.48 1.88L12 4l2.12-2.12C14.5 1.32 14.9 1 15.5 1c.83 0 1.5.67 1.5 1.5S16.33 4 15.5 4H4C2.9 4 2 4.9 2 6v14c0 1.1.9 2 2 2h16c1.1 0 2-.9 2-2V8c0-1.1-.9-2-2-2zm-7.5 11.5h-3v-3h-3v-3h3v-3h3v3h3v3h-3v3z" fill="#c8500a" scaleX="0.8" scaleY="0.8"/>
                             </StackPane>
                             <VBox>
-                                <Label styleClass="stat-label" text="TOTAL ITEMS"/>
+                                <Label styleClass="stat-label" text="TOTAL INVENTORY"/>
                                 <Label fx:id="lblTotal" styleClass="stat-value" text="0"/>
                             </VBox>
                         </HBox>

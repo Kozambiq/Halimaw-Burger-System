@@ -1,273 +1,129 @@
 /* ============================================================
-    Inventory Tab Styles
+    Halimaw Burger – Inventory Tab Styles
     ============================================================ */
 
-/* ── Filter Styles ──────────────────────────────────── */
-.filter-combo {
-    -fx-background-color: #332615;
-    -fx-text-fill: #c4a882;
-    -fx-prompt-text-fill: #8a7055;
-    -fx-border-color: #4a3820;
-    -fx-border-width: 1;
-    -fx-border-radius: 6;
-    -fx-background-radius: 6;
-    -fx-padding: 8 12 8 12;
-    -fx-font-size: 13px;
-    -fx-font-family: 'DM Sans', sans-serif;
-}
+/* ── Stat Cards & Console already handled in FXML/Common ── */
 
-.filter-combo .list-cell {
-    -fx-text-fill: #c4a882;
-    -fx-background-color: #332615;
-}
-
-.filter-combo .list-view {
-    -fx-background-color: #2e2410;
-    -fx-border-color: #4a3820;
-}
-
-.filter-date {
-    -fx-background-color: #332615;
-    -fx-text-fill: #f5ede0;
-    -fx-border-color: #4a3820;
-    -fx-border-width: 1;
-    -fx-border-radius: 6;
-    -fx-background-radius: 6;
-    -fx-padding: 4 8 4 8;
-}
-
-.date-picker-box {
-    -fx-alignment: center-left;
-}
-
-.date-separator {
-    -fx-text-fill: #8a7055;
-    -fx-font-size: 12px;
-}
-
-/* ── Inventory Table ───────────────────────────────── */
+/* ── Inventory Table Polish ──────────────────────────────── */
 .inventory-table {
     -fx-background-color: transparent;
     -fx-border-width: 0;
-    -fx-background: transparent;
-}
-
-.inventory-table .table-view {
-    -fx-background-color: transparent;
 }
 
 .inventory-table .column-header-background {
-    -fx-background-color: #2a1e10;
-}
-
-.inventory-table .filler {
-    -fx-background-color: #2a1e10;
+    -fx-background-color: transparent;
+    -fx-padding: 8 0 8 0;
 }
 
 .inventory-table .column-header {
-    -fx-background-color: #2a1e10;
-    -fx-background: #2a1e10;
-    -fx-text-fill: #ffffff; /* Pure white for maximum brightness */
+    -fx-background-color: transparent;
+    -fx-text-fill: #ffffff;
     -fx-font-size: 12px;
     -fx-font-weight: 900;
-    -fx-letter-spacing: 0.08em;
-}
-
-.inventory-table .table-cell {
-    -fx-background-color: transparent;
-    -fx-text-fill: #c4a882;
-    -fx-font-size: 13px;
-    -fx-border-width: 0;
+    -fx-letter-spacing: 0.12em;
+    -fx-border-color: #4a3820;
+    -fx-border-width: 0 0 1.5 0;
+    -fx-padding: 4 0 4 0;
 }
 
 .inventory-table .table-row-cell {
     -fx-background-color: transparent;
-    -fx-border-color: #4a3820;
+    -fx-border-color: #332615;
     -fx-border-width: 0 0 1 0;
+    -fx-border-style: segments(4, 4);
 }
 
 .inventory-table .table-row-cell:odd {
-    -fx-background-color: transparent;
+    -fx-background-color: rgba(255, 255, 255, 0.015);
 }
 
 .inventory-table .table-row-cell:hover {
-    -fx-background-color: #3d2e1a;
+    -fx-background-color: rgba(200, 80, 10, 0.04);
+    -fx-border-color: #c8500a;
+    -fx-border-style: solid;
+    -fx-border-width: 0 0 1 4;
 }
 
-.table-row-cell:selected {
-    -fx-background-color: rgba(212, 89, 30, 0.12);
+.inventory-table .table-cell {
+    -fx-padding: 16 8 16 8;
+    -fx-text-fill: #c4a882;
+    -fx-font-size: 14px;
 }
 
-.inventory-table .table-row-cell:selected {
-    -fx-background-color: rgba(212, 89, 30, 0.12);
-}
-
-.badge-cell {
-    -fx-padding: 3 10 3 10;
-    -fx-background-radius: 20;
-    -fx-font-size: 11px;
+.cell-name {
+    -fx-text-fill: #f5ede0 !important;
     -fx-font-weight: 600;
+}
+
+.cell-mono {
+    -fx-font-family: 'DM Mono', monospace;
+    -fx-text-fill: #c4a882;
+}
+
+/* ── Progress Bar Styling (Stock Levels) ─────────────────── */
+.stock-bar-track {
+    -fx-background-color: rgba(255, 255, 255, 0.05);
+    -fx-background-radius: 10;
+}
+
+.stock-bar-fill-ok {
+    -fx-background-color: linear-gradient(to right, #4a8c3f, #7ec470);
+    -fx-background-radius: 10;
+}
+
+.stock-bar-fill-low {
+    -fx-background-color: linear-gradient(to right, #b07a18, #e8b84b);
+    -fx-background-radius: 10;
+}
+
+.stock-bar-fill-out {
+    -fx-background-color: linear-gradient(to right, #8c3030, #e07070);
+    -fx-background-radius: 10;
+}
+
+.stock-marker {
+    -fx-fill: rgba(255, 255, 255, 0.3);
 }
 
 /* ── Status Pills ───────────────────────────────────────── */
 .status-pill {
-    -fx-padding: 3 12 3 12;
+    -fx-padding: 4 14 4 14;
     -fx-background-radius: 20;
+    -fx-font-family: 'DM Sans', sans-serif;
     -fx-font-size: 11px;
-    -fx-font-weight: bold;
+    -fx-font-weight: 800;
+    -fx-letter-spacing: 0.02em;
+    -fx-alignment: center;
 }
 
 .pill-ok {
-    -fx-background-color: rgba(74, 140, 63, 0.15);
+    -fx-background-color: rgba(126, 196, 112, 0.12);
     -fx-text-fill: #7ec470;
+    -fx-border-color: rgba(126, 196, 112, 0.2);
+    -fx-border-radius: 20;
+    -fx-border-width: 1;
 }
 
 .pill-low {
-    -fx-background-color: rgba(176, 122, 24, 0.15);
+    -fx-background-color: rgba(232, 184, 75, 0.12);
     -fx-text-fill: #e8b84b;
+    -fx-border-color: rgba(232, 184, 75, 0.2);
+    -fx-border-radius: 20;
+    -fx-border-width: 1;
 }
 
-.badge-out {
-    -fx-background-color: rgba(140, 48, 48, 0.15);
-    -fx-text-fill: #e07070;
-}
-
-.badge-completed {
-    -fx-background-color: rgba(74, 140, 63, 0.15);
-    -fx-text-fill: #7ec470;
-    -fx-font-size: 11px;
-    -fx-font-weight: 600;
-    -fx-padding: 3 10 3 10;
-    -fx-background-radius: 20;
-}
-
-.pill-off {
-    -fx-background-color: rgba(100, 80, 60, 0.2);
-    -fx-text-fill: #8a7055;
+.pill-out {
+    -fx-background-color: rgba(224, 112, 112, 0.12);
+    -fx-text-fill: #ff6b6b;
+    -fx-border-color: rgba(224, 112, 112, 0.2);
+    -fx-border-radius: 20;
+    -fx-border-width: 1;
 }
 
 .pill-disabled {
-    -fx-background-color: rgba(224, 112, 112, 0.15);
-    -fx-text-fill: #e07070;
-}
-
-/* ── Scrollbar ───────────────────────────────────────────── */
-.scroll-bar {
-    -fx-background-color: #221a0e;
-}
-
-.scroll-bar:vertical {
-    -fx-pref-width: 8;
-}
-
-.scroll-bar:horizontal {
-    -fx-pref-height: 8;
-}
-
-.scroll-bar .track {
-    -fx-background-color: #221a0e;
-    -fx-background-radius: 4;
-}
-
-.scroll-bar .track-background {
-    -fx-background-color: #221a0e;
-}
-
-.scroll-bar .thumb {
-    -fx-background-color: #4a3820;
-    -fx-background-radius: 4;
-}
-
-.scroll-bar .thumb:hover {
-    -fx-background-color: #5c4828;
-}
-
-.scroll-bar .thumb:pressed {
-    -fx-background-color: #c8500a;
-}
-
-.scroll-bar .increment-button,
-.scroll-bar .decrement-button {
-    -fx-background-color: transparent;
-    -fx-pref-width: 0;
-    -fx-pref-height: 0;
-    -fx-opacity: 0;
-}
-
-/* ── Dialog Styles ─────────────────────────────────────── */
-
-/* Apply to all dialog panes */
-.dialog-pane {
-    -fx-background-color: #2e2410;
-    -fx-text-fill: #f5ede0;
-}
-
-.dialog-pane {
-    background-color: #2e2410;
-}
-
-/* Dialog header */
-.dialog-pane .header-panel {
-    -fx-background-color: #221a0e;
-}
-
-.dialog-pane .header-panel .label {
-    -fx-text-fill: #f5ede0;
-    -fx-font-size: 15px;
-    -fx-font-weight: bold;
-}
-
-/* Dialog content */
-.dialog-pane .content-area {
-    -fx-background-color: #2e2410;
-}
-
-/* Button bar */
-.dialog-pane .button-bar {
-    -fx-background-color: #2e2410;
-}
-
-/* Dialog buttons */
-.dialog-pane .button-bar .button {
-    -fx-background-color: #4a3820;
-    -fx-text-fill: #f5ede0;
-    -fx-font-size: 12px;
-    -fx-padding: 8px 16px;
-}
-
-.dialog-pane .button-bar .button:hover {
-    -fx-background-color: #5c4828;
-}
-
-/* TextField in dialog */
-.dialog-pane .text-field {
-    -fx-background-color: #221a0e;
-    -fx-text-fill: #f5ede0;
-    -fx-prompt-text-fill: #8a7055;
-    -fx-border-color: #4a3820;
-    -fx-border-width: 1px;
-    -fx-padding: 8px;
-}
-
-.dialog-pane .text-field:focused {
-    -fx-border-color: #c8500a;
-}
-
-/* Label in dialog */
-.dialog-pane Label {
-    -fx-text-fill: #a09070;
-}
-
-/* Dialog header - white background fix */
-.dialog-pane *.headerPanel {
-    -fx-background-color: #2e2410;
-}
-
-.dialog-pane *.headerPanel > *.label {
-    -fx-text-fill: #f5ede0;
-    -fx-font-size: 14px;
-}
-
-.dialog-pane *.title {
-    -fx-background-color: #2e2410;
+    -fx-background-color: rgba(92, 72, 40, 0.15);
+    -fx-text-fill: #8a7055;
+    -fx-border-color: rgba(92, 72, 40, 0.2);
+    -fx-border-radius: 20;
+    -fx-border-width: 1;
 }
