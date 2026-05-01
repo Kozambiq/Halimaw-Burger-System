@@ -121,27 +121,48 @@
                 <padding><Insets top="24" right="32" bottom="24" left="32"/></padding>
 
                 <HBox spacing="16" alignment="CENTER_LEFT">
-                    <VBox styleClass="stat-card" prefWidth="180">
-                        <Label styleClass="stat-label" text="TOTAL STAFF"/>
-                        <Label fx:id="lblTotal" styleClass="stat-value" text="0"/>
+                    <VBox styleClass="stat-card" prefWidth="210">
+                        <HBox alignment="CENTER_LEFT" spacing="12">
+                            <StackPane style="-fx-background-color: rgba(200, 80, 10, 0.1); -fx-background-radius: 8; -fx-padding: 8;">
+                                <SVGPath content="M16 11c1.66 0 2.99-1.34 2.99-3S17.66 5 16 5c-1.66 0-3 1.34-3 3s1.34 3 3 3zm-8 0c1.66 0 2.99-1.34 2.99-3S9.66 5 8 5C6.34 5 5 6.34 5 8s1.34 3 3 3zm0 2c-2.33 0-7 1.17-7 3.5V19h14v-2.5c0-2.33-4.67-3.5-7-3.5z" fill="#c8500a" scaleX="0.8" scaleY="0.8"/>
+                            </StackPane>
+                            <VBox>
+                                <Label styleClass="stat-label" text="TOTAL TEAM"/>
+                                <Label fx:id="lblTotal" styleClass="stat-value" text="0"/>
+                            </VBox>
+                        </HBox>
                     </VBox>
-                    <VBox styleClass="stat-card" prefWidth="180">
-                        <Label styleClass="stat-label" text="ON SHIFT TODAY"/>
-                        <Label fx:id="lblOnShift" styleClass="stat-value" text="0" style="-fx-text-fill: #7ec470;"/>
+                    <VBox styleClass="stat-card" prefWidth="210">
+                        <HBox alignment="CENTER_LEFT" spacing="12">
+                            <StackPane style="-fx-background-color: rgba(126, 196, 112, 0.1); -fx-background-radius: 8; -fx-padding: 8;">
+                                <SVGPath content="M11.99 2C6.47 2 2 6.48 2 12s4.47 10 9.99 10C17.52 22 22 17.52 22 12S17.52 2 11.99 2zM12 20c-4.42 0-8-3.58-8-8s3.58-8 8-8 8 3.58 8 8-3.58 8-8 8zm.5-13H11v6l5.25 3.15.75-1.23-4.5-2.67z" fill="#7ec470" scaleX="0.8" scaleY="0.8"/>
+                            </StackPane>
+                            <VBox>
+                                <Label styleClass="stat-label" text="ON SHIFT"/>
+                                <Label fx:id="lblOnShift" styleClass="stat-value" text="0" style="-fx-text-fill: #7ec470;"/>
+                            </VBox>
+                        </HBox>
                     </VBox>
-                    <VBox styleClass="stat-card" prefWidth="180">
-                        <Label styleClass="stat-label" text="ON BREAK"/>
-                        <Label fx:id="lblOnBreak" styleClass="stat-value" text="0" style="-fx-text-fill: #e8b84b;"/>
+                    <VBox styleClass="stat-card" prefWidth="210">
+                        <HBox alignment="CENTER_LEFT" spacing="12">
+                            <StackPane style="-fx-background-color: rgba(232, 184, 75, 0.1); -fx-background-radius: 8; -fx-padding: 8;">
+                                <SVGPath content="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm1 15h-2v-6h2v6zm0-8h-2V7h2v2z" fill="#e8b84b" scaleX="0.8" scaleY="0.8"/>
+                            </StackPane>
+                            <VBox>
+                                <Label styleClass="stat-label" text="ON BREAK"/>
+                                <Label fx:id="lblOnBreak" styleClass="stat-value" text="0" style="-fx-text-fill: #e8b84b;"/>
+                            </VBox>
+                        </HBox>
                     </VBox>
                     <Region HBox.hgrow="ALWAYS"/>
-                    <Button styleClass="btn-primary" text="+ Add Staff" onAction="#onAddStaff" prefWidth="120"/>
+                    <Button styleClass="btn-primary" text="+ ADD STAFF" onAction="#onAddStaff" prefWidth="150" style="-fx-font-weight: 900; -fx-letter-spacing: 0.05em;"/>
                 </HBox>
 
                 <StackPane VBox.vgrow="ALWAYS" maxHeight="Infinity" styleClass="table-wrap">
                     <padding><Insets top="24" bottom="0"/></padding>
-                    <TableView fx:id="staffTable" styleClass="inventory-table" maxHeight="Infinity" VBox.vgrow="ALWAYS">
+                    <TableView fx:id="staffTable" styleClass="table-view" maxHeight="Infinity" VBox.vgrow="ALWAYS">
                         <columns>
-                            <TableColumn text="" fx:id="colAvatar" prefWidth="50"/>
+                            <TableColumn text="" fx:id="colAvatar" prefWidth="60"/>
                             <TableColumn text="NAME" fx:id="colName" prefWidth="1" minWidth="160"/>
                             <TableColumn text="EMAIL" fx:id="colEmail" prefWidth="1" minWidth="180"/>
                             <TableColumn text="ROLE" fx:id="colRole" prefWidth="1" minWidth="120"/>

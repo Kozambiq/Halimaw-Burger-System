@@ -8,6 +8,7 @@ import javafx.collections.FXCollections;
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
 import javafx.geometry.Insets;
+import javafx.geometry.Pos;
 import javafx.scene.control.Alert;
 import javafx.scene.control.Button;
 import javafx.scene.control.ButtonType;
@@ -28,6 +29,7 @@ import javafx.scene.layout.HBox;
 import javafx.scene.layout.Pane;
 import javafx.scene.layout.Priority;
 import javafx.scene.layout.Region;
+import javafx.scene.layout.StackPane;
 import javafx.scene.paint.Color;
 import javafx.scene.shape.SVGPath;
 
@@ -75,6 +77,14 @@ public class StaffController {
 
     private void setupTableColumns() {
         colName.setCellValueFactory(new PropertyValueFactory<>("name"));
+        colName.setCellFactory(col -> new TableCell<Staff, String>() {
+            @Override protected void updateItem(String item, boolean empty) {
+                super.updateItem(item, empty);
+                if (empty || item == null) setText(null);
+                else { setText(item); getStyleClass().add("cell-name"); }
+            }
+        });
+
         colEmail.setCellValueFactory(new PropertyValueFactory<>("email"));
         colRole.setCellValueFactory(new PropertyValueFactory<>("role"));
         colShiftHours.setCellValueFactory(new PropertyValueFactory<>("shiftHours"));
@@ -85,22 +95,18 @@ public class StaffController {
             protected void updateItem(String status, boolean empty) {
                 super.updateItem(status, empty);
                 if (empty || status == null) {
-                    setGraphic(null);
-                    setText(null);
-                    return;
+                    setGraphic(null); setText(null); return;
                 }
 
-                Label pill = new Label(status);
+                Label pill = new Label(status.toUpperCase());
                 pill.getStyleClass().add("status-pill");
 
                 if ("Active".equals(status)) {
-                    pill.getStyleClass().add("pill-ok");
+                    pill.getStyleClass().add("pill-active");
                 } else if ("Break".equals(status)) {
-                    pill.getStyleClass().add("pill-low");
-                } else if ("Off Shift".equals(status)) {
+                    pill.getStyleClass().add("pill-break");
+                } else {
                     pill.getStyleClass().add("pill-off");
-                } else if ("Disabled".equals(status)) {
-                    pill.getStyleClass().add("pill-disabled");
                 }
 
                 setGraphic(pill);
@@ -112,21 +118,20 @@ public class StaffController {
             @Override
             protected void updateItem(String item, boolean empty) {
                 super.updateItem(item, empty);
-                if (empty) {
-                    setGraphic(null);
-                    setText(null);
-                    return;
-                }
+                if (empty) { setGraphic(null); setText(null); return; }
 
                 Staff staff = getTableView().getItems().get(getIndex());
-                if (staff == null) {
-                    setGraphic(null);
-                    return;
-                }
+                if (staff == null) { setGraphic(null); return; }
 
-                Label avatar = new Label(staff.getInitials());
-                avatar.getStyleClass().add("staff-avatar");
-                setGraphic(avatar);
+                StackPane avatarCircle = new StackPane();
+                avatarCircle.getStyleClass().add("staff-avatar-circle");
+                Label initials = new Label(staff.getInitials().toUpperCase());
+                initials.getStyleClass().add("staff-avatar-text");
+                avatarCircle.getChildren().add(initials);
+                
+                HBox box = new HBox(avatarCircle);
+                box.setAlignment(Pos.CENTER);
+                setGraphic(box);
                 setText(null);
             }
         });
@@ -135,55 +140,35 @@ public class StaffController {
             @Override
             protected void updateItem(String item, boolean empty) {
                 super.updateItem(item, empty);
-                if (empty) {
-                    setGraphic(null);
-                    setText(null);
-                    return;
-                }
+                if (empty) { setGraphic(null); setText(null); return; }
 
-                int rowIndex = getIndex();
-                if (rowIndex < 0 || rowIndex >= getTableView().getItems().size()) {
-                    setGraphic(null);
-                    return;
-                }
-
-                final Staff staff = getTableView().getItems().get(rowIndex);
-                if (staff == null) {
-                    setGraphic(null);
-                    return;
-                }
+                final Staff staff = getTableView().getItems().get(getIndex());
+                if (staff == null) { setGraphic(null); return; }
 
                 MenuButton menuBtn = new MenuButton("...");
                 menuBtn.getStyleClass().add("menu-btn-dots");
 
-                MenuItem edit = new MenuItem("Edit");
-                edit.setStyle("-fx-text-fill: #f5ede0; -fx-font-size: 13px; -fx-padding: 8 16 8 16;");
+                MenuItem edit = new MenuItem("Profile Details");
                 edit.setOnAction(e -> showEditStaffDialog(staff));
 
                 if ("Active".equals(staff.getStatus())) {
                     MenuItem onBreak = new MenuItem("Put on Break");
-                    onBreak.setStyle("-fx-text-fill: #e8b84b; -fx-font-size: 13px; -fx-padding: 8 16 8 16;");
                     onBreak.setOnAction(e -> updateStatus(staff.getId(), "Break"));
                     MenuItem offShift = new MenuItem("End Shift");
-                    offShift.setStyle("-fx-text-fill: #f5ede0; -fx-font-size: 13px; -fx-padding: 8 16 8 16;");
                     offShift.setOnAction(e -> updateStatus(staff.getId(), "Off Shift"));
                     menuBtn.getItems().addAll(edit, onBreak, offShift);
                 } else if ("Break".equals(staff.getStatus())) {
-                    MenuItem active = new MenuItem("Start Shift");
-                    active.setStyle("-fx-text-fill: #4CAF50; -fx-font-size: 13px; -fx-padding: 8 16 8 16;");
+                    MenuItem active = new MenuItem("Resume Shift");
                     active.setOnAction(e -> updateStatus(staff.getId(), "Active"));
                     MenuItem offShift = new MenuItem("End Shift");
-                    offShift.setStyle("-fx-text-fill: #f5ede0; -fx-font-size: 13px; -fx-padding: 8 16 8 16;");
                     offShift.setOnAction(e -> updateStatus(staff.getId(), "Off Shift"));
                     menuBtn.getItems().addAll(edit, active, offShift);
                 } else {
                     MenuItem active = new MenuItem("Start Shift");
-                    active.setStyle("-fx-text-fill: #4CAF50; -fx-font-size: 13px; -fx-padding: 8 16 8 16;");
                     active.setOnAction(e -> updateStatus(staff.getId(), "Active"));
-                    MenuItem disable = new MenuItem("Disabled");
-                    disable.setStyle("-fx-text-fill: #e07070; -fx-font-size: 13px; -fx-padding: 8 16 8 16;");
-                    disable.setOnAction(e -> updateStatus(staff.getId(), "Disabled"));
-                    menuBtn.getItems().addAll(edit, active, disable);
+                    MenuItem remove = new MenuItem("Remove Access");
+                    remove.setOnAction(e -> showRemoveConfirmation(staff));
+                    menuBtn.getItems().addAll(edit, active, remove);
                 }
 
                 setGraphic(menuBtn);

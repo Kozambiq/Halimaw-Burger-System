@@ -1,22 +1,53 @@
 /* ============================================================
-    Staff Tab Styles
+    Halimaw Burger – Staff Tab Styles
     ============================================================ */
 
 /* ── Staff Avatar ──────────────────────────────────── */
-.staff-avatar {
-    -fx-min-width: 32;
-    -fx-min-height: 32;
-    -fx-pref-width: 32;
-    -fx-pref-height: 32;
-    -fx-max-width: 32;
-    -fx-max-height: 32;
-    -fx-background-color: rgba(212, 89, 30, 0.12);
-    -fx-border-color: #5c4828;
-    -fx-border-width: 1;
-    -fx-border-radius: 16;
-    -fx-background-radius: 16;
-    -fx-text-fill: #c8500a;
-    -fx-font-size: 10px;
-    -fx-font-weight: bold;
+.staff-avatar-cell {
     -fx-alignment: center;
+}
+
+.staff-avatar-circle {
+    -fx-min-width: 36;
+    -fx-min-height: 36;
+    -fx-max-width: 36;
+    -fx-max-height: 36;
+    -fx-background-color: rgba(200, 80, 10, 0.1);
+    -fx-border-color: rgba(200, 80, 10, 0.3);
+    -fx-border-width: 1.5;
+    -fx-background-radius: 50;
+    -fx-border-radius: 50;
+    -fx-alignment: center;
+}
+
+.staff-avatar-text {
+    -fx-text-fill: #c8500a;
+    -fx-font-size: 11px;
+    -fx-font-weight: 900;
+    -fx-font-family: 'DM Sans', sans-serif;
+}
+
+/* ── Status Pills ───────────────────────────────────────── */
+.pill-active {
+    -fx-background-color: rgba(126, 196, 112, 0.12);
+    -fx-text-fill: #7ec470;
+    -fx-border-color: rgba(126, 196, 112, 0.2);
+    -fx-border-radius: 20;
+    -fx-border-width: 1;
+}
+
+.pill-break {
+    -fx-background-color: rgba(232, 184, 75, 0.12);
+    -fx-text-fill: #e8b84b;
+    -fx-border-color: rgba(232, 184, 75, 0.2);
+    -fx-border-radius: 20;
+    -fx-border-width: 1;
+}
+
+.pill-off {
+    -fx-background-color: rgba(138, 112, 85, 0.12);
+    -fx-text-fill: #8a7055;
+    -fx-border-color: rgba(138, 112, 85, 0.2);
+    -fx-border-radius: 20;
+    -fx-border-width: 1;
 }

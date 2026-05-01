@@ -1,0 +1,92 @@
+/* ============================================================
+    Halimaw Burger – Sales Reports Specialized Styles
+    ============================================================ */
+
+/* ── Pro-Data Stat Cards ───────────────────────────────── */
+.stat-card-premium {
+    -fx-background-color: linear-gradient(to bottom right, #281e10, #1f180d);
+    -fx-border-color: rgba(200, 169, 122, 0.15);
+    -fx-border-width: 1;
+    -fx-border-radius: 20;
+    -fx-background-radius: 20;
+    -fx-padding: 24 32 24 32;
+    -fx-effect: dropshadow(gaussian, rgba(0,0,0,0.4), 25, 0, 0, 10);
+}
+
+.stat-card-premium:hover {
+    -fx-border-color: #c8500a;
+    -fx-effect: dropshadow(gaussian, rgba(200, 80, 10, 0.2), 35, 0, 0, 12);
+}
+
+/* ── AI Intelligence Aesthetic ──────────────────────────── */
+.ai-widget {
+    -fx-background-color: linear-gradient(to bottom right, #1a1208, #150d20); /* Purple tint for AI */
+    -fx-border-color: rgba(138, 112, 255, 0.2); /* AI Purple Border */
+    -fx-border-width: 1.5;
+    -fx-border-radius: 20;
+    -fx-background-radius: 20;
+    -fx-padding: 24;
+    -fx-effect: dropshadow(gaussian, rgba(138, 112, 255, 0.1), 30, 0, 0, 0);
+}
+
+.ai-widget:hover {
+    -fx-border-color: #8a70ff;
+    -fx-effect: dropshadow(gaussian, rgba(138, 112, 255, 0.2), 40, 0, 0, 0);
+}
+
+.ai-badge {
+    -fx-background-color: rgba(138, 112, 255, 0.15);
+    -fx-text-fill: #b4a5ff;
+    -fx-font-size: 9px;
+    -fx-font-weight: 900;
+    -fx-letter-spacing: 0.15em;
+    -fx-padding: 4 10 4 10;
+    -fx-background-radius: 50;
+    -fx-border-color: rgba(138, 112, 255, 0.3);
+    -fx-border-width: 1;
+    -fx-border-radius: 50;
+}
+
+.ai-title {
+    -fx-text-fill: #b4a5ff;
+    -fx-font-weight: 900;
+    -fx-border-color: #8a70ff;
+    -fx-border-width: 0 0 0 3;
+    -fx-padding: 0 0 0 12;
+}
+
+/* ── Trend Indicators ────────────────────────────────── */
+.trend-pill {
+    -fx-padding: 4 12 4 12;
+    -fx-background-radius: 50;
+    -fx-font-size: 11px;
+    -fx-font-weight: 800;
+    -fx-font-family: 'DM Mono', monospace;
+}
+
+.trend-up {
+    -fx-background-color: rgba(126, 196, 112, 0.12);
+    -fx-text-fill: #7ec470;
+    -fx-border-color: rgba(126, 196, 112, 0.2);
+    -fx-border-width: 1;
+    -fx-border-radius: 50;
+}
+
+.trend-down {
+    -fx-background-color: rgba(224, 112, 112, 0.12);
+    -fx-text-fill: #ff6b6b;
+    -fx-border-color: rgba(224, 112, 112, 0.2);
+    -fx-border-width: 1;
+    -fx-border-radius: 50;
+}
+
+/* ── WebView Customization ───────────────────────────── */
+.chart-container {
+    -fx-background-color: #1a1208;
+    -fx-background-radius: 12;
+    -fx-padding: 8;
+}
+
+.webview-placeholder {
+    -fx-background-color: #1a1208;
+}

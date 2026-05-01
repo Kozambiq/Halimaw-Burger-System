@@ -15,7 +15,7 @@
 <HBox xmlns="http://javafx.com/javafx/17"
       xmlns:fx="http://javafx.com/fxml/1"
       fx:controller="com.myapp.halimawburgersystem.SalesReportController"
-      stylesheets="@../css/common.css, @../css/dashboard.css, @../css/inventory.css, @../css/orders.css">
+      stylesheets="@../css/common.css, @../css/dashboard.css, @../css/salesreport.css">
 
     <!-- ===== SIDEBAR ===== -->
     <VBox styleClass="sidebar" prefWidth="240" spacing="4">
@@ -112,63 +112,70 @@
         </HBox>
 
         <ScrollPane fitToWidth="true" VBox.vgrow="ALWAYS" styleClass="content-scroll">
-            <VBox spacing="16" styleClass="content-area">
+            <VBox spacing="24" styleClass="content-area">
                 <padding><Insets top="16" right="24" bottom="24" left="24"/></padding>
 
                 <!-- Stat Cards -->
-                <HBox spacing="12">
-                    <VBox styleClass="stat-card" HBox.hgrow="ALWAYS">
-                        <Label styleClass="stat-label" text="REVENUE TODAY"/>
-                        <Label fx:id="lblRevenue" styleClass="stat-value" text="₱0.00"/>
-                        <Label fx:id="lblRevenueDelta" styleClass="stat-delta delta-up" text=""/>
+                <HBox spacing="16">
+                    <VBox styleClass="stat-card-premium" HBox.hgrow="ALWAYS">
+                        <HBox alignment="CENTER_LEFT" spacing="8">
+                            <Label styleClass="stat-label" text="REVENUE TODAY"/>
+                            <Region HBox.hgrow="ALWAYS"/>
+                            <Label fx:id="lblRevenueDelta" styleClass="trend-pill, trend-up" text="+0%"/>
+                        </HBox>
+                        <Label fx:id="lblRevenue" styleClass="stat-value" text="₱0.00" style="-fx-text-fill: #f5ede0;"/>
                     </VBox>
-                    <VBox styleClass="stat-card" HBox.hgrow="ALWAYS">
-                        <Label styleClass="stat-label" text="ORDERS TODAY"/>
-                        <Label fx:id="lblOrders" styleClass="stat-value" text="0"/>
-                        <Label fx:id="lblOrdersDelta" styleClass="stat-delta delta-up" text=""/>
+                    <VBox styleClass="stat-card-premium" HBox.hgrow="ALWAYS">
+                        <HBox alignment="CENTER_LEFT" spacing="8">
+                            <Label styleClass="stat-label" text="ORDERS TODAY"/>
+                            <Region HBox.hgrow="ALWAYS"/>
+                            <Label fx:id="lblOrdersDelta" styleClass="trend-pill, trend-up" text="+0%"/>
+                        </HBox>
+                        <Label fx:id="lblOrders" styleClass="stat-value" text="0" style="-fx-text-fill: #f5ede0;"/>
                     </VBox>
                 </HBox>
 
                 <!-- Hourly Revenue Chart -->
                 <VBox styleClass="widget">
-                    <HBox alignment="CENTER_LEFT" spacing="8">
-                        <Label styleClass="widget-title" text="HOURLY REVENUE TODAY"/>
-                        <Region HBox.hgrow="ALWAYS"/>
-                    </HBox>
-                    <WebView fx:id="chartWebView" prefHeight="140"/>
+                    <Label styleClass="widget-title" text="HOURLY REVENUE FLOW"/>
+                    <StackPane styleClass="chart-container">
+                        <WebView fx:id="chartWebView" prefHeight="160"/>
+                    </StackPane>
                 </VBox>
 
                 <!-- Daily Revenue Chart -->
                 <VBox styleClass="widget">
-                    <HBox alignment="CENTER_LEFT" spacing="8">
-                        <Label styleClass="widget-title" text="DAILY REVENUE"/>
+                    <HBox alignment="CENTER_LEFT" spacing="12">
+                        <Label styleClass="widget-title" text="DAILY PERFORMANCE OVERVIEW"/>
                         <Region HBox.hgrow="ALWAYS"/>
-                        <ComboBox fx:id="cmbDailyFilter" styleClass="filter-combo" prefWidth="140" onAction="#onDailyFilterChanged"/>
+                        <ComboBox fx:id="cmbDailyFilter" styleClass="premium-combo" prefWidth="160" onAction="#onDailyFilterChanged"/>
                     </HBox>
-                    <WebView fx:id="dailyChartWebView" prefHeight="140"/>
+                    <StackPane styleClass="chart-container">
+                        <WebView fx:id="dailyChartWebView" prefHeight="160"/>
+                    </StackPane>
                 </VBox>
 
                 <!-- AI Analysis + Recommendations side by side -->
-                <HBox spacing="12">
+                <HBox spacing="16">
 
                     <!-- AI Analysis -->
-                    <VBox styleClass="widget" HBox.hgrow="ALWAYS" spacing="8">
-                        <HBox alignment="CENTER_LEFT" spacing="8">
-                            <Label styleClass="widget-title" text="AI SALES ANALYSIS"/>
+                    <VBox styleClass="ai-widget" HBox.hgrow="ALWAYS" spacing="12">
+                        <HBox alignment="CENTER_LEFT" spacing="10">
+                            <Label styleClass="ai-title" text="GEMINI CORE ANALYSIS"/>
                             <Region HBox.hgrow="ALWAYS"/>
-                            <Label fx:id="lblAnalysisStatus" styleClass="stat-label" text="Loading..."/>
+                            <Label fx:id="lblAnalysisStatus" styleClass="ai-badge" text="LIVE FEED"/>
                         </HBox>
-                        <WebView fx:id="analysisWebView" prefHeight="220"/>
+                        <WebView fx:id="analysisWebView" prefHeight="240"/>
                     </VBox>
 
                     <!-- AI Recommendations -->
-                    <VBox styleClass="widget" HBox.hgrow="ALWAYS" spacing="8">
-                        <HBox alignment="CENTER_LEFT" spacing="8">
-                            <Label styleClass="widget-title" text="INVENTORY RECOMMENDATIONS"/>
+                    <VBox styleClass="ai-widget" HBox.hgrow="ALWAYS" spacing="12">
+                        <HBox alignment="CENTER_LEFT" spacing="10">
+                            <Label styleClass="ai-title" text="STRATEGIC RECOMMENDATIONS"/>
                             <Region HBox.hgrow="ALWAYS"/>
-                            <Label fx:id="lblRecommendationStatus" styleClass="stat-label" text="Loading..."/>
+                            <Label fx:id="lblRecommendationStatus" styleClass="ai-badge" text="READY"/>
                         </HBox>
-                        <WebView fx:id="recommendationWebView" prefHeight="220"/>
+                        <WebView fx:id="recommendationWebView" prefHeight="240"/>
                     </VBox>
 
                 </HBox>
