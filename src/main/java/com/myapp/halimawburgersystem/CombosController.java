@@ -387,7 +387,7 @@ public class CombosController {
         dateEyebrow.getStyleClass().add("dialog-eyebrow");
         DatePicker validUntilPicker = new DatePicker(existingCombo.getValidUntil());
         validUntilPicker.setMaxWidth(Double.MAX_VALUE);
-        validUntilPicker.getStyleClass().add("premium-field");
+        validUntilPicker.getStyleClass().add("premium-date-picker");
         dateBox.getChildren().addAll(dateEyebrow, validUntilPicker);
 
         colLeft.getChildren().addAll(nameBox, promoPriceBox, dateBox);
@@ -570,7 +570,7 @@ public class CombosController {
         dateEyebrow.getStyleClass().add("dialog-eyebrow");
         DatePicker validUntilPicker = new DatePicker();
         validUntilPicker.setMaxWidth(Double.MAX_VALUE);
-        validUntilPicker.getStyleClass().add("premium-field");
+        validUntilPicker.getStyleClass().add("premium-date-picker");
         dateBox.getChildren().addAll(dateEyebrow, validUntilPicker);
 
         colLeft.getChildren().addAll(nameBox, promoPriceBox, dateBox);
