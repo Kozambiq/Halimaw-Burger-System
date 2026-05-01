@@ -85,18 +85,18 @@
 
 .menu-items-table .column-header-background {
     -fx-background-color: transparent;
-    -fx-padding: 0 0 12 0;
+    -fx-padding: 8 0 8 0; /* Balanced padding */
 }
 
 .menu-items-table .column-header {
     -fx-background-color: transparent;
-    -fx-text-fill: #5c4828;
-    -fx-font-size: 11px;
-    -fx-font-weight: 800;
-    -fx-letter-spacing: 0.1em;
+    -fx-text-fill: #ffffff; /* Pure white for maximum brightness */
+    -fx-font-size: 12px; /* Slightly larger */
+    -fx-font-weight: 900;
+    -fx-letter-spacing: 0.12em;
     -fx-border-color: #4a3820;
-    -fx-border-width: 0 0 1 0;
-    -fx-padding: 0 0 12 0;
+    -fx-border-width: 0 0 1.5 0;
+    -fx-padding: 4 0 4 0; /* Balanced internal padding */
 }
 
 .menu-items-table .table-row-cell {

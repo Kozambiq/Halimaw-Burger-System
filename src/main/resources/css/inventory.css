@@ -67,9 +67,9 @@
 .inventory-table .column-header {
     -fx-background-color: #2a1e10;
     -fx-background: #2a1e10;
-    -fx-text-fill: #8a7055;
-    -fx-font-size: 11px;
-    -fx-font-weight: bold;
+    -fx-text-fill: #ffffff; /* Pure white for maximum brightness */
+    -fx-font-size: 12px;
+    -fx-font-weight: 900;
     -fx-letter-spacing: 0.08em;
 }
 
