@@ -251,10 +251,17 @@ public class InventoryController {
                 markerLayer.setPrefSize(BAR_WIDTH, 8);
                 
                 if (maxStock > 0) {
-                    javafx.scene.shape.Rectangle lowMarker = new javafx.scene.shape.Rectangle(1.5, 8);
-                    lowMarker.getStyleClass().add("stock-marker");
+                    // Low Stock Marker (Yellow)
+                    javafx.scene.shape.Rectangle lowMarker = new javafx.scene.shape.Rectangle(2.5, 8);
+                    lowMarker.getStyleClass().add("stock-marker-low");
                     lowMarker.setLayoutX((minThreshold / maxStock) * BAR_WIDTH);
-                    markerLayer.getChildren().add(lowMarker);
+                    
+                    // Critical Stock Marker (Red - 50% of threshold)
+                    javafx.scene.shape.Rectangle criticalMarker = new javafx.scene.shape.Rectangle(2.5, 8);
+                    criticalMarker.getStyleClass().add("stock-marker-critical");
+                    criticalMarker.setLayoutX((minThreshold * 0.5 / maxStock) * BAR_WIDTH);
+
+                    markerLayer.getChildren().addAll(lowMarker, criticalMarker);
                 }
 
                 container.getChildren().addAll(barTrack, barFill, markerLayer);

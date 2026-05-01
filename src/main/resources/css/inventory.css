@@ -81,8 +81,14 @@
     -fx-background-radius: 10;
 }
 
-.stock-marker {
-    -fx-fill: rgba(255, 255, 255, 0.3);
+.stock-marker-low {
+    -fx-fill: #e8b84b;
+    -fx-opacity: 1.0;
+}
+
+.stock-marker-critical {
+    -fx-fill: #ff6b6b;
+    -fx-opacity: 1.0;
 }
 
 /* ── Status Pills ───────────────────────────────────────── */
