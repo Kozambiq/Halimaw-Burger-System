@@ -96,3 +96,77 @@
     -fx-border-color: #c8500a;
     -fx-background-color: #281e10;
 }
+
+/* ── Standardized Action Button (Dots) ─────────────────── */
+.menu-btn-dots {
+    -fx-background-color: #332615;
+    -fx-text-fill: #f5ede0;
+    -fx-font-size: 13px;
+    -fx-font-weight: 900;
+    -fx-padding: 4 10 4 10;
+    -fx-cursor: hand;
+    -fx-border-color: #4a3820;
+    -fx-border-width: 1;
+    -fx-border-radius: 6;
+    -fx-background-radius: 6;
+    -fx-alignment: CENTER;
+}
+
+.menu-btn-dots .label {
+    -fx-text-fill: #f5ede0;
+    -fx-font-weight: 900;
+}
+
+.menu-btn-dots:hover {
+    -fx-background-color: #c8500a;
+    -fx-border-color: #e05c0a;
+}
+
+.menu-btn-dots:hover .label {
+    -fx-text-fill: white;
+}
+
+.menu-btn-dots:focused {
+    -fx-border-color: #c8500a;
+    -fx-effect: dropshadow(gaussian, rgba(200, 80, 10, 0.2), 8, 0, 0, 0);
+}
+
+.menu-btn-dots .arrow {
+    -fx-background-color: #c4a882;
+    -fx-translate-x: 2;
+}
+
+.menu-btn-dots:hover .arrow {
+    -fx-background-color: white;
+}
+
+/* ── Global Context Menu Styling ───────────────────────── */
+.context-menu {
+    -fx-background-color: #2e2410;
+    -fx-border-color: #4a3820;
+    -fx-border-width: 1;
+    -fx-border-radius: 8;
+    -fx-background-radius: 8;
+    -fx-padding: 5 0 5 0;
+    -fx-effect: dropshadow(gaussian, rgba(0,0,0,0.6), 20, 0, 0, 10);
+}
+
+.context-menu .menu-item {
+    -fx-background-color: transparent;
+    -fx-padding: 10 20 10 20;
+}
+
+.context-menu .menu-item .label {
+    -fx-text-fill: #c4a882;
+    -fx-font-size: 13px;
+    -fx-font-family: "DM Sans", sans-serif;
+}
+
+.context-menu .menu-item:focused {
+    -fx-background-color: rgba(200, 80, 10, 0.15);
+}
+
+.context-menu .menu-item:focused .label {
+    -fx-text-fill: #f5ede0;
+    -fx-font-weight: bold;
+}

@@ -75,13 +75,87 @@
 }
 
 .premium-combo {
-    -fx-background-color: #221a0e;
-    -fx-border-color: rgba(200, 169, 122, 0.2);
+    -fx-background-color: rgba(255, 255, 255, 0.04);
+    -fx-border-color: transparent transparent rgba(200, 169, 122, 0.2) transparent;
+    -fx-border-width: 0 0 2 0;
+    -fx-background-radius: 0;
+    -fx-border-radius: 0;
+    -fx-padding: 6 0 6 0; /* Reduced vertical padding for better alignment */
+    -fx-font-size: 15px;
+    -fx-text-fill: #f5ede0;
+}
+
+.premium-combo:focused {
+    -fx-background-color: rgba(200, 80, 10, 0.08);
+    -fx-border-color: transparent transparent #c8500a transparent;
+}
+
+.premium-combo .list-cell {
+    -fx-background-color: transparent;
+    -fx-text-fill: #f5ede0;
+    -fx-padding: 4 4 4 4;
+}
+
+.premium-combo .list-cell:filled {
+    -fx-text-fill: #f5ede0;
+}
+
+/* Prompt text styling */
+.premium-combo > .text-field {
+    -fx-prompt-text-fill: #8a7055;
+}
+
+.premium-combo .arrow-button {
+    -fx-background-color: transparent;
+    -fx-padding: 0 10 0 10;
+}
+
+.premium-combo .arrow {
+    -fx-background-color: #8a7055;
+    -fx-shape: "M 0 0 L 4 4 L 8 0 Z";
+}
+
+.premium-combo:hover .arrow,
+.premium-combo:showing .arrow {
+    -fx-background-color: #c8500a;
+}
+
+/* ── ComboBox Popup Styling ── */
+.combo-box-popup .list-view {
+    -fx-background-color: #1a1208; /* Match dialog background */
+    -fx-border-color: #4a3820;
     -fx-border-width: 1;
     -fx-border-radius: 8;
     -fx-background-radius: 8;
+    -fx-padding: 4;
+    -fx-effect: dropshadow(gaussian, rgba(0,0,0,0.6), 20, 0, 0, 12);
+}
+
+.combo-box-popup .list-cell {
+    -fx-background-color: transparent;
+    -fx-text-fill: #c4a882;
+    -fx-padding: 10 16 10 16;
+    -fx-font-size: 13px;
+    -fx-background-radius: 6;
+    -fx-font-family: "DM Sans", sans-serif;
+}
+
+.combo-box-popup .list-cell:hover {
+    -fx-background-color: rgba(200, 80, 10, 0.12);
+    -fx-text-fill: #f5ede0;
+}
+
+.combo-box-popup .list-cell:selected {
+    -fx-background-color: #c8500a;
     -fx-text-fill: white;
-    -fx-padding: 4 8 4 8;
+    -fx-font-weight: 800;
+}
+
+.dialog-error {
+    -fx-text-fill: #ff6b6b;
+    -fx-font-size: 11px;
+    -fx-font-weight: 500;
+    -fx-padding: 4 0 0 4;
 }
 
 /* ── Dialog Action Buttons ── */
