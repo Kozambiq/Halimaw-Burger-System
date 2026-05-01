@@ -667,6 +667,7 @@ public class MenuItemsController {
         List<String> allIngredientNames = menuItemDAO.searchIngredients("").stream().map(Ingredient::getName).collect(Collectors.toList());
         javafx.scene.control.ListView<String> suggestionList = new javafx.scene.control.ListView<>();
         suggestionList.getStyleClass().add("suggestion-list");
+        suggestionList.getStylesheets().add(getClass().getResource("/css/common.css").toExternalForm());
         suggestionList.setFixedCellSize(40);
         javafx.stage.Popup suggestionPopup = new javafx.stage.Popup();
         suggestionPopup.setAutoHide(true);

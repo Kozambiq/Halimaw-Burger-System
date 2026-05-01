@@ -86,31 +86,9 @@ public class InventoryController {
     private void setupSearchAutocomplete() {
         javafx.scene.control.ListView<String> suggestionList = new javafx.scene.control.ListView<>();
         suggestionList.getStyleClass().add("suggestion-list");
-        suggestionList.setFixedCellSize(32);
-        suggestionList.setMaxHeight(200);
+        suggestionList.getStylesheets().add(getClass().getResource("/css/common.css").toExternalForm());
+        suggestionList.setFixedCellSize(40);
         suggestionList.setPrefWidth(300);
-        suggestionList.setStyle(
-            "-fx-background-color: #2e2410;" +
-            "-fx-border-color: #4a3820;" +
-            "-fx-border-width: 1;" +
-            "-fx-border-radius: 6;" +
-            "-fx-background-radius: 6;" +
-            "-fx-padding: 4 0 4 0;"
-        );
-        suggestionList.setCellFactory(list -> new javafx.scene.control.ListCell<String>() {
-            @Override
-            protected void updateItem(String item, boolean empty) {
-                super.updateItem(item, empty);
-                if (empty || item == null) {
-                    setText(null);
-                    setGraphic(null);
-                } else {
-                    setText(item);
-                    setTextFill(Color.valueOf("#f5ede0"));
-                    setStyle("-fx-background-color: transparent; -fx-text-fill: #f5ede0; -fx-font-size: 13px; -fx-padding: 8 16 8 16; -fx-cursor: hand;");
-                }
-            }
-        });
 
         javafx.stage.Popup suggestionPopup = new javafx.stage.Popup();
         suggestionPopup.setAutoHide(true);
