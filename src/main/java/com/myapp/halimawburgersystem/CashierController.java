@@ -197,11 +197,11 @@ public class CashierController {
     private int addCategorySection(String category, List<MenuItemModel> items, int columns, int startRow) {
         int row = startRow;
 
-        Label dividerLabel = new Label(category.toUpperCase() + "  ─────────────────");
+        Label dividerLabel = new Label(category.toUpperCase());
         dividerLabel.getStyleClass().add("menu-divider-label");
         GridPane.setConstraints(dividerLabel, 0, row, columns, 1);
         dividerLabel.setMaxWidth(Double.MAX_VALUE);
-        GridPane.setMargin(dividerLabel, new Insets(16, 0, 8, 0));
+        GridPane.setMargin(dividerLabel, new Insets(0, 16, 0, 16)); // Standardized side margins
         menuGrid.getChildren().add(dividerLabel);
         row++;
 
@@ -243,11 +243,11 @@ public class CashierController {
 
             int columns = calculateColumns();
 
-            Label dividerLabel = new Label("PROMOS & COMBOS  ─────────────────");
+            Label dividerLabel = new Label("PROMOS & COMBOS");
             dividerLabel.getStyleClass().add("menu-divider-label");
             GridPane.setConstraints(dividerLabel, 0, startRow, columns, 1);
             dividerLabel.setMaxWidth(Double.MAX_VALUE);
-            GridPane.setMargin(dividerLabel, new Insets(16, 0, 8, 0));
+            GridPane.setMargin(dividerLabel, new Insets(0, 16, 0, 16));
             menuGrid.getChildren().add(dividerLabel);
             int row = startRow + 1;
 

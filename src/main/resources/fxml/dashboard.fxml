@@ -128,7 +128,7 @@
             <padding><Insets top="16" right="24" bottom="16" left="24"/></padding>
 
             <HBox spacing="12">
-                <VBox styleClass="stat-card" HBox.hgrow="ALWAYS">
+                <VBox styleClass="stat-card, stat-card-primary" HBox.hgrow="ALWAYS">
                     <Label styleClass="stat-label" text="REVENUE TODAY"/>
                     <Label fx:id="lblRevenue" styleClass="stat-value" text="₱0"/>
                     <Label fx:id="lblRevenueDelta" styleClass="stat-delta delta-up" text=""/>
@@ -155,24 +155,19 @@
             </VBox>
 
             <HBox spacing="12">
-                <VBox styleClass="widget" HBox.hgrow="ALWAYS">
+                <VBox styleClass="widget" HBox.hgrow="ALWAYS" prefWidth="320">
                     <Label text="TOP MENU ITEMS TODAY" styleClass="widget-title"/>
-                    <StackPane styleClass="table-wrap">
-                        <TableView fx:id="topItemsTable" styleClass="inventory-table" maxHeight="220">
-                            <columns>
-                                <TableColumn fx:id="colItemName" text="ITEM" prefWidth="200" minWidth="100"/>
-                                <TableColumn fx:id="colItemSold" text="SOLD" prefWidth="80" minWidth="60"/>
-                            </columns>
-                        </TableView>
-                    </StackPane>
+                    <VBox fx:id="topItemsContainer" spacing="12" styleClass="sales-progress-container">
+                        <!-- Dynamic Progress Bars Here -->
+                    </VBox>
                 </VBox>
                 <VBox styleClass="widget" HBox.hgrow="ALWAYS">
                     <Label text="ACTIVE STAFF" styleClass="widget-title"/>
-                    <VBox fx:id="activeStaffContainer" spacing="8"/>
+                    <VBox fx:id="activeStaffContainer" spacing="12"/>
                 </VBox>
                 <VBox styleClass="widget" HBox.hgrow="ALWAYS">
                     <Label text="LOW STOCK ALERTS" styleClass="widget-title"/>
-                    <VBox fx:id="lowStockContainer" spacing="8"/>
+                    <VBox fx:id="lowStockContainer" spacing="12"/>
                 </VBox>
             </HBox>
         </VBox>

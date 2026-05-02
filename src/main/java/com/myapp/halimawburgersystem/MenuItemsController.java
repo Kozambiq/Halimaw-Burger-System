@@ -285,7 +285,13 @@ public class MenuItemsController {
         addBtn.getStyleClass().add("btn-recipe-add");
 
         searchInputs.getChildren().addAll(ingSearchWrapper, qtyField, addBtn);
-        searchArea.getChildren().addAll(recipeEyebrow, searchInputs);
+
+        Label unitErrorLabel = new Label("Decimals not allowed for 'pcs' unit");
+        unitErrorLabel.setStyle("-fx-text-fill: #e07070; -fx-font-size: 11px; -fx-font-weight: bold;");
+        unitErrorLabel.setVisible(false);
+        unitErrorLabel.setManaged(false);
+
+        searchArea.getChildren().addAll(recipeEyebrow, searchInputs, unitErrorLabel);
 
         // Current Recipe List (Chips)
         javafx.scene.control.ScrollPane recipeScroll = new javafx.scene.control.ScrollPane();
@@ -304,6 +310,49 @@ public class MenuItemsController {
         // --- Logic & Events ---
         List<MenuItemIngredient> ingredientDataList = new ArrayList<>();
         List<String> allIngredientNames = menuItemDAO.searchIngredients("").stream().map(Ingredient::getName).collect(Collectors.toList());
+
+        // Validation Logic
+        Runnable validateIngredient = () -> {
+            String name = ingSearch.getText().trim();
+            String qtyStr = qtyField.getText().trim();
+            
+            if (qtyStr.isEmpty()) {
+                unitErrorLabel.setVisible(false);
+                unitErrorLabel.setManaged(false);
+                addBtn.setDisable(true);
+                return;
+            }
+
+            try {
+                double qty = Double.parseDouble(qtyStr);
+                String unit = menuItemDAO.getIngredientUnit(name);
+                boolean isPcs = "pcs".equalsIgnoreCase(unit);
+                boolean hasDecimal = qtyStr.contains(".");
+                
+                if (qty < 0) {
+                    unitErrorLabel.setText("Quantity cannot be negative");
+                    unitErrorLabel.setVisible(true);
+                    unitErrorLabel.setManaged(true);
+                    addBtn.setDisable(true);
+                } else if (isPcs && hasDecimal) {
+                    unitErrorLabel.setText("Decimals not allowed for 'pcs' unit");
+                    unitErrorLabel.setVisible(true);
+                    unitErrorLabel.setManaged(true);
+                    addBtn.setDisable(true);
+                } else {
+                    unitErrorLabel.setVisible(false);
+                    unitErrorLabel.setManaged(false);
+                    addBtn.setDisable(false);
+                }
+            } catch (NumberFormatException e) {
+                addBtn.setDisable(true);
+                unitErrorLabel.setVisible(false);
+                unitErrorLabel.setManaged(false);
+            }
+        };
+
+        ingSearch.textProperty().addListener((obs, old, newVal) -> validateIngredient.run());
+        qtyField.textProperty().addListener((obs, old, newVal) -> validateIngredient.run());
 
         // Ingredient Autocomplete (Reusing logic but with new UI)
         javafx.scene.control.ListView<String> ingSuggestionList = new javafx.scene.control.ListView<>();
@@ -644,7 +693,13 @@ public class MenuItemsController {
         addBtn.getStyleClass().add("btn-recipe-add");
 
         searchInputs.getChildren().addAll(ingSearchWrapper, qtyField, addBtn);
-        searchArea.getChildren().addAll(recipeEyebrow, searchInputs);
+
+        Label unitErrorLabel = new Label("Decimals not allowed for 'pcs' unit");
+        unitErrorLabel.setStyle("-fx-text-fill: #e07070; -fx-font-size: 11px; -fx-font-weight: bold;");
+        unitErrorLabel.setVisible(false);
+        unitErrorLabel.setManaged(false);
+
+        searchArea.getChildren().addAll(recipeEyebrow, searchInputs, unitErrorLabel);
 
         javafx.scene.control.ScrollPane recipeScroll = new javafx.scene.control.ScrollPane();
         recipeScroll.setFitToWidth(true);
@@ -662,6 +717,49 @@ public class MenuItemsController {
         for (MenuItemIngredient ing : currentIngredients) {
             ingredientList.getChildren().add(createIngredientChip(ing, ingredientDataList, ingredientList));
         }
+
+        // Validation Logic
+        Runnable validateIngredient = () -> {
+            String name = searchField.getText().trim();
+            String qtyStr = qtyField.getText().trim();
+            
+            if (qtyStr.isEmpty()) {
+                unitErrorLabel.setVisible(false);
+                unitErrorLabel.setManaged(false);
+                addBtn.setDisable(true);
+                return;
+            }
+
+            try {
+                double qty = Double.parseDouble(qtyStr);
+                String unit = menuItemDAO.getIngredientUnit(name);
+                boolean isPcs = "pcs".equalsIgnoreCase(unit);
+                boolean hasDecimal = qtyStr.contains(".");
+                
+                if (qty < 0) {
+                    unitErrorLabel.setText("Quantity cannot be negative");
+                    unitErrorLabel.setVisible(true);
+                    unitErrorLabel.setManaged(true);
+                    addBtn.setDisable(true);
+                } else if (isPcs && hasDecimal) {
+                    unitErrorLabel.setText("Decimals not allowed for 'pcs' unit");
+                    unitErrorLabel.setVisible(true);
+                    unitErrorLabel.setManaged(true);
+                    addBtn.setDisable(true);
+                } else {
+                    unitErrorLabel.setVisible(false);
+                    unitErrorLabel.setManaged(false);
+                    addBtn.setDisable(false);
+                }
+            } catch (NumberFormatException e) {
+                addBtn.setDisable(true);
+                unitErrorLabel.setVisible(false);
+                unitErrorLabel.setManaged(false);
+            }
+        };
+
+        searchField.textProperty().addListener((obs, old, newVal) -> validateIngredient.run());
+        qtyField.textProperty().addListener((obs, old, newVal) -> validateIngredient.run());
 
         // Ingredient Autocomplete
         List<String> allIngredientNames = menuItemDAO.searchIngredients("").stream().map(Ingredient::getName).collect(Collectors.toList());

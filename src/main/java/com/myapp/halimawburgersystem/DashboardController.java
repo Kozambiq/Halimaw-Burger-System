@@ -61,10 +61,7 @@ public class DashboardController {
     @FXML private TableColumn<Order, String> colType;
     @FXML private TableColumn<Order, String> colStatus;
 
-    @FXML private TableView<MenuItemDAO.TopSellingItem> topItemsTable;
-    @FXML private TableColumn<MenuItemDAO.TopSellingItem, String> colItemName;
-    @FXML private TableColumn<MenuItemDAO.TopSellingItem, Integer> colItemSold;
-
+    @FXML private VBox topItemsContainer;
     @FXML private VBox lowStockContainer;
     @FXML private VBox activeStaffContainer;
 
@@ -74,7 +71,6 @@ public class DashboardController {
     private StaffDAO staffDAO = new StaffDAO();
 
     private ObservableList<Order> recentOrdersList = FXCollections.observableArrayList();
-    private ObservableList<MenuItemDAO.TopSellingItem> topItemsList = FXCollections.observableArrayList();
     private ScheduledExecutorService refreshService;
 
     @FXML
@@ -170,37 +166,6 @@ public class DashboardController {
 
         recentOrdersTable.setItems(recentOrdersList);
         recentOrdersTable.setColumnResizePolicy(TableView.CONSTRAINED_RESIZE_POLICY);
-
-        colItemName.setCellValueFactory(data -> new javafx.beans.property.SimpleStringProperty(data.getValue().getName()));
-        colItemName.setCellFactory(column -> new TableCell<MenuItemDAO.TopSellingItem, String>() {
-            @Override
-            protected void updateItem(String item, boolean empty) {
-                super.updateItem(item, empty);
-                if (empty || item == null) {
-                    setText(null);
-                } else {
-                    setText(item);
-                    setStyle("-fx-text-fill: #f5ede0; -fx-font-weight: 500;");
-                }
-            }
-        });
-
-        colItemSold.setCellValueFactory(data -> new javafx.beans.property.SimpleObjectProperty<>(data.getValue().getTotalSold()));
-        colItemSold.setCellFactory(column -> new TableCell<MenuItemDAO.TopSellingItem, Integer>() {
-            @Override
-            protected void updateItem(Integer item, boolean empty) {
-                super.updateItem(item, empty);
-                if (empty || item == null) {
-                    setText(null);
-                } else {
-                    setText(String.valueOf(item));
-                    setStyle("-fx-font-family: 'DM Mono', monospace; -fx-text-fill: #c8500a;");
-                }
-            }
-        });
-
-        topItemsTable.setItems(topItemsList);
-        topItemsTable.setColumnResizePolicy(TableView.CONSTRAINED_RESIZE_POLICY);
     }
 
     private void loadDashboardData() {
@@ -226,7 +191,7 @@ public class DashboardController {
                 lblRevenueDelta.getStyleClass().removeAll("delta-down");
                 lblRevenueDelta.getStyleClass().add("delta-up");
             } else {
-                lblRevenueDelta.setText("↓ " + String.format("%.0f", revenueChange) + "% vs yesterday");
+                lblRevenueDelta.setText("↓ " + String.format("%.0f", Math.abs(revenueChange)) + "% vs yesterday");
                 lblRevenueDelta.getStyleClass().removeAll("delta-up");
                 lblRevenueDelta.getStyleClass().add("delta-down");
             }
@@ -243,7 +208,7 @@ public class DashboardController {
                 lblOrdersDelta.getStyleClass().removeAll("delta-down");
                 lblOrdersDelta.getStyleClass().add("delta-up");
             } else {
-                lblOrdersDelta.setText("↓ " + String.format("%.0f", ordersChange) + "% vs yesterday");
+                lblOrdersDelta.setText("↓ " + String.format("%.0f", Math.abs(ordersChange)) + "% vs yesterday");
                 lblOrdersDelta.getStyleClass().removeAll("delta-up");
                 lblOrdersDelta.getStyleClass().add("delta-down");
             }
@@ -260,8 +225,36 @@ public class DashboardController {
     }
 
     private void loadTopItems() {
+        topItemsContainer.getChildren().clear();
         List<MenuItemDAO.TopSellingItem> items = menuItemDAO.getTopSellingItems(5);
-        topItemsList.setAll(items);
+        
+        if (items.isEmpty()) {
+            Label empty = new Label("No sales data yet");
+            empty.setStyle("-fx-text-fill: #8a7055; -fx-font-size: 12px; -fx-font-style: italic;");
+            topItemsContainer.getChildren().add(empty);
+            return;
+        }
+
+        int maxSold = items.get(0).getTotalSold();
+
+        for (MenuItemDAO.TopSellingItem item : items) {
+            VBox itemRow = new VBox(4);
+            HBox labels = new HBox();
+            Label name = new Label(item.getName());
+            name.getStyleClass().add("sales-progress-label");
+            Region spacer = new Region();
+            HBox.setHgrow(spacer, Priority.ALWAYS);
+            Label sold = new Label(item.getTotalSold() + " sold");
+            sold.getStyleClass().add("sales-progress-value");
+            labels.getChildren().addAll(name, spacer, sold);
+
+            javafx.scene.control.ProgressBar pb = new javafx.scene.control.ProgressBar((double) item.getTotalSold() / maxSold);
+            pb.getStyleClass().add("sales-progress-bar");
+            pb.setMaxWidth(Double.MAX_VALUE);
+
+            itemRow.getChildren().addAll(labels, pb);
+            topItemsContainer.getChildren().add(itemRow);
+        }
     }
 
     private void loadLowStock() {
@@ -274,7 +267,7 @@ public class DashboardController {
 
         for (Ingredient ing : critical) {
             if (count >= maxDisplay) break;
-            HBox row = createStockRow(ing.getName(), "0 " + ing.getUnit(), "out");
+            HBox row = createStockRow(ing.getName(), "OUT", "out");
             lowStockContainer.getChildren().add(row);
             count++;
         }
@@ -294,30 +287,27 @@ public class DashboardController {
     }
 
     private HBox createStockRow(String name, String qty, String status) {
-        HBox row = new HBox();
-        row.setAlignment(Pos.CENTER_LEFT);
-        row.setSpacing(8);
-        row.setStyle("-fx-border-color: transparent transparent #5c4828 transparent; -fx-border-width: 0 0 1 0;");
+        HBox tile = new HBox();
+        tile.setAlignment(Pos.CENTER_LEFT);
+        tile.getStyleClass().add("activity-tile");
+        if ("out".equals(status)) tile.getStyleClass().add("activity-tile-out");
+        else if ("low".equals(status)) tile.getStyleClass().add("activity-tile-low");
 
+        VBox info = new VBox(2);
         Label nameLabel = new Label(name);
-        nameLabel.setStyle("-fx-text-fill: #c4a882; -fx-font-size: 12px;");
+        nameLabel.setStyle("-fx-text-fill: #f5ede0; -fx-font-size: 13px; -fx-font-weight: 600;");
+        Label statusLabel = new Label("out".equals(status) ? "Critical" : "Running Low");
+        statusLabel.setStyle("-fx-text-fill: " + ("out".equals(status) ? "#e07070" : "#e8b84b") + "; -fx-font-size: 10px;");
+        info.getChildren().addAll(nameLabel, statusLabel);
 
         Region spacer = new Region();
-        HBox.setHgrow(spacer, javafx.scene.layout.Priority.ALWAYS);
+        HBox.setHgrow(spacer, Priority.ALWAYS);
 
         Label qtyLabel = new Label(qty);
-        qtyLabel.setStyle("-fx-font-family: 'DM Mono', monospace; -fx-font-size: 11px;");
+        qtyLabel.getStyleClass().add("sales-progress-value");
 
-        if ("out".equals(status)) {
-            nameLabel.setStyle("-fx-text-fill: #e07070;");
-            qtyLabel.setStyle("-fx-font-family: 'DM Mono', monospace; -fx-font-size: 11px; -fx-text-fill: #e07070;");
-        } else if ("low".equals(status)) {
-            nameLabel.setStyle("-fx-text-fill: #e8b84b;");
-            qtyLabel.setStyle("-fx-font-family: 'DM Mono', monospace; -fx-font-size: 11px; -fx-text-fill: #e8b84b;");
-        }
-
-        row.getChildren().addAll(nameLabel, spacer, qtyLabel);
-        return row;
+        tile.getChildren().addAll(info, spacer, qtyLabel);
+        return tile;
     }
 
     private void loadActiveStaff() {
@@ -342,29 +332,26 @@ public class DashboardController {
     }
 
     private HBox createStaffChip(Staff staff) {
-        HBox chip = new HBox();
-        chip.setAlignment(Pos.CENTER_LEFT);
-        chip.setSpacing(10);
+        HBox tile = new HBox();
+        tile.setAlignment(Pos.CENTER_LEFT);
+        tile.setSpacing(12);
+        tile.getStyleClass().add("activity-tile");
 
         StackPane avatar = new StackPane();
-        avatar.setStyle("-fx-background-color: rgba(212, 89, 30, 0.12); -fx-border-color: #5c4828; -fx-border-width: 1; -fx-background-radius: 14; -fx-border-radius: 14; -fx-min-width: 28; -fx-min-height: 28; -fx-max-width: 28; -fx-max-height: 28;");
+        avatar.setStyle("-fx-background-color: rgba(200, 80, 10, 0.1); -fx-border-color: #c8500a; -fx-border-width: 1; -fx-background-radius: 50; -fx-border-radius: 50; -fx-min-width: 32; -fx-min-height: 32;");
         Label avatarText = new Label(staff.getInitials());
-        avatarText.setStyle("-fx-font-size: 10px; -fx-font-weight: bold; -fx-text-fill: #c8500a;");
+        avatarText.setStyle("-fx-font-size: 11px; -fx-font-weight: bold; -fx-text-fill: #c8500a;");
         avatar.getChildren().add(avatarText);
 
-        VBox info = new VBox();
-        info.setSpacing(2);
-
+        VBox info = new VBox(2);
         Label name = new Label(staff.getName());
-        name.setStyle("-fx-text-fill: #f5ede0; -fx-font-size: 12px; -fx-font-weight: 500;");
-
-        Label role = new Label(staff.getRole());
-        role.setStyle("-fx-text-fill: #8a7055; -fx-font-size: 10px;");
-
+        name.setStyle("-fx-text-fill: #f5ede0; -fx-font-size: 13px; -fx-font-weight: 600;");
+        Label role = new Label(staff.getRole().toUpperCase());
+        role.setStyle("-fx-text-fill: #8a7055; -fx-font-size: 9px; -fx-font-weight: 800; -fx-letter-spacing: 0.05em;");
         info.getChildren().addAll(name, role);
 
-        chip.getChildren().addAll(avatar, info);
-        return chip;
+        tile.getChildren().addAll(avatar, info);
+        return tile;
     }
 
     @FXML

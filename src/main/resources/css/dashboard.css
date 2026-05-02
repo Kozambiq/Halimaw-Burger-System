@@ -86,35 +86,100 @@
     -fx-fill: #c8500a;
 }
 
-/* ── Stat Cards (Premium Glassmorphism) ─────────────────── */
+/* ── Stat Cards (Premium Glassmorphism + Gradients) ─────────────────── */
 .stat-card {
-    -fx-background-color: #281e10;
-    -fx-border-color: #4a3820;
-    -fx-border-width: 1;
-    -fx-border-radius: 16;
-    -fx-background-radius: 16;
+    -fx-background-color: linear-gradient(to bottom right, #2d2214, #221a0e);
+    -fx-border-color: rgba(200, 80, 10, 0.2);
+    -fx-border-width: 1.5;
+    -fx-border-radius: 20;
+    -fx-background-radius: 20;
     -fx-padding: 24 28 24 28;
-    -fx-effect: dropshadow(gaussian, rgba(0,0,0,0.2), 15, 0, 0, 4);
+    -fx-effect: dropshadow(gaussian, rgba(0,0,0,0.4), 20, 0, 0, 8);
+    -fx-transition: all 0.3s ease;
 }
 
 .stat-card:hover {
     -fx-border-color: #c8500a;
-    -fx-background-color: #2d2214;
+    -fx-background-color: linear-gradient(to bottom right, #332615, #281e10);
+    -fx-effect: dropshadow(gaussian, rgba(200, 80, 10, 0.15), 30, 0, 0, 0);
+}
+
+.stat-card-primary {
+    -fx-border-color: rgba(200, 80, 10, 0.4);
+    -fx-background-color: linear-gradient(to bottom right, #3d2a15, #221a0e);
 }
 
 .stat-label {
     -fx-font-size: 11px;
     -fx-font-weight: 800;
-    -fx-letter-spacing: 0.12em;
+    -fx-letter-spacing: 0.14em;
     -fx-text-fill: #8a7055;
-    -fx-padding: 0 0 8 0;
+    -fx-padding: 0 0 4 0;
 }
 
 .stat-value {
-    -fx-font-size: 32px;
+    -fx-font-size: 36px;
     -fx-font-weight: 900;
     -fx-font-family: "DM Mono", monospace;
     -fx-text-fill: #f5ede0;
+}
+
+/* ── Activity Tiles ────────────────────────────────────── */
+.activity-tile {
+    -fx-background-color: #281e10;
+    -fx-background-radius: 12;
+    -fx-padding: 10 12 10 12;
+    -fx-border-color: #332615;
+    -fx-border-width: 1;
+    -fx-border-radius: 12;
+    -fx-cursor: hand;
+}
+
+.activity-tile:hover {
+    -fx-background-color: #2d2214;
+    -fx-border-color: #4a3820;
+}
+
+.activity-tile-out {
+    -fx-border-color: rgba(224, 112, 112, 0.3);
+}
+
+.activity-tile-low {
+    -fx-border-color: rgba(232, 184, 75, 0.3);
+}
+
+/* ── Progress Bars ────────────────────────────────────── */
+.sales-progress-container {
+    -fx-spacing: 12;
+    -fx-padding: 8 0 8 0;
+}
+
+.sales-progress-bar {
+    -fx-pref-height: 6;
+    -fx-min-height: 6;
+    -fx-max-height: 6;
+}
+
+.sales-progress-bar .track {
+    -fx-background-color: #332615;
+    -fx-background-radius: 10;
+}
+
+.sales-progress-bar .bar {
+    -fx-background-color: linear-gradient(to right, #d4591e, #ff8c42);
+    -fx-background-radius: 10;
+}
+
+.sales-progress-label {
+    -fx-font-size: 13px;
+    -fx-font-weight: 600;
+    -fx-text-fill: #f5ede0;
+}
+
+.sales-progress-value {
+    -fx-font-family: 'DM Mono', monospace;
+    -fx-font-size: 12px;
+    -fx-text-fill: #c8500a;
 }
 
 /* ── Widgets ────────────────────────────────────────────── */

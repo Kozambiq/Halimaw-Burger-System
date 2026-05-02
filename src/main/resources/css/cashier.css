@@ -279,10 +279,15 @@
 /* Category Divider */
 .menu-divider-label {
     -fx-font-family: 'DM Sans', sans-serif;
-    -fx-font-size: 11px;
-    -fx-font-weight: 700;
-    -fx-letter-spacing: 0.12em;
-    -fx-text-fill: #8a7055;
+    -fx-font-size: 12px;
+    -fx-font-weight: 800;
+    -fx-letter-spacing: 0.15em;
+    -fx-text-fill: #d4591e; /* Brand Orange */
+    -fx-padding: 20 0 10 0;
+    -fx-border-color: rgba(212, 89, 30, 0.3);
+    -fx-border-width: 0 0 2 0; /* Bottom border for the line */
+    -fx-border-style: solid;
+    -fx-max-width: Infinity;
 }
 
 /* ── Order Panel ──────────────────────────────────── */
