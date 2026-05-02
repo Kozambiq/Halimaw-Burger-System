@@ -972,14 +972,20 @@ private void onAddIngredient() {
     minEyebrow.getStyleClass().add("dialog-eyebrow");
     TextField minField = new TextField();
     minField.getStyleClass().add("premium-field");
-    minBox.getChildren().addAll(minEyebrow, minField);
+    Label minError = new Label("");
+    minError.getStyleClass().add("dialog-error");
+    minError.setVisible(false); minError.setManaged(false);
+    minBox.getChildren().addAll(minEyebrow, minField, minError);
 
     VBox maxBox = new VBox(8);
     Label maxEyebrow = new Label("MAX CAPACITY");
     maxEyebrow.getStyleClass().add("dialog-eyebrow");
     TextField maxField = new TextField();
     maxField.getStyleClass().add("premium-field");
-    maxBox.getChildren().addAll(maxEyebrow, maxField);
+    Label maxError = new Label("");
+    maxError.getStyleClass().add("dialog-error");
+    maxError.setVisible(false); maxError.setManaged(false);
+    maxBox.getChildren().addAll(maxEyebrow, maxField, maxError);
 
     limitsBox.getChildren().addAll(minBox, maxBox);
     HBox.setHgrow(minBox, javafx.scene.layout.Priority.ALWAYS);
@@ -1011,9 +1017,38 @@ private void onAddIngredient() {
 
         if (unitField.getText().trim().isEmpty()) valid = false;
 
-        try { Double.parseDouble(qtyField.getText().trim()); } catch (Exception e) { valid = false; }
-        try { Double.parseDouble(minField.getText().trim()); } catch (Exception e) { valid = false; }
-        try { Double.parseDouble(maxField.getText().trim()); } catch (Exception e) { valid = false; }
+        double qty = 0;
+        double min = 0;
+        double max = 0;
+        boolean qtyParsed = false, minParsed = false, maxParsed = false;
+
+        try { qty = Double.parseDouble(qtyField.getText().trim()); qtyParsed = true; } catch (Exception e) { valid = false; }
+        try { min = Double.parseDouble(minField.getText().trim()); minParsed = true; } catch (Exception e) { valid = false; }
+        try { max = Double.parseDouble(maxField.getText().trim()); maxParsed = true; } catch (Exception e) { valid = false; }
+        
+        if (minParsed) {
+            if (min < 0) {
+                minError.setText("Min Alert cannot be negative");
+                minError.setVisible(true); minError.setManaged(true);
+                valid = false;
+            } else if (maxParsed && min > max) {
+                minError.setText("Cannot exceed max capacity");
+                minError.setVisible(true); minError.setManaged(true);
+                valid = false;
+            } else {
+                minError.setVisible(false); minError.setManaged(false);
+            }
+        }
+
+        if (maxParsed) {
+            if (qtyParsed && max < qty) {
+                maxError.setText("Cannot be lower than initial quantity");
+                maxError.setVisible(true); maxError.setManaged(true);
+                valid = false;
+            } else {
+                maxError.setVisible(false); maxError.setManaged(false);
+            }
+        }
 
         okButton.setDisable(!valid);
     };

@@ -326,6 +326,15 @@ public class MenuItemsController {
             try {
                 double qty = Double.parseDouble(qtyStr);
                 String unit = menuItemDAO.getIngredientUnit(name);
+                
+                if (unit == null) {
+                    unitErrorLabel.setText("Ingredient does not exist");
+                    unitErrorLabel.setVisible(true);
+                    unitErrorLabel.setManaged(true);
+                    addBtn.setDisable(true);
+                    return;
+                }
+
                 boolean isPcs = "pcs".equalsIgnoreCase(unit);
                 boolean hasDecimal = qtyStr.contains(".");
                 
@@ -391,8 +400,14 @@ public class MenuItemsController {
             try {
                 double q = Double.parseDouble(qtxt);
                 List<Ingredient> res = menuItemDAO.searchIngredients(txt);
-                if (!res.isEmpty()) {
-                    Ingredient i = res.get(0);
+                
+                // Find exact match (case-insensitive) to avoid fuzzy match bugs (e.g. egg matching veggies)
+                Ingredient i = res.stream()
+                    .filter(ing -> ing.getName().equalsIgnoreCase(txt))
+                    .findFirst()
+                    .orElse(null);
+
+                if (i != null) {
                     MenuItemIngredient mi = new MenuItemIngredient(i.getId(), i.getName(), i.getUnit(), q);
                     ingredientDataList.add(mi);
                     
@@ -733,6 +748,15 @@ public class MenuItemsController {
             try {
                 double qty = Double.parseDouble(qtyStr);
                 String unit = menuItemDAO.getIngredientUnit(name);
+                
+                if (unit == null) {
+                    unitErrorLabel.setText("Ingredient does not exist");
+                    unitErrorLabel.setVisible(true);
+                    unitErrorLabel.setManaged(true);
+                    addBtn.setDisable(true);
+                    return;
+                }
+
                 boolean isPcs = "pcs".equalsIgnoreCase(unit);
                 boolean hasDecimal = qtyStr.contains(".");
                 
@@ -798,8 +822,14 @@ public class MenuItemsController {
             try {
                 double q = Double.parseDouble(qtxt);
                 List<Ingredient> res = menuItemDAO.searchIngredients(txt);
-                if (!res.isEmpty()) {
-                    Ingredient i = res.get(0);
+                
+                // Find exact match (case-insensitive) to avoid fuzzy match bugs (e.g. egg matching veggies)
+                Ingredient i = res.stream()
+                    .filter(ing -> ing.getName().equalsIgnoreCase(txt))
+                    .findFirst()
+                    .orElse(null);
+
+                if (i != null) {
                     MenuItemIngredient mi = new MenuItemIngredient(i.getId(), i.getName(), i.getUnit(), q);
                     ingredientDataList.add(mi);
                     ingredientList.getChildren().add(createIngredientChip(mi, ingredientDataList, ingredientList));
