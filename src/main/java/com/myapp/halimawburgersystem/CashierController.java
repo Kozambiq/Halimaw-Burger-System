@@ -43,6 +43,8 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import com.myapp.util.OrderNotificationService;
+
 public class CashierController {
 
     @FXML private GridPane menuGrid;
@@ -645,13 +647,16 @@ public class CashierController {
                 orderDAO.updateStatus(orderId, "Cancelled");
                 return;
             }
+orderNumber = orderDAO.getNextOrderNumber();
+orderItems.clear();
+subtotal = 0.0;
+txtOrderNotes.clear();
+updateOrderNumber();
+updateOrderDisplay();
+updateTotals();
 
-            orderNumber = orderDAO.getNextOrderNumber();
-            orderItems.clear();
-            subtotal = 0.0;
-            txtOrderNotes.clear();
-            updateOrderDisplay();
-            updateTotals();
+// Notify other modules (like Cook Panel) instantly
+OrderNotificationService.notifyNewOrder();
             updateOrderNumber();
             reloadMenu();
         } else {

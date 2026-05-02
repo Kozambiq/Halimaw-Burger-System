@@ -33,6 +33,8 @@ import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
 
+import com.myapp.util.OrderNotificationService;
+
 public class CookController {
 
     @FXML private Label pageTitle;
@@ -60,12 +62,23 @@ public class CookController {
         loadUserInfo();
         loadQueue();
         
+        // Subscribe to instant notifications from the Cashier
+        OrderNotificationService.subscribeToNewOrders(this::loadQueue);
+        
         timerService = Executors.newSingleThreadScheduledExecutor(r -> {
             Thread t = new Thread(r);
             t.setDaemon(true);
             return t;
         });
-        timerService.scheduleAtFixedRate(() -> Platform.runLater(this::loadQueue), 5, 5, TimeUnit.SECONDS);
+        
+        // Polling as a backup, with safety net to prevent silent crashes
+        timerService.scheduleAtFixedRate(() -> {
+            try {
+                Platform.runLater(this::loadQueue);
+            } catch (Exception e) {
+                System.err.println("Error in Cook Queue timer: " + e.getMessage());
+            }
+        }, 5, 5, TimeUnit.SECONDS);
     }
 
     private void loadUserInfo() {

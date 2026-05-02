@@ -33,6 +33,8 @@ import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
 
+import com.myapp.util.OrderNotificationService;
+
 public class DashboardController {
 
     @FXML private Label pageTitle;
@@ -78,6 +80,9 @@ public class DashboardController {
         setupUserInfo();
         setupTableColumns();
         loadDashboardData();
+
+        // Subscribe to instant notifications for live dashboard data
+        OrderNotificationService.subscribeToNewOrders(this::loadDashboardData);
 
         refreshService = Executors.newSingleThreadScheduledExecutor(r -> {
             Thread t = new Thread(r);
