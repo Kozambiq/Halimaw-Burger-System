@@ -136,14 +136,18 @@ public class CashierController {
         try {
             String searchText = txtSearch.getText().toLowerCase().trim();
             menuGrid.getChildren().clear();
-            int lastRow = loadFilteredMenuItems(searchText);
-            loadFilteredCombos(lastRow, searchText);
+            
+            // 1. Load Promos & Combos First
+            int currentRow = loadFilteredCombos(0, searchText);
+            
+            // 2. Load Menu Items Categories in requested order: Burgers, Drinks, Sides, Others
+            loadFilteredMenuItems(currentRow, searchText);
         } catch (Exception e) {
             System.err.println("Error reloading menu: " + e.getMessage());
         }
     }
 
-    private int loadFilteredMenuItems(String searchText) {
+    private int loadFilteredMenuItems(int startRow, String searchText) {
         try {
             if (allMenuItems == null) {
                 menuItemDAO.syncAvailabilityToDatabase();
@@ -162,7 +166,8 @@ public class CashierController {
             }
 
             Map<String, List<MenuItemModel>> byCategory = new java.util.LinkedHashMap<>();
-            String[] categoryOrder = {"Burgers", "Sides", "Drinks", "Others"};
+            // Updated category order: Burgers, Drinks, Sides, Others
+            String[] categoryOrder = {"Burgers", "Drinks", "Sides", "Others"};
             for (String cat : categoryOrder) {
                 if ("All".equals(currentCategory) || cat.equals(currentCategory)) {
                     byCategory.put(cat, new ArrayList<>());
@@ -176,7 +181,7 @@ public class CashierController {
                 byCategory.computeIfAbsent(item.getCategory(), k -> new ArrayList<>()).add(item);
             }
 
-            int row = 0;
+            int row = startRow;
             for (String category : byCategory.keySet()) {
                 List<MenuItemModel> items = byCategory.get(category);
                 if (items == null || items.isEmpty()) continue;
@@ -185,7 +190,7 @@ public class CashierController {
             return row;
         } catch (Exception e) {
             System.err.println("Error loading menu items: " + e.getMessage());
-            return 0;
+            return startRow;
         }
     }
 
@@ -218,14 +223,14 @@ public class CashierController {
         return row;
     }
 
-    private void loadFilteredCombos(int startRow, String searchText) {
+    private int loadFilteredCombos(int startRow, String searchText) {
         try {
             if (allCombos == null) {
                 allCombos = comboDAO.findAll();
             }
 
-            if (allCombos.isEmpty()) return;
-            if (!"All".equals(currentCategory)) return;
+            if (allCombos.isEmpty()) return startRow;
+            if (!"All".equals(currentCategory)) return startRow;
 
             List<Combo> filteredCombos = new ArrayList<>();
             for (Combo combo : allCombos) {
@@ -234,7 +239,7 @@ public class CashierController {
                 filteredCombos.add(combo);
             }
 
-            if (filteredCombos.isEmpty()) return;
+            if (filteredCombos.isEmpty()) return startRow;
 
             int columns = calculateColumns();
 
@@ -244,11 +249,9 @@ public class CashierController {
             dividerLabel.setMaxWidth(Double.MAX_VALUE);
             GridPane.setMargin(dividerLabel, new Insets(16, 0, 8, 0));
             menuGrid.getChildren().add(dividerLabel);
-            startRow++;
+            int row = startRow + 1;
 
-            int row = startRow;
             int col = 0;
-
             for (Combo combo : filteredCombos) {
                 comboPrices.put(combo.getId(), combo.getPromoPrice());
                 StackPane card = createComboCard(combo);
@@ -261,8 +264,11 @@ public class CashierController {
                     row++;
                 }
             }
+            if (col > 0) row++;
+            return row;
         } catch (Exception e) {
             System.err.println("Error loading combos: " + e.getMessage());
+            return startRow;
         }
     }
 
