@@ -268,22 +268,10 @@ public class CashierController {
 
     private StackPane createMenuCard(MenuItemModel item) {
         StackPane card = new StackPane();
-        card.setPrefSize(160, 180);
-        card.setMinSize(160, 180);
-        card.setMaxSize(160, 180);
+        card.setPrefSize(160, 100);
+        card.setMinSize(160, 100);
+        card.setMaxSize(160, 100);
         card.getStyleClass().add("menu-card");
-
-        VBox layout = new VBox(0);
-        
-        // Image Placeholder
-        StackPane imgContainer = new StackPane();
-        imgContainer.getStyleClass().add("menu-card-image-container");
-        SVGPath burgerIcon = new SVGPath();
-        burgerIcon.setContent("M12,2L4,5V11C4,16.55 7.84,21.74 13,23C18.16,21.74 22,16.55 22,11V5L14,2M12,4L19,6.63V11C19,15.28 16.3,19.28 12.61,20.41C8.7,19.28 6,15.28 6,11V6.63L13,4M12,8C10.89,8 10,8.89 10,10C10,11.11 10.89,12 12,12C13.11,12 14,11.11 14,10C14,8.89 13.11,8 12,8M12,14C10.33,14 7,14.83 7,16.5V18H17V16.5C17,14.83 13.67,14 12,14Z");
-        burgerIcon.setScaleX(2.0);
-        burgerIcon.setScaleY(2.0);
-        burgerIcon.getStyleClass().add("menu-card-image-placeholder");
-        imgContainer.getChildren().add(burgerIcon);
 
         VBox content = new VBox(4);
         content.getStyleClass().add("menu-card-content");
@@ -299,23 +287,29 @@ public class CashierController {
         priceLabel.getStyleClass().add("menu-card-price");
 
         content.getChildren().addAll(catLabel, nameLabel, priceLabel);
-        layout.getChildren().addAll(imgContainer, content);
 
-        boolean isOutOfStock = "Out of Stock".equals(item.getAvailability());
-        if (isOutOfStock) {
+        String availability = item.getAvailability();
+        if ("Out of Stock".equals(availability)) {
             card.getStyleClass().add("menu-card-disabled");
             StackPane overlay = new StackPane();
             overlay.getStyleClass().add("menu-card-overlay");
             Label outLabel = new Label("OUT OF STOCK");
             outLabel.getStyleClass().add("menu-out-label");
             overlay.getChildren().add(outLabel);
-            card.getChildren().addAll(layout, overlay);
+            card.getChildren().addAll(content, overlay);
+        } else if ("Low Stock".equals(availability)) {
+            card.getStyleClass().add("menu-card-low");
+            Label lowLabel = new Label("LOW STOCK");
+            lowLabel.getStyleClass().add("menu-low-label");
+            StackPane.setAlignment(lowLabel, javafx.geometry.Pos.TOP_RIGHT);
+            StackPane.setMargin(lowLabel, new Insets(8));
+            card.getChildren().addAll(content, lowLabel);
         } else {
-            card.getChildren().add(layout);
+            card.getChildren().add(content);
         }
 
         card.setOnMouseClicked((MouseEvent event) -> {
-            if (!isOutOfStock) {
+            if (!"Out of Stock".equals(availability)) {
                 addMenuItemToOrder(item);
             }
         });
@@ -325,22 +319,11 @@ public class CashierController {
 
     private StackPane createComboCard(Combo combo) {
         StackPane card = new StackPane();
-        card.setPrefSize(160, 180);
-        card.setMinSize(160, 180);
-        card.setMaxSize(160, 180);
+        card.setPrefSize(160, 100);
+        card.setMinSize(160, 100);
+        card.setMaxSize(160, 100);
         card.getStyleClass().add("menu-card");
         card.getStyleClass().add("menu-card-promo");
-
-        VBox layout = new VBox(0);
-
-        StackPane imgContainer = new StackPane();
-        imgContainer.getStyleClass().add("menu-card-image-container");
-        SVGPath comboIcon = new SVGPath();
-        comboIcon.setContent("M11,9H13V7H11M11,17H13V11H11M12,2A10,10 0 0,0 2,12A10,10 0 0,0 12,22A10,10 0 0,0 22,12A10,10 0 0,0 12,2M12,20A8,8 0 0,1 4,12A8,8 0 0,1 12,4A8,8 0 0,1 20,12A8,8 0 0,1 12,20Z");
-        comboIcon.setScaleX(2.0);
-        comboIcon.setScaleY(2.0);
-        comboIcon.getStyleClass().add("menu-card-image-placeholder");
-        imgContainer.getChildren().add(comboIcon);
 
         VBox content = new VBox(4);
         content.getStyleClass().add("menu-card-content");
@@ -358,8 +341,7 @@ public class CashierController {
         priceLabel.getStyleClass().add("menu-card-price");
 
         content.getChildren().addAll(badgeBox, nameLabel, priceLabel);
-        layout.getChildren().addAll(imgContainer, content);
-        card.getChildren().add(layout);
+        card.getChildren().add(content);
 
         card.setOnMouseClicked((MouseEvent event) -> {
             addComboToOrder(combo);

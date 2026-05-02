@@ -173,37 +173,26 @@
 .menu-card {
     -fx-background-color: #221a0e;
     -fx-border-color: #332615;
-    -fx-border-width: 1;
-    -fx-border-radius: 16;
-    -fx-background-radius: 16;
+    -fx-border-width: 1.5;
+    -fx-border-radius: 12;
+    -fx-background-radius: 12;
     -fx-padding: 0;
     -fx-cursor: hand;
     -fx-pref-width: 160;
-    -fx-pref-height: 180;
+    -fx-pref-height: 100;
     -fx-transition: all 0.2s ease;
 }
 
 .menu-card:hover {
     -fx-border-color: #d4591e;
     -fx-background-color: #2a2012;
-    -fx-effect: dropshadow(gaussian, rgba(212,89,30,0.25), 15, 0, 0, 4);
+    -fx-effect: dropshadow(gaussian, rgba(212,89,30,0.25), 12, 0, 0, 3);
     -fx-translate-y: -2;
-}
-
-.menu-card-image-container {
-    -fx-background-color: #2e2410;
-    -fx-background-radius: 16 16 0 0;
-    -fx-min-height: 90;
-    -fx-alignment: center;
-}
-
-.menu-card-image-placeholder {
-    -fx-fill: #4a3820;
 }
 
 /* Menu Card Content */
 .menu-card-content {
-    -fx-padding: 12;
+    -fx-padding: 14;
     -fx-spacing: 4;
 }
 
@@ -259,6 +248,21 @@
     -fx-background-color: #8c3030;
     -fx-padding: 4 10 4 10;
     -fx-background-radius: 20;
+}
+
+.menu-low-label {
+    -fx-font-family: 'DM Sans', sans-serif;
+    -fx-font-size: 9px;
+    -fx-font-weight: 800;
+    -fx-letter-spacing: 0.05em;
+    -fx-text-fill: #1a1208;
+    -fx-background-color: #d4a017;
+    -fx-padding: 2 8 2 8;
+    -fx-background-radius: 4;
+}
+
+.menu-card-low {
+    -fx-border-color: rgba(212, 160, 23, 0.4);
 }
 
 /* Combo/Promo Badge */
