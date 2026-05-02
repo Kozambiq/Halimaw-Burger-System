@@ -35,7 +35,13 @@ stylesheets="@../css/cashier.css, @../css/common.css, @../css/login.css, @../css
             </HBox>
         </HBox>
 
-        <HBox styleClass="cat-filters" prefHeight="48" spacing="4">
+        <HBox styleClass="cat-filters" prefHeight="48" spacing="8" alignment="CENTER_LEFT">
+            <padding><Insets top="8" right="16" bottom="8" left="16"/></padding>
+            <HBox styleClass="search-bar-group" prefWidth="240" alignment="CENTER_LEFT" spacing="8">
+                <SVGPath content="M15.5 14h-.79l-.28-.27A6.471 6.471 0 0 0 16 9.5 6.5 6.5 0 1 0 9.5 16c1.61 0 3.09-.59 4.23-1.57l.27.28v.79l5 4.99L20.49 19l-4.99-5zm-6 0C7.01 14 5 11.99 5 9.5S7.01 5 9.5 5 14 7.01 14 9.5 11.99 14 9.5 14z" styleClass="search-icon-svg"/>
+                <TextField fx:id="txtSearch" styleClass="search-field" promptText="Search menu..." HBox.hgrow="ALWAYS" onKeyReleased="#onSearchKeyReleased"/>
+            </HBox>
+            <Region prefWidth="12"/>
             <Button fx:id="btnCatAll" styleClass="cat-btn" text="All" onAction="#onFilterCategory"/>
             <Button fx:id="btnCatBurgers" styleClass="cat-btn" text="Burgers" onAction="#onFilterCategory"/>
             <Button fx:id="btnCatSides" styleClass="cat-btn" text="Sides" onAction="#onFilterCategory"/>
@@ -92,10 +98,24 @@ stylesheets="@../css/cashier.css, @../css/common.css, @../css/login.css, @../css
             </HBox>
         </VBox>
 
-        <HBox styleClass="payment-btns" prefHeight="120" spacing="8">
-            <padding><Insets top="12" right="12" bottom="12" left="12"/></padding>
-            <Button fx:id="btnCash" styleClass="pay-btn" text="Cash" onAction="#onPayCash" HBox.hgrow="ALWAYS" maxWidth="9999"/>
-            <Button fx:id="btnCard" styleClass="pay-btn" text="GCash" onAction="#onPayCard" HBox.hgrow="ALWAYS" maxWidth="9999"/>
+        <HBox styleClass="payment-btns" prefHeight="100" spacing="12">
+            <padding><Insets top="16" right="16" bottom="16" left="16"/></padding>
+            <Button fx:id="btnCash" styleClass="pay-btn" onAction="#onPayCash" HBox.hgrow="ALWAYS" maxWidth="9999">
+                <graphic>
+                    <HBox alignment="CENTER" spacing="10">
+                        <SVGPath content="M11.8 10.9c-2.27-.59-3-1.2-3-2.15 0-1.09 1.01-1.85 2.7-1.85 1.78 0 2.44.85 2.5 2.1h2.21c-.07-1.72-1.12-3.3-3.21-3.81V3h-3v2.16c-1.94.42-3.5 1.68-3.5 3.61 0 2.31 1.91 3.46 4.7 4.13 2.5.6 3 1.48 3 2.41 0 .69-.49 1.79-2.7 1.79-2.06 0-2.87-.92-2.98-2.1h-2.2c.12 2.19 1.76 3.42 3.68 3.83V21h3v-2.15c1.95-.37 3.5-1.5 3.5-3.55 0-2.84-2.43-3.81-4.7-4.4z" styleClass="pay-btn-icon"/>
+                        <Label text="CASH" style="-fx-text-fill: white; -fx-font-weight: 800;"/>
+                    </HBox>
+                </graphic>
+            </Button>
+            <Button fx:id="btnCard" styleClass="pay-btn" onAction="#onPayCard" HBox.hgrow="ALWAYS" maxWidth="9999">
+                <graphic>
+                    <HBox alignment="CENTER" spacing="10">
+                        <SVGPath content="M21 7.28V5c0-1.1-.9-2-2-2H5c-1.11 0-2 .9-2 2v14c0 1.1.89 2 2 2h14c1.1 0 2-.9 2-2v-2.28c.59-.35 1-.98 1-1.72V9c0-.74-.41-1.37-1-1.72zM20 9v6h-7V9h7zM5 19V5h14v2h-6c-1.1 0-2 .9-2 2v6c0 1.1.9 2 2 2h6v2H5z" styleClass="pay-btn-icon"/>
+                        <Label text="GCASH" style="-fx-text-fill: white; -fx-font-weight: 800;"/>
+                    </HBox>
+                </graphic>
+            </Button>
         </HBox>
     </VBox>
 

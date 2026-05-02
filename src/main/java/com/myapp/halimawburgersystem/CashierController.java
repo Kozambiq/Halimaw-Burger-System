@@ -47,6 +47,7 @@ public class CashierController {
 
     @FXML private GridPane menuGrid;
     @FXML private VBox orderItemsList;
+    @FXML private TextField txtSearch;
     @FXML private TextField txtOrderNotes;
     @FXML private Label lblOrderNum;
     @FXML private Label lblSubtotal;
@@ -73,9 +74,10 @@ public class CashierController {
     private List<MenuItemModel> allMenuItems;
     private List<Combo> allCombos;
     private String currentOrderType = "Dine-in";
+    private String currentCategory = "All";
     private int orderNumber = 1;
     private double subtotal = 0.0;
-    private static final int CARD_WIDTH = 150;
+    private static final int CARD_WIDTH = 160;
     private static final int CARD_HGAP = 10;
     private static final int RIGHT_PANEL_WIDTH = 360;
     private static final int GRID_PADDING = 32;
@@ -125,21 +127,29 @@ public class CashierController {
         return Math.max(columns, 1);
     }
 
+    @FXML
+    private void onSearchKeyReleased() {
+        reloadMenu();
+    }
+
     private void reloadMenu() {
         try {
+            String searchText = txtSearch.getText().toLowerCase().trim();
             menuGrid.getChildren().clear();
-            int lastRow = loadMenuItems();
-            loadCombos(lastRow);
+            int lastRow = loadFilteredMenuItems(searchText);
+            loadFilteredCombos(lastRow, searchText);
         } catch (Exception e) {
             System.err.println("Error reloading menu: " + e.getMessage());
         }
     }
 
-    private int loadMenuItems() {
+    private int loadFilteredMenuItems(String searchText) {
         try {
-            menuItemDAO.syncAvailabilityToDatabase();
-            allMenuItems = menuItemDAO.findAllWithIngredientStatus();
-            menuGrid.getChildren().clear();
+            if (allMenuItems == null) {
+                menuItemDAO.syncAvailabilityToDatabase();
+                allMenuItems = menuItemDAO.findAllWithIngredientStatus();
+            }
+            
             menuGrid.getColumnConstraints().clear();
 
             int columns = calculateColumns();
@@ -154,9 +164,15 @@ public class CashierController {
             Map<String, List<MenuItemModel>> byCategory = new java.util.LinkedHashMap<>();
             String[] categoryOrder = {"Burgers", "Sides", "Drinks", "Others"};
             for (String cat : categoryOrder) {
-                byCategory.put(cat, new ArrayList<>());
+                if ("All".equals(currentCategory) || cat.equals(currentCategory)) {
+                    byCategory.put(cat, new ArrayList<>());
+                }
             }
+            
             for (MenuItemModel item : allMenuItems) {
+                if (!"All".equals(currentCategory) && !item.getCategory().equals(currentCategory)) continue;
+                if (!searchText.isEmpty() && !item.getName().toLowerCase().contains(searchText)) continue;
+                
                 byCategory.computeIfAbsent(item.getCategory(), k -> new ArrayList<>()).add(item);
             }
 
@@ -187,7 +203,7 @@ public class CashierController {
         int col = 0;
         for (MenuItemModel item : items) {
             itemPrices.put(-item.getId(), item.getPrice());
-            StackPane card = createMenuCard(item, false);
+            StackPane card = createMenuCard(item);
             GridPane.setConstraints(card, col, row);
             menuGrid.getChildren().add(card);
 
@@ -202,11 +218,23 @@ public class CashierController {
         return row;
     }
 
-    private void loadCombos(int startRow) {
+    private void loadFilteredCombos(int startRow, String searchText) {
         try {
-            allCombos = comboDAO.findAll();
+            if (allCombos == null) {
+                allCombos = comboDAO.findAll();
+            }
 
             if (allCombos.isEmpty()) return;
+            if (!"All".equals(currentCategory)) return;
+
+            List<Combo> filteredCombos = new ArrayList<>();
+            for (Combo combo : allCombos) {
+                if (!"Active".equals(combo.getStatus())) continue;
+                if (!searchText.isEmpty() && !combo.getName().toLowerCase().contains(searchText)) continue;
+                filteredCombos.add(combo);
+            }
+
+            if (filteredCombos.isEmpty()) return;
 
             int columns = calculateColumns();
 
@@ -221,8 +249,7 @@ public class CashierController {
             int row = startRow;
             int col = 0;
 
-            for (Combo combo : allCombos) {
-                if (!"Active".equals(combo.getStatus())) continue;
+            for (Combo combo : filteredCombos) {
                 comboPrices.put(combo.getId(), combo.getPromoPrice());
                 StackPane card = createComboCard(combo);
                 GridPane.setConstraints(card, col, row);
@@ -239,43 +266,57 @@ public class CashierController {
         }
     }
 
-    private StackPane createMenuCard(MenuItemModel item, boolean isCombo) {
+    private StackPane createMenuCard(MenuItemModel item) {
         StackPane card = new StackPane();
-        card.setPrefSize(150, 110);
-        card.setMinSize(150, 110);
-        card.setMaxSize(150, 110);
+        card.setPrefSize(160, 180);
+        card.setMinSize(160, 180);
+        card.setMaxSize(160, 180);
         card.getStyleClass().add("menu-card");
 
+        VBox layout = new VBox(0);
+        
+        // Image Placeholder
+        StackPane imgContainer = new StackPane();
+        imgContainer.getStyleClass().add("menu-card-image-container");
+        SVGPath burgerIcon = new SVGPath();
+        burgerIcon.setContent("M12,2L4,5V11C4,16.55 7.84,21.74 13,23C18.16,21.74 22,16.55 22,11V5L14,2M12,4L19,6.63V11C19,15.28 16.3,19.28 12.61,20.41C8.7,19.28 6,15.28 6,11V6.63L13,4M12,8C10.89,8 10,8.89 10,10C10,11.11 10.89,12 12,12C13.11,12 14,11.11 14,10C14,8.89 13.11,8 12,8M12,14C10.33,14 7,14.83 7,16.5V18H17V16.5C17,14.83 13.67,14 12,14Z");
+        burgerIcon.setScaleX(2.0);
+        burgerIcon.setScaleY(2.0);
+        burgerIcon.getStyleClass().add("menu-card-image-placeholder");
+        imgContainer.getChildren().add(burgerIcon);
+
         VBox content = new VBox(4);
-        content.setPadding(new Insets(12));
-
-        Label nameLabel = new Label(item.getName());
-        nameLabel.getStyleClass().add("menu-card-name");
-
-        Label priceLabel = new Label("₱" + String.format("%.2f", item.getPrice()));
-        priceLabel.getStyleClass().add("menu-card-price");
+        content.getStyleClass().add("menu-card-content");
 
         Label catLabel = new Label(item.getCategory());
         catLabel.getStyleClass().add("menu-card-cat");
 
-        content.getChildren().addAll(nameLabel, priceLabel, catLabel);
+        Label nameLabel = new Label(item.getName());
+        nameLabel.getStyleClass().add("menu-card-name");
+        VBox.setVgrow(nameLabel, Priority.ALWAYS);
+
+        Label priceLabel = new Label("₱" + String.format("%.2f", item.getPrice()));
+        priceLabel.getStyleClass().add("menu-card-price");
+
+        content.getChildren().addAll(catLabel, nameLabel, priceLabel);
+        layout.getChildren().addAll(imgContainer, content);
 
         boolean isOutOfStock = "Out of Stock".equals(item.getAvailability());
         if (isOutOfStock) {
             card.getStyleClass().add("menu-card-disabled");
-
+            StackPane overlay = new StackPane();
+            overlay.getStyleClass().add("menu-card-overlay");
             Label outLabel = new Label("OUT OF STOCK");
             outLabel.getStyleClass().add("menu-out-label");
-            StackPane.setAlignment(outLabel, javafx.geometry.Pos.CENTER);
-            card.getChildren().addAll(content, outLabel);
+            overlay.getChildren().add(outLabel);
+            card.getChildren().addAll(layout, overlay);
         } else {
-            card.getChildren().add(content);
+            card.getChildren().add(layout);
         }
 
-        final MenuItemModel clickedItem = item;
         card.setOnMouseClicked((MouseEvent event) -> {
             if (!isOutOfStock) {
-                addMenuItemToOrder(clickedItem);
+                addMenuItemToOrder(item);
             }
         });
 
@@ -284,35 +325,44 @@ public class CashierController {
 
     private StackPane createComboCard(Combo combo) {
         StackPane card = new StackPane();
-        card.setPrefSize(150, 110);
-        card.setMinSize(150, 110);
-        card.setMaxSize(150, 110);
+        card.setPrefSize(160, 180);
+        card.setMinSize(160, 180);
+        card.setMaxSize(160, 180);
         card.getStyleClass().add("menu-card");
         card.getStyleClass().add("menu-card-promo");
 
-        VBox content = new VBox(2);
-        content.setPadding(new Insets(8, 12, 8, 12));
-        content.setAlignment(javafx.geometry.Pos.TOP_LEFT);
+        VBox layout = new VBox(0);
 
+        StackPane imgContainer = new StackPane();
+        imgContainer.getStyleClass().add("menu-card-image-container");
+        SVGPath comboIcon = new SVGPath();
+        comboIcon.setContent("M11,9H13V7H11M11,17H13V11H11M12,2A10,10 0 0,0 2,12A10,10 0 0,0 12,22A10,10 0 0,0 22,12A10,10 0 0,0 12,2M12,20A8,8 0 0,1 4,12A8,8 0 0,1 12,4A8,8 0 0,1 20,12A8,8 0 0,1 12,20Z");
+        comboIcon.setScaleX(2.0);
+        comboIcon.setScaleY(2.0);
+        comboIcon.getStyleClass().add("menu-card-image-placeholder");
+        imgContainer.getChildren().add(comboIcon);
+
+        VBox content = new VBox(4);
+        content.getStyleClass().add("menu-card-content");
+
+        HBox badgeBox = new HBox();
         Label promoBadge = new Label("PROMO");
         promoBadge.getStyleClass().add("menu-promo-badge");
+        badgeBox.getChildren().add(promoBadge);
 
         Label nameLabel = new Label(combo.getName());
         nameLabel.getStyleClass().add("menu-card-name");
+        VBox.setVgrow(nameLabel, Priority.ALWAYS);
 
         Label priceLabel = new Label("₱" + String.format("%.2f", combo.getPromoPrice()));
         priceLabel.getStyleClass().add("menu-card-price");
 
-        Label includesLabel = new Label(combo.getIncludes());
-        includesLabel.getStyleClass().add("menu-card-cat");
-        includesLabel.setWrapText(true);
+        content.getChildren().addAll(badgeBox, nameLabel, priceLabel);
+        layout.getChildren().addAll(imgContainer, content);
+        card.getChildren().add(layout);
 
-        content.getChildren().addAll(promoBadge, nameLabel, priceLabel, includesLabel);
-        card.getChildren().add(content);
-
-        final Combo clickedCombo = combo;
         card.setOnMouseClicked((MouseEvent event) -> {
-            addComboToOrder(clickedCombo);
+            addComboToOrder(combo);
         });
 
         return card;
@@ -360,18 +410,31 @@ public class CashierController {
     private void addOrderRow(String name, int qty, double price) {
         HBox row = new HBox(8);
         row.getStyleClass().add("order-item-row");
-        row.setPadding(new Insets(8, 0, 8, 0));
+        row.setPadding(new Insets(10, 0, 10, 0));
+        row.setAlignment(javafx.geometry.Pos.CENTER_LEFT);
 
+        VBox info = new VBox(2);
         Label nameLabel = new Label(name);
         nameLabel.getStyleClass().add("order-item-name");
-        nameLabel.setMaxWidth(Double.MAX_VALUE);
-        HBox.setHgrow(nameLabel, javafx.scene.layout.Priority.ALWAYS);
+        Label unitPriceLabel = new Label("₱" + String.format("%.2f", price));
+        unitPriceLabel.getStyleClass().add("order-item-cat"); // Use existing small text style
+        unitPriceLabel.setStyle("-fx-text-fill: #5c4828; -fx-font-size: 10px;");
+        info.getChildren().addAll(nameLabel, unitPriceLabel);
+        HBox.setHgrow(info, javafx.scene.layout.Priority.ALWAYS);
 
-        HBox qtyCtrl = new HBox(6);
+        HBox qtyCtrl = new HBox(4);
         qtyCtrl.getStyleClass().add("qty-ctrl");
+        qtyCtrl.setAlignment(javafx.geometry.Pos.CENTER);
 
-        Button minusBtn = new Button("-");
+        Button minusBtn = new Button();
         minusBtn.getStyleClass().add("qty-btn");
+        SVGPath minusIcon = new SVGPath();
+        minusIcon.setContent("M19 13H5v-2h14v2z");
+        minusIcon.setScaleX(0.7);
+        minusIcon.setScaleY(0.7);
+        minusIcon.getStyleClass().add("qty-btn-icon");
+        minusBtn.setGraphic(minusIcon);
+        
         final int finalQty = qty;
         final String finalName = name;
         final double finalPrice = price;
@@ -379,9 +442,16 @@ public class CashierController {
 
         Label qtyLabel = new Label(String.valueOf(qty));
         qtyLabel.getStyleClass().add("qty-val");
+        qtyLabel.setMinWidth(24);
 
-        Button plusBtn = new Button("+");
+        Button plusBtn = new Button();
         plusBtn.getStyleClass().add("qty-btn");
+        SVGPath plusIcon = new SVGPath();
+        plusIcon.setContent("M19 13h-6v6h-2v-6H5v-2h6V5h2v6h6v2z");
+        plusIcon.setScaleX(0.7);
+        plusIcon.setScaleY(0.7);
+        plusIcon.getStyleClass().add("qty-btn-icon");
+        plusBtn.setGraphic(plusIcon);
         plusBtn.setOnAction(e -> incrementItem(finalName, finalPrice));
 
         qtyCtrl.getChildren().addAll(minusBtn, qtyLabel, plusBtn);
@@ -389,8 +459,9 @@ public class CashierController {
         double itemTotal = price * qty;
         Label totalLabel = new Label("₱" + String.format("%.2f", itemTotal));
         totalLabel.getStyleClass().add("order-item-total");
+        totalLabel.setMinWidth(70);
 
-        row.getChildren().addAll(nameLabel, qtyCtrl, totalLabel);
+        row.getChildren().addAll(info, qtyCtrl, totalLabel);
         orderItemsList.getChildren().add(row);
     }
 
@@ -501,12 +572,16 @@ public class CashierController {
     @FXML
     private void onFilterCategory(ActionEvent event) {
         Button clickedBtn = (Button) event.getSource();
+        currentCategory = clickedBtn.getText();
+        
         btnCatAll.getStyleClass().remove("cat-btn-active");
         btnCatBurgers.getStyleClass().remove("cat-btn-active");
         btnCatSides.getStyleClass().remove("cat-btn-active");
         btnCatDrinks.getStyleClass().remove("cat-btn-active");
         btnCatOthers.getStyleClass().remove("cat-btn-active");
         clickedBtn.getStyleClass().add("cat-btn-active");
+        
+        reloadMenu();
     }
 
     @FXML

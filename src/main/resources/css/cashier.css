@@ -171,96 +171,105 @@
 
 /* Menu Card */
 .menu-card {
-    -fx-background-color: #332615;
-    -fx-border-color: #4a3820;
+    -fx-background-color: #221a0e;
+    -fx-border-color: #332615;
     -fx-border-width: 1;
-    -fx-border-radius: 12;
-    -fx-background-radius: 12;
-    -fx-padding: 12;
+    -fx-border-radius: 16;
+    -fx-background-radius: 16;
+    -fx-padding: 0;
     -fx-cursor: hand;
-    -fx-pref-width: 150;
-    -fx-pref-height: 110;
+    -fx-pref-width: 160;
+    -fx-pref-height: 180;
+    -fx-transition: all 0.2s ease;
 }
 
 .menu-card:hover {
     -fx-border-color: #d4591e;
+    -fx-background-color: #2a2012;
+    -fx-effect: dropshadow(gaussian, rgba(212,89,30,0.25), 15, 0, 0, 4);
+    -fx-translate-y: -2;
 }
 
-/* Menu Card - Hover Animation */
-.menu-card:hover {
-    -fx-effect: dropshadow(gaussian, rgba(212,89,30,0.3), 8, 0, 0, 2);
+.menu-card-image-container {
+    -fx-background-color: #2e2410;
+    -fx-background-radius: 16 16 0 0;
+    -fx-min-height: 90;
+    -fx-alignment: center;
 }
 
-/* Menu Card - Promo/Combo styling */
-.menu-card-promo {
-    -fx-border-color: #4a8c3f;
-    -fx-border-width: 2;
-}
-
-.menu-card-promo:hover {
-    -fx-border-color: #7ec470;
-    -fx-effect: dropshadow(gaussian, rgba(74,140,63,0.4), 10, 0, 0, 2);
+.menu-card-image-placeholder {
+    -fx-fill: #4a3820;
 }
 
 /* Menu Card Content */
+.menu-card-content {
+    -fx-padding: 12;
+    -fx-spacing: 4;
+}
+
 .menu-card-name {
     -fx-font-family: 'DM Sans', sans-serif;
-    -fx-font-size: 13px;
-    -fx-font-weight: 500;
+    -fx-font-size: 14px;
+    -fx-font-weight: 700;
     -fx-text-fill: #f5ede0;
     -fx-wrap-text: true;
 }
 
 .menu-card-price {
     -fx-font-family: 'DM Mono', monospace;
-    -fx-font-size: 12px;
-    -fx-font-weight: 500;
+    -fx-font-size: 14px;
+    -fx-font-weight: 700;
     -fx-text-fill: #d4591e;
 }
 
 .menu-card-cat {
     -fx-font-family: 'DM Sans', sans-serif;
     -fx-font-size: 10px;
+    -fx-font-weight: 500;
     -fx-text-fill: #8a7055;
+    -fx-text-transform: uppercase;
+}
+
+/* Menu Card - Promo/Combo styling */
+.menu-card-promo {
+    -fx-border-color: rgba(126, 196, 112, 0.3);
+}
+
+.menu-card-promo:hover {
+    -fx-border-color: #7ec470;
+    -fx-effect: dropshadow(gaussian, rgba(74,140,63,0.3), 15, 0, 0, 4);
 }
 
 /* Out of Stock Overlay */
 .menu-card-overlay {
-    -fx-background-color: rgba(26, 18, 8, 0.85);
-    -fx-border-radius: 12;
-    -fx-background-radius: 12;
+    -fx-background-color: rgba(26, 18, 8, 0.7);
+    -fx-background-radius: 16;
 }
 
 .menu-card-disabled {
-    -fx-opacity: 0.6;
-}
-
-.menu-card-disabled .menu-card-name,
-.menu-card-disabled .menu-card-price {
-    -fx-text-fill: #8a7055;
+    -fx-opacity: 0.8;
 }
 
 .menu-out-label {
     -fx-font-family: 'DM Sans', sans-serif;
-    -fx-font-size: 9px;
-    -fx-font-weight: 600;
+    -fx-font-size: 10px;
+    -fx-font-weight: 800;
     -fx-letter-spacing: 0.1em;
-    -fx-text-fill: #e07070;
+    -fx-text-fill: #ffffff;
     -fx-background-color: #8c3030;
-    -fx-padding: 2 8 2 8;
-    -fx-background-radius: 3;
+    -fx-padding: 4 10 4 10;
+    -fx-background-radius: 20;
 }
 
 /* Combo/Promo Badge */
 .menu-promo-badge {
     -fx-font-family: 'DM Sans', sans-serif;
     -fx-font-size: 9px;
-    -fx-font-weight: 600;
-    -fx-letter-spacing: 0.1em;
+    -fx-font-weight: 800;
     -fx-text-fill: #7ec470;
-    -fx-background-color: rgba(74, 140, 63, 0.2);
+    -fx-background-color: rgba(74, 140, 63, 0.15);
     -fx-padding: 2 8 2 8;
-    -fx-background-radius: 3;
+    -fx-background-radius: 4;
 }
 
 /* Category Divider */
@@ -326,27 +335,28 @@
     -fx-background-color: #332615;
     -fx-border-color: #5c4828;
     -fx-border-width: 1;
-    -fx-border-radius: 11;
-    -fx-background-radius: 11;
-    -fx-min-width: 26;
-    -fx-min-height: 26;
-    -fx-max-width: 26;
-    -fx-max-height: 26;
-    -fx-pref-width: 26;
-    -fx-pref-height: 26;
-    -fx-text-fill: #f5ede0;
-    -fx-font-family: 'DM Sans', sans-serif;
-    -fx-font-size: 14px;
-    -fx-font-weight: bold;
+    -fx-border-radius: 8;
+    -fx-background-radius: 8;
+    -fx-min-width: 28;
+    -fx-min-height: 28;
+    -fx-max-width: 28;
+    -fx-max-height: 28;
     -fx-cursor: hand;
     -fx-alignment: center;
     -fx-padding: 0;
-    -fx-graphic-text-gap: 0;
+}
+
+.qty-btn-icon {
+    -fx-fill: #c4a882;
 }
 
 .qty-btn:hover {
     -fx-background-color: #d4591e;
     -fx-border-color: #d4591e;
+}
+
+.qty-btn:hover .qty-btn-icon {
+    -fx-fill: white;
 }
 
 .qty-val {
@@ -386,29 +396,32 @@
 .order-totals {
     -fx-background-color: #2e2410;
     -fx-border-color: #4a3820;
-    -fx-border-width: 1 0 1 0;
+    -fx-border-width: 1 0 0 0;
     -fx-border-style: solid;
+    -fx-spacing: 2;
 }
 
 .total-row {
     -fx-font-family: 'DM Sans', sans-serif;
     -fx-font-size: 13px;
-    -fx-padding: 4 0 4 0;
+    -fx-padding: 2 0 2 0;
 }
 
 .total-row.grand {
-    -fx-font-size: 16px;
-    -fx-font-weight: 600;
+    -fx-font-size: 18px;
+    -fx-font-weight: 800;
     -fx-text-fill: #f5ede0;
-    -fx-padding: 8 0 0 0;
+    -fx-padding: 12 0 0 0;
     -fx-border-color: #4a3820;
     -fx-border-width: 1 0 0 0;
     -fx-border-style: solid;
-    -fx-margin: 4 0 0 0;
+    -fx-margin: 8 0 0 0;
 }
 
 .total-label {
     -fx-text-fill: #8a7055;
+    -fx-text-transform: uppercase;
+    -fx-letter-spacing: 0.05em;
 }
 
 .total-val {
@@ -418,35 +431,60 @@
 
 .total-val-bold {
     -fx-font-family: 'DM Mono', monospace;
-    -fx-font-weight: 600;
+    -fx-font-weight: 800;
     -fx-text-fill: #d4591e;
+    -fx-font-size: 20px;
 }
 
 /* ── Payment Buttons ──────────────────────────────────── */
 .payment-btns {
     -fx-background-color: #2e2410;
-    -fx-border-color: #4a3820;
-    -fx-border-width: 1 0 0 0;
-    -fx-border-style: solid;
+    -fx-padding: 16;
 }
 
 .pay-btn {
     -fx-background-color: #332615;
     -fx-border-color: #5c4828;
-    -fx-border-width: 1;
-    -fx-border-radius: 8;
-    -fx-background-radius: 8;
+    -fx-border-width: 1.5;
+    -fx-border-radius: 12;
+    -fx-background-radius: 12;
     -fx-text-fill: #f5ede0;
     -fx-font-family: 'DM Sans', sans-serif;
-    -fx-font-size: 13px;
-    -fx-font-weight: 600;
-    -fx-padding: 12 0 12 0;
+    -fx-font-size: 14px;
+    -fx-font-weight: 700;
+    -fx-padding: 14 0 14 0;
     -fx-cursor: hand;
+    -fx-transition: all 0.2s;
 }
 
 .pay-btn:hover {
     -fx-background-color: #d4591e;
     -fx-border-color: #d4591e;
+    -fx-effect: dropshadow(gaussian, rgba(212,89,30,0.3), 10, 0, 0, 2);
+}
+
+.pay-btn-icon {
+    -fx-fill: #f5ede0;
+}
+
+#btnCash {
+    -fx-background-color: #2a3a2a; /* Subtle green for cash */
+    -fx-border-color: #3e523e;
+}
+
+#btnCash:hover {
+    -fx-background-color: #4a8c3f;
+    -fx-border-color: #4a8c3f;
+}
+
+#btnCard {
+    -fx-background-color: #1a2a3a; /* Subtle blue for GCash */
+    -fx-border-color: #2a3a4a;
+}
+
+#btnCard:hover {
+    -fx-background-color: #007dfe;
+    -fx-border-color: #007dfe;
 }
 
 .btn-clear {
