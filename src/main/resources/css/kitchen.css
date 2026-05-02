@@ -190,6 +190,32 @@
     -fx-background-radius: 6;
 }
 
+/* Urgent & Preparing Animations */
+@keyframes pulse-blue {
+    0% { -fx-border-color: rgba(112, 180, 224, 0.2); }
+    50% { -fx-border-color: rgba(112, 180, 224, 0.8); }
+    100% { -fx-border-color: rgba(112, 180, 224, 0.2); }
+}
+
+.order-card.preparing-pulse {
+    -fx-border-width: 2;
+    /* In JavaFX CSS, animations are limited, so we use a solid but vibrant style */
+    -fx-border-color: #70b4e0;
+    -fx-background-color: linear-gradient(to bottom right, #1a2530, #2a1f0d);
+}
+
+.card-note-urgent {
+    -fx-font-family: 'DM Sans', sans-serif;
+    -fx-font-size: 12px;
+    -fx-font-weight: 900;
+    -fx-text-fill: #ff6b6b;
+    -fx-background-color: rgba(255, 107, 107, 0.1);
+    -fx-padding: 8 12 8 12;
+    -fx-background-radius: 6;
+    -fx-border-color: rgba(255, 107, 107, 0.3);
+    -fx-border-width: 1;
+}
+
 /* ── Action Buttons on Card ─────────────────────────── */
 .btn-card-action {
     -fx-background-color: #332615;
@@ -197,25 +223,48 @@
     -fx-text-fill: #f5ede0;
     -fx-font-family: 'DM Sans', sans-serif;
     -fx-font-size: 11px;
-    -fx-font-weight: 700;
-    -fx-padding: 8 16 8 16;
+    -fx-font-weight: 800;
+    -fx-padding: 10 20 10 20;
     -fx-background-radius: 8;
     -fx-cursor: hand;
+    -fx-transition: all 0.2s;
 }
 
 .btn-card-action:hover {
-    -fx-background-color: #c8500a;
-    -fx-border-color: #c8500a;
+    -fx-background-color: #4a3820;
+    -fx-border-color: #8a7055;
+}
+
+.btn-card-start {
+    -fx-background-color: #d4591e;
+    -fx-border-color: #d4591e;
     -fx-text-fill: white;
 }
 
-.btn-card-primary {
-    -fx-background-color: #c8500a;
-    -fx-border-color: #c8500a;
+.btn-card-start:hover {
+    -fx-background-color: #e07030;
+    -fx-effect: dropshadow(gaussian, rgba(212, 89, 30, 0.4), 10, 0, 0, 0);
+}
+
+.btn-card-ready {
+    -fx-background-color: #4a8c3f;
+    -fx-border-color: #4a8c3f;
     -fx-text-fill: white;
 }
 
-.btn-card-primary:hover {
-    -fx-background-color: #e05c0a;
-    -fx-effect: dropshadow(gaussian, rgba(200, 80, 10, 0.4), 10, 0, 0, 0);
+.btn-card-ready:hover {
+    -fx-background-color: #5eb051;
+    -fx-effect: dropshadow(gaussian, rgba(74, 140, 63, 0.4), 10, 0, 0, 0);
+}
+
+.btn-card-complete {
+    -fx-background-color: transparent;
+    -fx-border-color: #8a7055;
+    -fx-text-fill: #8a7055;
+}
+
+.btn-card-complete:hover {
+    -fx-background-color: rgba(138, 112, 85, 0.1);
+    -fx-text-fill: #f5ede0;
+    -fx-border-color: #f5ede0;
 }

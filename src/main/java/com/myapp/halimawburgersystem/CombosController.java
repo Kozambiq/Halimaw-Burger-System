@@ -21,6 +21,7 @@ import javafx.geometry.Insets;
 import javafx.geometry.Pos;
 import javafx.scene.layout.GridPane;
 import javafx.scene.layout.HBox;
+import javafx.scene.layout.Priority;
 import javafx.scene.layout.Region;
 import javafx.scene.layout.StackPane;
 import javafx.scene.layout.VBox;
@@ -30,6 +31,8 @@ import java.sql.Date;
 import java.time.format.DateTimeFormatter;
 import java.time.LocalDate;
 import java.util.List;
+import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.stream.Collectors;
 import javafx.scene.paint.Color;
 
@@ -295,66 +298,52 @@ public class CombosController {
         }
     }
 
-    private void showDeleteConfirmation(Combo combo) {
-        Alert alert = new Alert(Alert.AlertType.CONFIRMATION);
-        alert.setTitle("Delete Combo");
-        alert.setHeaderText("Delete " + combo.getName() + "?");
-        alert.setContentText("This action cannot be undone.");
-        alert.setGraphic(null);
-        alert.getDialogPane().setGraphic(null);
-        alert.getDialogPane().getStyleClass().add("dialog-pane");
-        alert.getDialogPane().setStyle("-fx-background-color: #2e2410; -fx-border-color: #4a3820; -fx-border-width: 1; -fx-border-radius: 12; -fx-background-radius: 12;");
-        alert.initOwner(combosTable.getScene().getWindow());
+    private static class InclusionData {
+        String name;
+        int qty;
+        double unitPrice;
+        InclusionData(String n, int q, double p) { name = n; qty = q; unitPrice = p; }
+    }
 
-        alert.getDialogPane().applyCss();
-        alert.getDialogPane().layout();
+    private HBox createItemChipWithQty(InclusionData data, List<InclusionData> dataList, VBox container, TextField originalPriceInput) {
+        HBox chip = new HBox(12);
+        chip.setAlignment(Pos.CENTER_LEFT);
+        chip.getStyleClass().add("ingredient-chip");
 
-        javafx.scene.Node header = alert.getDialogPane().lookup(".header-panel");
-        if (header != null) {
-            header.setStyle("-fx-background-color: transparent;");
-        }
+        Label name = new Label(data.name.toUpperCase());
+        name.getStyleClass().add("chip-name");
 
-        javafx.scene.control.Label headerText = (javafx.scene.control.Label) alert.getDialogPane().lookup(".header-panel .label");
-        if (headerText == null) {
-            javafx.scene.Node hdrPanel = alert.getDialogPane().lookup(".header-panel");
-            if (hdrPanel != null) {
-                for (javafx.scene.Node n : hdrPanel.lookupAll(".label")) {
-                    n.setStyle("-fx-text-fill: #e07070; -fx-font-size: 14px;");
-                }
-            }
-        } else {
-            headerText.setStyle("-fx-text-fill: #e07070; -fx-font-size: 14px;");
-        }
+        Region spacer = new Region();
+        HBox.setHgrow(spacer, javafx.scene.layout.Priority.ALWAYS);
 
-        javafx.scene.Node content = alert.getDialogPane().lookup(".content");
-        if (content != null) {
-            content.setStyle("-fx-text-fill: #e07070; -fx-font-size: 13px;");
-        }
+        StackPane qtyPill = new StackPane();
+        qtyPill.getStyleClass().add("chip-qty-pill");
+        Label qtyText = new Label("x" + data.qty);
+        qtyText.getStyleClass().add("chip-qty-text");
+        qtyPill.getChildren().add(qtyText);
 
-        javafx.scene.control.ButtonType okType = new javafx.scene.control.ButtonType("Delete");
-        javafx.scene.control.ButtonType cancelType = new javafx.scene.control.ButtonType("Cancel");
-        alert.getDialogPane().getButtonTypes().setAll(okType, cancelType);
-
-        javafx.scene.control.Button okButton = (javafx.scene.control.Button) alert.getDialogPane().lookupButton(okType);
-        okButton.setStyle("-fx-background-color: #c8500a; -fx-text-fill: #f5ede0; -fx-border-radius: 6; -fx-padding: 8 16 8 16; -fx-font-size: 12px; -fx-font-weight: bold;");
-        okButton.setOnAction(e -> {
-            comboDAO.delete(combo.getId());
-            loadCombos();
+        Button removeBtn = new Button("✕");
+        removeBtn.getStyleClass().add("btn-chip-remove");
+        removeBtn.setOnAction(e -> {
+            dataList.remove(data);
+            container.getChildren().remove(chip);
+            double newTotal = 0;
+            for (InclusionData id : dataList) { newTotal += (id.unitPrice * id.qty); }
+            originalPriceInput.setText(dataList.isEmpty() ? "" : String.format("%.2f", newTotal));
         });
 
-        javafx.scene.control.Button cancelButton = (javafx.scene.control.Button) alert.getDialogPane().lookupButton(cancelType);
-        cancelButton.setStyle("-fx-background-color: transparent; -fx-text-fill: #a09070; -fx-border-color: #4a3820; -fx-border-width: 1; -fx-border-radius: 6; -fx-padding: 8 16 8 16; -fx-font-size: 12px;");
-
-        alert.showAndWait();
+        chip.getChildren().addAll(name, spacer, qtyPill, removeBtn);
+        return chip;
     }
 
     private void onEditPromo(Combo existingCombo) {
         Dialog<Boolean> dialog = new Dialog<>();
         dialog.setTitle("EDIT PROMO");
         dialog.getDialogPane().getStyleClass().add("dialog-pane");
-        
-        dialog.getDialogPane().getStylesheets().add(getClass().getResource("/css/common.css").toExternalForm());
-        dialog.getDialogPane().getStylesheets().add(getClass().getResource("/css/dialog.css").toExternalForm());
+        dialog.getDialogPane().getStylesheets().addAll(
+            getClass().getResource("/css/common.css").toExternalForm(),
+            getClass().getResource("/css/dialog.css").toExternalForm()
+        );
 
         Label headerLabel = new Label("Edit Promo Details");
         headerLabel.getStyleClass().add("dialog-header-text");
@@ -362,51 +351,37 @@ public class CombosController {
 
         HBox mainLayout = new HBox(32);
         mainLayout.setPadding(new Insets(30, 40, 30, 40));
-        mainLayout.setAlignment(javafx.geometry.Pos.TOP_CENTER);
+        mainLayout.setAlignment(Pos.TOP_CENTER);
 
         VBox colLeft = new VBox(28);
         colLeft.getStyleClass().addAll("dialog-col-left", "dialog-section-card");
         colLeft.setPrefWidth(340);
 
-        VBox nameBox = new VBox(8);
-        Label nameEyebrow = new Label("PROMO NAME");
-        nameEyebrow.getStyleClass().add("dialog-eyebrow");
         TextField nameField = new TextField(existingCombo.getName());
         nameField.getStyleClass().add("premium-field");
-        nameBox.getChildren().addAll(nameEyebrow, nameField);
+        colLeft.getChildren().add(createFieldGroup("PROMO NAME", nameField));
 
-        VBox promoPriceBox = new VBox(8);
-        Label promoPriceEyebrow = new Label("PROMO PRICE (PHP)");
-        promoPriceEyebrow.getStyleClass().add("dialog-eyebrow");
         TextField promoPriceField = new TextField(String.format("%.2f", existingCombo.getPromoPrice()));
         promoPriceField.getStyleClass().add("premium-field");
-        promoPriceBox.getChildren().addAll(promoPriceEyebrow, promoPriceField);
+        colLeft.getChildren().add(createFieldGroup("PROMO PRICE (PHP)", promoPriceField));
 
-        VBox dateBox = new VBox(8);
-        Label dateEyebrow = new Label("VALID UNTIL");
-        dateEyebrow.getStyleClass().add("dialog-eyebrow");
         DatePicker validUntilPicker = new DatePicker(existingCombo.getValidUntil());
         validUntilPicker.setMaxWidth(Double.MAX_VALUE);
         validUntilPicker.getStyleClass().add("premium-date-picker");
-        dateBox.getChildren().addAll(dateEyebrow, validUntilPicker);
-
-        colLeft.getChildren().addAll(nameBox, promoPriceBox, dateBox);
+        colLeft.getChildren().add(createFieldGroup("VALID UNTIL", validUntilPicker));
 
         VBox colRight = new VBox(24);
         colRight.getStyleClass().addAll("dialog-col-right", "dialog-section-card");
         colRight.setPrefWidth(400);
 
-        Label itemsEyebrow = new Label("COMBO INCLUSIONS");
-        itemsEyebrow.getStyleClass().add("dialog-eyebrow");
-
         VBox searchArea = new VBox(12);
         HBox searchInputs = new HBox(10);
-        searchInputs.setAlignment(javafx.geometry.Pos.CENTER_LEFT);
+        searchInputs.setAlignment(Pos.CENTER_LEFT);
 
         HBox itemSearchWrapper = new HBox(10);
         itemSearchWrapper.getStyleClass().add("search-bar-group");
-        itemSearchWrapper.setAlignment(javafx.geometry.Pos.CENTER_LEFT);
-        HBox.setHgrow(itemSearchWrapper, javafx.scene.layout.Priority.ALWAYS);
+        itemSearchWrapper.setAlignment(Pos.CENTER_LEFT);
+        HBox.setHgrow(itemSearchWrapper, Priority.ALWAYS);
 
         SVGPath searchIcon = new SVGPath();
         searchIcon.setContent("M15.5 14h-.79l-.28-.27C15.41 12.59 16 11.11 16 9.5 16 5.91 13.09 3 9.5 3S3 5.91 3 9.5 5.91 16 9.5 16c1.61 0 3.09-.59 4.23-1.57l.27.28v.79l5 4.99L20.49 19l-4.99-5zm-6 0C7.01 14 5 11.99 5 9.5S7.01 5 9.5 5 14 7.01 14 9.5 11.99 14 9.5 14z");
@@ -417,30 +392,35 @@ public class CombosController {
         itemSearchField.getStyleClass().add("premium-field");
         itemSearchField.setStyle("-fx-background-color: transparent; -fx-border-width: 0; -fx-padding: 8 0 8 0;");
         itemSearchField.setPromptText("Search menu items...");
-        HBox.setHgrow(itemSearchField, javafx.scene.layout.Priority.ALWAYS);
+        HBox.setHgrow(itemSearchField, Priority.ALWAYS);
         itemSearchWrapper.getChildren().addAll(searchIcon, itemSearchField);
+
+        TextField qtyField = new TextField();
+        qtyField.getStyleClass().add("premium-field");
+        qtyField.setPrefWidth(60);
+        qtyField.setPromptText("Qty");
 
         Button addBtn = new Button("ADD");
         addBtn.getStyleClass().add("btn-recipe-add");
+        searchInputs.getChildren().addAll(itemSearchWrapper, qtyField, addBtn);
 
-        searchInputs.getChildren().addAll(itemSearchWrapper, addBtn);
+        Label inclusionErrorLabel = new Label("Quantity must be a whole number > 0");
+        inclusionErrorLabel.setStyle("-fx-text-fill: #e07070; -fx-font-size: 11px; -fx-font-weight: bold;");
+        inclusionErrorLabel.setVisible(false);
+        inclusionErrorLabel.setManaged(false);
 
-        VBox originalPriceBox = new VBox(8);
-        Label origPriceEyebrow = new Label("TOTAL ORIGINAL PRICE (AUTO)");
-        origPriceEyebrow.getStyleClass().add("dialog-eyebrow");
         TextField originalPriceField = new TextField(String.format("%.2f", existingCombo.getOriginalPrice()));
         originalPriceField.setEditable(false);
         originalPriceField.getStyleClass().add("premium-field");
-        originalPriceField.setStyle(originalPriceField.getStyle() + "-fx-opacity: 0.7;");
-        originalPriceBox.getChildren().addAll(origPriceEyebrow, originalPriceField);
+        originalPriceField.setStyle("-fx-opacity: 0.7;");
+        VBox originalPriceBox = createFieldGroup("TOTAL ORIGINAL PRICE (AUTO)", originalPriceField);
 
-        searchArea.getChildren().addAll(itemsEyebrow, searchInputs, originalPriceBox);
+        searchArea.getChildren().addAll(new Label("COMBO INCLUSIONS") {{ getStyleClass().add("dialog-eyebrow"); }}, searchInputs, inclusionErrorLabel, originalPriceBox);
 
         javafx.scene.control.ScrollPane itemsScroll = new javafx.scene.control.ScrollPane();
         itemsScroll.setFitToWidth(true);
         itemsScroll.setPrefHeight(180);
         itemsScroll.setStyle("-fx-background-color: transparent; -fx-background: transparent; -fx-border-width: 0;");
-        
         VBox selectedItemsContainer = new VBox(10);
         selectedItemsContainer.setPadding(new Insets(4, 0, 0, 0));
         itemsScroll.setContent(selectedItemsContainer);
@@ -448,74 +428,66 @@ public class CombosController {
         colRight.getChildren().addAll(searchArea, itemsScroll);
         mainLayout.getChildren().addAll(colLeft, colRight);
 
-        List<String> selectedItems = new java.util.ArrayList<>(java.util.Arrays.asList(existingCombo.getIncludes().split(" \\+ ")));
-        for (String item : selectedItems) {
-            selectedItemsContainer.getChildren().add(createItemChip(item, selectedItems, selectedItemsContainer, originalPriceField));
+        List<InclusionData> inclusionList = new ArrayList<>();
+        String[] parts = existingCombo.getIncludes().split(" \\+ ");
+        for (String p : parts) {
+            try {
+                if (p.contains(" x ")) {
+                    String[] sub = p.split(" x ");
+                    int qty = Integer.parseInt(sub[0]);
+                    String name = sub[1];
+                    inclusionList.add(new InclusionData(name, qty, comboDAO.getMenuItemPrice(name)));
+                } else {
+                    inclusionList.add(new InclusionData(p, 1, comboDAO.getMenuItemPrice(p)));
+                }
+            } catch (Exception ex) {}
         }
 
+        for (InclusionData id : inclusionList) {
+            selectedItemsContainer.getChildren().add(createItemChipWithQty(id, inclusionList, selectedItemsContainer, originalPriceField));
+        }
+
+        qtyField.textProperty().addListener((obs, old, nv) -> {
+            validateInclusion(qtyField, inclusionErrorLabel, addBtn);
+        });
+
         List<String> allMenuItemNames = comboDAO.searchMenuItems("");
-        javafx.scene.control.ListView<String> suggestionList = new javafx.scene.control.ListView<>();
-        suggestionList.getStyleClass().add("suggestion-list");
-        suggestionList.getStylesheets().add(getClass().getResource("/css/common.css").toExternalForm());
-        suggestionList.setFixedCellSize(40);
-        javafx.stage.Popup suggestionPopup = new javafx.stage.Popup();
-        suggestionPopup.setAutoHide(true);
-        suggestionPopup.getContent().add(suggestionList);
-
-        itemSearchField.textProperty().addListener(obs -> {
-            String q = itemSearchField.getText().trim().toLowerCase();
-            if (q.isEmpty()) { suggestionPopup.hide(); return; }
-            List<String> matches = allMenuItemNames.stream().filter(n -> n.toLowerCase().contains(q)).collect(Collectors.toList());
-            if (!matches.isEmpty()) {
-                suggestionList.setItems(FXCollections.observableArrayList(matches));
-                suggestionList.setPrefHeight(Math.min(matches.size(), 5) * 40 + 8);
-                suggestionList.setPrefWidth(itemSearchWrapper.getWidth());
-                javafx.geometry.Bounds bounds = itemSearchWrapper.localToScreen(itemSearchWrapper.getBoundsInLocal());
-                suggestionPopup.show(itemSearchWrapper, bounds.getMinX(), bounds.getMaxY() + 4);
-            } else { suggestionPopup.hide(); }
-        });
-
-        suggestionList.setOnMouseClicked(e -> {
-            if (!suggestionList.getSelectionModel().isEmpty()) {
-                itemSearchField.setText(suggestionList.getSelectionModel().getSelectedItem());
-                suggestionPopup.hide();
-            }
-        });
+        setupAutocomplete(itemSearchField, itemSearchWrapper, allMenuItemNames);
 
         addBtn.setOnAction(e -> {
             String item = itemSearchField.getText().trim();
-            if (item.isEmpty() || selectedItems.contains(item)) return;
-            selectedItems.add(item);
-            selectedItemsContainer.getChildren().add(createItemChip(item, selectedItems, selectedItemsContainer, originalPriceField));
-            double total = 0;
-            for (String s : selectedItems) total += comboDAO.getMenuItemPrice(s);
-            originalPriceField.setText(String.format("%.2f", total));
-            itemSearchField.clear();
+            String qtxt = qtyField.getText().trim();
+            if (item.isEmpty() || qtxt.isEmpty()) return;
+            try {
+                int qty = Integer.parseInt(qtxt);
+                double unitPrice = comboDAO.getMenuItemPrice(item);
+                if (unitPrice <= 0) return;
+                InclusionData existing = inclusionList.stream().filter(i -> i.name.equalsIgnoreCase(item)).findFirst().orElse(null);
+                if (existing != null) { existing.qty += qty; }
+                else { inclusionList.add(new InclusionData(item, qty, unitPrice)); }
+                
+                refreshInclusionsUI(inclusionList, selectedItemsContainer, originalPriceField);
+                itemSearchField.clear(); qtyField.clear();
+            } catch (Exception ex) {}
         });
 
         dialog.getDialogPane().setContent(mainLayout);
         dialog.getDialogPane().getButtonTypes().addAll(javafx.scene.control.ButtonType.CANCEL, javafx.scene.control.ButtonType.OK);
 
-        Button okButton = (Button) dialog.getDialogPane().lookupButton(javafx.scene.control.ButtonType.OK);
-        okButton.setText("UPDATE PROMO");
-        okButton.getStyleClass().add("dialog-button-save");
-        
-        Button cancelButton = (Button) dialog.getDialogPane().lookupButton(javafx.scene.control.ButtonType.CANCEL);
-        cancelButton.getStyleClass().add("dialog-button-cancel");
+        setupDialogButtons(dialog, "UPDATE PROMO");
 
         dialog.setResultConverter(btn -> btn == javafx.scene.control.ButtonType.OK);
 
-        okButton.setOnAction(e -> {
+        ((Button) dialog.getDialogPane().lookupButton(javafx.scene.control.ButtonType.OK)).setOnAction(e -> {
             String name = nameField.getText().trim();
             String pPrice = promoPriceField.getText().trim();
             LocalDate date = validUntilPicker.getValue();
-            if (name.isEmpty() || pPrice.isEmpty() || date == null || selectedItems.isEmpty()) {
-                e.consume(); return;
-            }
+            if (name.isEmpty() || pPrice.isEmpty() || date == null || inclusionList.isEmpty()) { e.consume(); return; }
             try {
                 double promoPrice = Double.parseDouble(pPrice);
                 double originalPrice = Double.parseDouble(originalPriceField.getText());
-                comboDAO.update(existingCombo.getId(), name, String.join(" + ", selectedItems), promoPrice, originalPrice, java.sql.Date.valueOf(date));
+                String inclusionStr = inclusionList.stream().map(id -> id.qty + " x " + id.name).collect(Collectors.joining(" + "));
+                comboDAO.update(existingCombo.getId(), name, inclusionStr, promoPrice, originalPrice, java.sql.Date.valueOf(date));
                 loadCombos();
                 dialog.close();
             } catch (Exception ex) { e.consume(); }
@@ -529,68 +501,50 @@ public class CombosController {
         Dialog<Boolean> dialog = new Dialog<>();
         dialog.setTitle("CREATE NEW PROMO");
         dialog.getDialogPane().getStyleClass().add("dialog-pane");
+        dialog.getDialogPane().getStylesheets().addAll(
+            getClass().getResource("/css/common.css").toExternalForm(),
+            getClass().getResource("/css/dialog.css").toExternalForm()
+        );
 
-        // Load Stylesheets
-        dialog.getDialogPane().getStylesheets().add(getClass().getResource("/css/common.css").toExternalForm());
-        dialog.getDialogPane().getStylesheets().add(getClass().getResource("/css/dialog.css").toExternalForm());
-
-        // Header
         Label headerLabel = new Label("Create New Promo");
         headerLabel.getStyleClass().add("dialog-header-text");
         dialog.getDialogPane().setHeader(headerLabel);
 
-        // Main Layout
         HBox mainLayout = new HBox(32);
         mainLayout.setPadding(new Insets(30, 40, 30, 40));
-        mainLayout.setAlignment(javafx.geometry.Pos.TOP_CENTER);
+        mainLayout.setAlignment(Pos.TOP_CENTER);
 
-        // LEFT COLUMN: Promo Identity
         VBox colLeft = new VBox(28);
         colLeft.getStyleClass().addAll("dialog-col-left", "dialog-section-card");
         colLeft.setPrefWidth(340);
 
-        VBox nameBox = new VBox(8);
-        Label nameEyebrow = new Label("PROMO NAME");
-        nameEyebrow.getStyleClass().add("dialog-eyebrow");
         TextField nameField = new TextField();
         nameField.setPromptText("e.g. Halimaw Meal Deal");
         nameField.getStyleClass().add("premium-field");
-        nameBox.getChildren().addAll(nameEyebrow, nameField);
+        colLeft.getChildren().add(createFieldGroup("PROMO NAME", nameField));
 
-        VBox promoPriceBox = new VBox(8);
-        Label promoPriceEyebrow = new Label("PROMO PRICE (PHP)");
-        promoPriceEyebrow.getStyleClass().add("dialog-eyebrow");
         TextField promoPriceField = new TextField();
         promoPriceField.setPromptText("0.00");
         promoPriceField.getStyleClass().add("premium-field");
-        promoPriceBox.getChildren().addAll(promoPriceEyebrow, promoPriceField);
+        colLeft.getChildren().add(createFieldGroup("PROMO PRICE (PHP)", promoPriceField));
 
-        VBox dateBox = new VBox(8);
-        Label dateEyebrow = new Label("VALID UNTIL");
-        dateEyebrow.getStyleClass().add("dialog-eyebrow");
         DatePicker validUntilPicker = new DatePicker();
         validUntilPicker.setMaxWidth(Double.MAX_VALUE);
         validUntilPicker.getStyleClass().add("premium-date-picker");
-        dateBox.getChildren().addAll(dateEyebrow, validUntilPicker);
+        colLeft.getChildren().add(createFieldGroup("VALID UNTIL", validUntilPicker));
 
-        colLeft.getChildren().addAll(nameBox, promoPriceBox, dateBox);
-
-        // RIGHT COLUMN: Combo Items
         VBox colRight = new VBox(24);
         colRight.getStyleClass().addAll("dialog-col-right", "dialog-section-card");
         colRight.setPrefWidth(400);
 
-        Label itemsEyebrow = new Label("COMBO INCLUSIONS");
-        itemsEyebrow.getStyleClass().add("dialog-eyebrow");
-
         VBox searchArea = new VBox(12);
         HBox searchInputs = new HBox(10);
-        searchInputs.setAlignment(javafx.geometry.Pos.CENTER_LEFT);
+        searchInputs.setAlignment(Pos.CENTER_LEFT);
 
         HBox itemSearchWrapper = new HBox(10);
         itemSearchWrapper.getStyleClass().add("search-bar-group");
-        itemSearchWrapper.setAlignment(javafx.geometry.Pos.CENTER_LEFT);
-        HBox.setHgrow(itemSearchWrapper, javafx.scene.layout.Priority.ALWAYS);
+        itemSearchWrapper.setAlignment(Pos.CENTER_LEFT);
+        HBox.setHgrow(itemSearchWrapper, Priority.ALWAYS);
 
         SVGPath searchIcon = new SVGPath();
         searchIcon.setContent("M15.5 14h-.79l-.28-.27C15.41 12.59 16 11.11 16 9.5 16 5.91 13.09 3 9.5 3S3 5.91 3 9.5 5.91 16 9.5 16c1.61 0 3.09-.59 4.23-1.57l.27.28v.79l5 4.99L20.49 19l-4.99-5zm-6 0C7.01 14 5 11.99 5 9.5S7.01 5 9.5 5 14 7.01 14 9.5 11.99 14 9.5 14z");
@@ -601,30 +555,35 @@ public class CombosController {
         itemSearchField.getStyleClass().add("premium-field");
         itemSearchField.setStyle("-fx-background-color: transparent; -fx-border-width: 0; -fx-padding: 8 0 8 0;");
         itemSearchField.setPromptText("Search menu items...");
-        HBox.setHgrow(itemSearchField, javafx.scene.layout.Priority.ALWAYS);
+        HBox.setHgrow(itemSearchField, Priority.ALWAYS);
         itemSearchWrapper.getChildren().addAll(searchIcon, itemSearchField);
+
+        TextField qtyField = new TextField();
+        qtyField.getStyleClass().add("premium-field");
+        qtyField.setPrefWidth(60);
+        qtyField.setPromptText("Qty");
 
         Button addBtn = new Button("ADD");
         addBtn.getStyleClass().add("btn-recipe-add");
+        searchInputs.getChildren().addAll(itemSearchWrapper, qtyField, addBtn);
 
-        searchInputs.getChildren().addAll(itemSearchWrapper, addBtn);
+        Label inclusionErrorLabel = new Label("Quantity must be a whole number > 0");
+        inclusionErrorLabel.setStyle("-fx-text-fill: #e07070; -fx-font-size: 11px; -fx-font-weight: bold;");
+        inclusionErrorLabel.setVisible(false);
+        inclusionErrorLabel.setManaged(false);
 
-        VBox originalPriceBox = new VBox(8);
-        Label origPriceEyebrow = new Label("TOTAL ORIGINAL PRICE (AUTO)");
-        origPriceEyebrow.getStyleClass().add("dialog-eyebrow");
         TextField originalPriceField = new TextField();
         originalPriceField.setEditable(false);
         originalPriceField.getStyleClass().add("premium-field");
-        originalPriceField.setStyle(originalPriceField.getStyle() + "-fx-opacity: 0.7;");
-        originalPriceBox.getChildren().addAll(origPriceEyebrow, originalPriceField);
+        originalPriceField.setStyle("-fx-opacity: 0.7;");
+        VBox originalPriceBox = createFieldGroup("TOTAL ORIGINAL PRICE (AUTO)", originalPriceField);
 
-        searchArea.getChildren().addAll(itemsEyebrow, searchInputs, originalPriceBox);
+        searchArea.getChildren().addAll(new Label("COMBO INCLUSIONS") {{ getStyleClass().add("dialog-eyebrow"); }}, searchInputs, inclusionErrorLabel, originalPriceBox);
 
         javafx.scene.control.ScrollPane itemsScroll = new javafx.scene.control.ScrollPane();
         itemsScroll.setFitToWidth(true);
         itemsScroll.setPrefHeight(180);
         itemsScroll.setStyle("-fx-background-color: transparent; -fx-background: transparent; -fx-border-width: 0;");
-        
         VBox selectedItemsContainer = new VBox(10);
         selectedItemsContainer.setPadding(new Insets(4, 0, 0, 0));
         itemsScroll.setContent(selectedItemsContainer);
@@ -632,75 +591,46 @@ public class CombosController {
         colRight.getChildren().addAll(searchArea, itemsScroll);
         mainLayout.getChildren().addAll(colLeft, colRight);
 
-        // Logic
-        List<String> selectedItems = new java.util.ArrayList<>();
+        List<InclusionData> inclusionList = new ArrayList<>();
+        qtyField.textProperty().addListener((obs, old, nv) -> validateInclusion(qtyField, inclusionErrorLabel, addBtn));
+
         List<String> allMenuItemNames = comboDAO.searchMenuItems("");
-
-        // Autocomplete
-        javafx.scene.control.ListView<String> suggestionList = new javafx.scene.control.ListView<>();
-        suggestionList.getStyleClass().add("suggestion-list");
-        suggestionList.getStylesheets().add(getClass().getResource("/css/common.css").toExternalForm());
-        suggestionList.setFixedCellSize(40);
-        javafx.stage.Popup suggestionPopup = new javafx.stage.Popup();
-        suggestionPopup.setAutoHide(true);
-        suggestionPopup.getContent().add(suggestionList);
-
-        itemSearchField.textProperty().addListener(obs -> {
-            String q = itemSearchField.getText().trim().toLowerCase();
-            if (q.isEmpty()) { suggestionPopup.hide(); return; }
-            List<String> matches = allMenuItemNames.stream().filter(n -> n.toLowerCase().contains(q)).collect(Collectors.toList());
-            if (!matches.isEmpty()) {
-                suggestionList.setItems(FXCollections.observableArrayList(matches));
-                suggestionList.setPrefHeight(Math.min(matches.size(), 5) * 40 + 8);
-                suggestionList.setPrefWidth(itemSearchWrapper.getWidth());
-                javafx.geometry.Bounds bounds = itemSearchWrapper.localToScreen(itemSearchWrapper.getBoundsInLocal());
-                suggestionPopup.show(itemSearchWrapper, bounds.getMinX(), bounds.getMaxY() + 4);
-            } else { suggestionPopup.hide(); }
-        });
-
-        suggestionList.setOnMouseClicked(e -> {
-            if (!suggestionList.getSelectionModel().isEmpty()) {
-                itemSearchField.setText(suggestionList.getSelectionModel().getSelectedItem());
-                suggestionPopup.hide();
-            }
-        });
+        setupAutocomplete(itemSearchField, itemSearchWrapper, allMenuItemNames);
 
         addBtn.setOnAction(e -> {
             String item = itemSearchField.getText().trim();
-            if (item.isEmpty() || selectedItems.contains(item)) return;
-            
-            selectedItems.add(item);
-            selectedItemsContainer.getChildren().add(createItemChip(item, selectedItems, selectedItemsContainer, originalPriceField));
-            
-            double total = 0;
-            for (String s : selectedItems) total += comboDAO.getMenuItemPrice(s);
-            originalPriceField.setText(String.format("%.2f", total));
-            itemSearchField.clear();
+            String qtxt = qtyField.getText().trim();
+            if (item.isEmpty() || qtxt.isEmpty()) return;
+            try {
+                int qty = Integer.parseInt(qtxt);
+                double unitPrice = comboDAO.getMenuItemPrice(item);
+                if (unitPrice <= 0) return;
+                InclusionData existing = inclusionList.stream().filter(i -> i.name.equalsIgnoreCase(item)).findFirst().orElse(null);
+                if (existing != null) { existing.qty += qty; }
+                else { inclusionList.add(new InclusionData(item, qty, unitPrice)); }
+                
+                refreshInclusionsUI(inclusionList, selectedItemsContainer, originalPriceField);
+                itemSearchField.clear(); qtyField.clear();
+            } catch (Exception ex) {}
         });
 
         dialog.getDialogPane().setContent(mainLayout);
         dialog.getDialogPane().getButtonTypes().addAll(javafx.scene.control.ButtonType.CANCEL, javafx.scene.control.ButtonType.OK);
 
-        Button okButton = (Button) dialog.getDialogPane().lookupButton(javafx.scene.control.ButtonType.OK);
-        okButton.setText("SAVE PROMO");
-        okButton.getStyleClass().add("dialog-button-save");
-        
-        Button cancelButton = (Button) dialog.getDialogPane().lookupButton(javafx.scene.control.ButtonType.CANCEL);
-        cancelButton.getStyleClass().add("dialog-button-cancel");
+        setupDialogButtons(dialog, "SAVE PROMO");
 
         dialog.setResultConverter(btn -> btn == javafx.scene.control.ButtonType.OK);
 
-        okButton.setOnAction(e -> {
+        ((Button) dialog.getDialogPane().lookupButton(javafx.scene.control.ButtonType.OK)).setOnAction(e -> {
             String name = nameField.getText().trim();
             String pPrice = promoPriceField.getText().trim();
             LocalDate date = validUntilPicker.getValue();
-            if (name.isEmpty() || pPrice.isEmpty() || date == null || selectedItems.isEmpty()) {
-                e.consume(); return;
-            }
+            if (name.isEmpty() || pPrice.isEmpty() || date == null || inclusionList.isEmpty()) { e.consume(); return; }
             try {
                 double promoPrice = Double.parseDouble(pPrice);
                 double originalPrice = Double.parseDouble(originalPriceField.getText());
-                comboDAO.insert(name, String.join(" + ", selectedItems), promoPrice, originalPrice, java.sql.Date.valueOf(date));
+                String inclusionStr = inclusionList.stream().map(id -> id.qty + " x " + id.name).collect(Collectors.joining(" + "));
+                comboDAO.insert(name, inclusionStr, promoPrice, originalPrice, java.sql.Date.valueOf(date));
                 loadCombos();
                 dialog.close();
             } catch (Exception ex) { e.consume(); }
@@ -709,112 +639,113 @@ public class CombosController {
         dialog.showAndWait();
     }
 
-    private HBox createItemChip(String itemName, List<String> selectedItems, VBox container, TextField originalPriceInput) {
-        HBox chip = new HBox(12);
-        chip.setAlignment(Pos.CENTER_LEFT);
-        chip.getStyleClass().add("ingredient-chip");
+    private VBox createFieldGroup(String label, javafx.scene.Node field) {
+        VBox box = new VBox(8);
+        Label lbl = new Label(label);
+        lbl.getStyleClass().add("dialog-eyebrow");
+        box.getChildren().addAll(lbl, field);
+        return box;
+    }
 
-        Label name = new Label(itemName.toUpperCase());
-        name.getStyleClass().add("chip-name");
-
-        Region spacer = new Region();
-        HBox.setHgrow(spacer, javafx.scene.layout.Priority.ALWAYS);
-
-        Button removeBtn = new Button("✕");
-        removeBtn.getStyleClass().add("btn-chip-remove");
-        removeBtn.setOnAction(e -> {
-            selectedItems.remove(itemName);
-            container.getChildren().remove(chip);
-            
-            double newTotal = 0;
-            for (String menuItem : selectedItems) {
-                newTotal += comboDAO.getMenuItemPrice(menuItem);
+    private void validateInclusion(TextField qtyField, Label errorLabel, Button addBtn) {
+        String qtxt = qtyField.getText().trim();
+        if (qtxt.isEmpty()) {
+            errorLabel.setVisible(false); errorLabel.setManaged(false); addBtn.setDisable(false); return;
+        }
+        try {
+            double val = Double.parseDouble(qtxt);
+            boolean isWhole = val == Math.floor(val);
+            if (val <= 0 || !isWhole) {
+                errorLabel.setVisible(true); errorLabel.setManaged(true); addBtn.setDisable(true);
+            } else {
+                errorLabel.setVisible(false); errorLabel.setManaged(false); addBtn.setDisable(false);
             }
-            originalPriceInput.setText(selectedItems.isEmpty() ? "" : String.format("%.2f", newTotal));
+        } catch (Exception ex) { addBtn.setDisable(true); }
+    }
+
+    private void setupAutocomplete(TextField field, HBox wrapper, List<String> names) {
+        javafx.scene.control.ListView<String> suggestionList = new javafx.scene.control.ListView<>();
+        suggestionList.getStyleClass().add("suggestion-list");
+        suggestionList.getStylesheets().add(getClass().getResource("/css/common.css").toExternalForm());
+        suggestionList.setFixedCellSize(40);
+        javafx.stage.Popup suggestionPopup = new javafx.stage.Popup();
+        suggestionPopup.setAutoHide(true);
+        suggestionPopup.getContent().add(suggestionList);
+
+        field.textProperty().addListener(obs -> {
+            String q = field.getText().trim().toLowerCase();
+            if (q.isEmpty()) { suggestionPopup.hide(); return; }
+            List<String> matches = names.stream().filter(n -> n.toLowerCase().contains(q)).collect(Collectors.toList());
+            if (!matches.isEmpty()) {
+                suggestionList.setItems(FXCollections.observableArrayList(matches));
+                suggestionList.setPrefHeight(Math.min(matches.size(), 5) * 40 + 8);
+                suggestionList.setPrefWidth(wrapper.getWidth());
+                javafx.geometry.Bounds bounds = wrapper.localToScreen(wrapper.getBoundsInLocal());
+                suggestionPopup.show(wrapper, bounds.getMinX(), bounds.getMaxY() + 4);
+            } else { suggestionPopup.hide(); }
         });
 
-        chip.getChildren().addAll(name, spacer, removeBtn);
-        return chip;
+        suggestionList.setOnMouseClicked(e -> {
+            if (!suggestionList.getSelectionModel().isEmpty()) {
+                field.setText(suggestionList.getSelectionModel().getSelectedItem());
+                suggestionPopup.hide();
+            }
+        });
+    }
+
+    private void refreshInclusionsUI(List<InclusionData> list, VBox container, TextField originalPriceField) {
+        container.getChildren().clear();
+        double total = 0;
+        for (InclusionData id : list) {
+            container.getChildren().add(createItemChipWithQty(id, list, container, originalPriceField));
+            total += (id.unitPrice * id.qty);
+        }
+        originalPriceField.setText(String.format("%.2f", total));
+    }
+
+    private void setupDialogButtons(Dialog<Boolean> dialog, String saveText) {
+        Button okButton = (Button) dialog.getDialogPane().lookupButton(javafx.scene.control.ButtonType.OK);
+        okButton.setText(saveText);
+        okButton.getStyleClass().add("dialog-button-save");
+        Button cancelButton = (Button) dialog.getDialogPane().lookupButton(javafx.scene.control.ButtonType.CANCEL);
+        cancelButton.getStyleClass().add("dialog-button-cancel");
+    }
+
+    private void showDeleteConfirmation(Combo combo) {
+        Alert alert = new Alert(Alert.AlertType.CONFIRMATION);
+        alert.setTitle("Delete Combo");
+        alert.setHeaderText("Delete " + combo.getName() + "?");
+        alert.setContentText("This action cannot be undone.");
+        alert.getDialogPane().getStyleClass().add("dialog-pane");
+        alert.getDialogPane().setStyle("-fx-background-color: #2e2410; -fx-border-color: #4a3820; -fx-border-width: 1; -fx-border-radius: 12; -fx-background-radius: 12;");
+        alert.initOwner(combosTable.getScene().getWindow());
+
+        javafx.scene.control.ButtonType okType = new javafx.scene.control.ButtonType("Delete");
+        javafx.scene.control.ButtonType cancelType = new javafx.scene.control.ButtonType("Cancel");
+        alert.getDialogPane().getButtonTypes().setAll(okType, cancelType);
+
+        ((Button) alert.getDialogPane().lookupButton(okType)).setStyle("-fx-background-color: #c8500a; -fx-text-fill: #f5ede0; -fx-border-radius: 6; -fx-padding: 8 16 8 16;");
+        ((Button) alert.getDialogPane().lookupButton(cancelType)).setStyle("-fx-background-color: transparent; -fx-text-fill: #a09070; -fx-border-color: #4a3820; -fx-border-width: 1; -fx-border-radius: 6;");
+
+        alert.showAndWait().ifPresent(btn -> {
+            if (btn == okType) {
+                comboDAO.delete(combo.getId());
+                loadCombos();
+            }
+        });
     }
 
     @FXML
     private void onLogout() {
-        try {
-            Main.showLogin();
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
+        try { Main.showLogin(); } catch (Exception e) { e.printStackTrace(); }
     }
 
-    @FXML
-    private void onNavigateDashboard() {
-        try {
-            Main.showDashboard();
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
-    }
-
-    @FXML
-    private void onNavigateOrders() {
-        try {
-            Main.showOrders();
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
-    }
-
-    @FXML
-    private void onNavigateKitchen() {
-        try {
-            Main.showKitchen();
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
-    }
-
-    @FXML
-    private void onNavigateMenuItems() {
-        try {
-            Main.showMenuItems();
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
-    }
-
-    @FXML
-    private void onNavigateCombos() {
-        try {
-            Main.showCombos();
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
-    }
-
-    @FXML
-    private void onNavigateInventory() {
-        try {
-            Main.showInventory();
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
-    }
-
-    @FXML
-    private void onNavigateSales() {
-        try {
-            Main.showSalesReport();
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
-    }
-
-    @FXML
-    private void onNavigateStaff() {
-        try {
-            Main.showStaff();
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
-    }
+    @FXML private void onNavigateDashboard() { try { Main.showDashboard(); } catch (Exception e) {} }
+    @FXML private void onNavigateOrders() { try { Main.showOrders(); } catch (Exception e) {} }
+    @FXML private void onNavigateKitchen() { try { Main.showKitchen(); } catch (Exception e) {} }
+    @FXML private void onNavigateMenuItems() { try { Main.showMenuItems(); } catch (Exception e) {} }
+    @FXML private void onNavigateCombos() { try { Main.showCombos(); } catch (Exception e) {} }
+    @FXML private void onNavigateInventory() { try { Main.showInventory(); } catch (Exception e) {} }
+    @FXML private void onNavigateSales() { try { Main.showSalesReport(); } catch (Exception e) {} }
+    @FXML private void onNavigateStaff() { try { Main.showStaff(); } catch (Exception e) {} }
 }
