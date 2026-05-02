@@ -125,11 +125,13 @@ public class CookController {
     }
 
     private VBox createOrderCard(Order order) {
-        VBox card = new VBox(8);
+        VBox card = new VBox(12);
         card.getStyleClass().add("order-card");
         
         if ("Cancelled".equals(order.getStatus())) {
             card.getStyleClass().add("cancelled-card");
+        } else if ("Done".equals(order.getStatus())) {
+            card.getStyleClass().add("done-card");
         }
         
         long mins = Duration.between(order.getCreatedAt(), LocalDateTime.now()).toMinutes();
@@ -145,17 +147,18 @@ public class CookController {
             card.getStyleClass().add("urgent");
         }
         
-        if ("Done".equals(order.getStatus())) {
-            card.setStyle("-fx-border-color: #4a8c3f; -fx-background-color: rgba(74, 140, 63, 0.15);");
+        if ("Preparing".equals(order.getStatus())) {
+            card.getStyleClass().add("preparing-pulse");
         }
 
+        // Header: #OrderNumber | Type
         HBox header = new HBox();
         header.setAlignment(Pos.CENTER_LEFT);
         Label orderNum = new Label("#" + String.format("%04d", order.getOrderNumber()));
         orderNum.getStyleClass().add("card-order");
         Region spacer = new Region();
         HBox.setHgrow(spacer, Priority.ALWAYS);
-        Label type = new Label(order.getOrderType());
+        Label type = new Label(order.getOrderType().toUpperCase());
         type.getStyleClass().add("card-type");
         header.getChildren().addAll(orderNum, spacer, type);
 
@@ -170,31 +173,32 @@ public class CookController {
             itemRow.setAlignment(Pos.CENTER_LEFT);
             
             Label qty = new Label(item.getQuantity() + "x");
-            qty.setStyle("-fx-font-family: 'DM Mono', monospace; -fx-text-fill: #d4591e; -fx-font-weight: bold; -fx-min-width: 30;");
+            qty.getStyleClass().add("item-qty");
             
             Label name = new Label(item.getItemName());
-            name.setStyle("-fx-text-fill: #f5ede0; -fx-font-size: 12px;");
+            name.getStyleClass().add("item-name");
             
             Region itemSpacer = new Region();
             HBox.setHgrow(itemSpacer, Priority.ALWAYS);
             
-            Label price = new Label("₱" + String.format("%.2f", item.getTotalPrice()));
-            price.setStyle("-fx-font-family: 'DM Mono', monospace; -fx-text-fill: #c4a882; -fx-font-size: 12px;");
-            
-            itemRow.getChildren().addAll(qty, name, itemSpacer, price);
+            itemRow.getChildren().addAll(qty, name, itemSpacer);
             itemsContainer.getChildren().add(itemRow);
         }
         
         if (order.getNotes() != null && !order.getNotes().isEmpty()) {
-            Label notesLabel = new Label("Note: " + order.getNotes());
-            notesLabel.setStyle("-fx-font-size: 11px; -fx-font-style: italic; -fx-text-fill: #c4a882;");
+            Label notesLabel = new Label("NOTE: " + order.getNotes().toUpperCase());
+            notesLabel.getStyleClass().add("card-note-urgent");
+            notesLabel.setWrapText(true);
+            notesLabel.setMaxWidth(280);
             itemsContainer.getChildren().add(notesLabel);
         }
         
         card.getChildren().add(itemsContainer);
 
+        // Footer: Timer + Actions
         HBox footer = new HBox();
         footer.setAlignment(Pos.CENTER_LEFT);
+        footer.setSpacing(10);
         
         String timerText = mins + "m ago";
         if ("Cancelled".equals(order.getStatus())) timerText = "CANCELLED";
@@ -203,46 +207,47 @@ public class CookController {
         Label timer = new Label(timerText + (isUrgent ? " ⚠" : ""));
         timer.getStyleClass().add("card-timer");
         if (isUrgent) timer.getStyleClass().add("urgent-text");
-        if ("Done".equals(order.getStatus())) timer.setStyle("-fx-text-fill: #7ec470;");
-        if ("Cancelled".equals(order.getStatus())) timer.setStyle("-fx-text-fill: #e07070;");
 
         Region footerSpacer = new Region();
         HBox.setHgrow(footerSpacer, Priority.ALWAYS);
-        
-        Button actionBtn = new Button();
-        actionBtn.getStyleClass().add("btn-card");
-        
-        if ("New".equals(order.getStatus())) {
-            actionBtn.setText("Start");
-            String warning = orderDAO.checkThresholdWarnings(order.getId());
-            if (warning != null) {
-                actionBtn.setStyle("-fx-background-color: #b8860b;");
+
+        footer.getChildren().addAll(timer, footerSpacer);
+
+        // Action Buttons
+        if (!"Cancelled".equals(order.getStatus())) {
+            Button actionBtn = new Button();
+            actionBtn.getStyleClass().add("btn-card-action");
+            
+            if ("New".equals(order.getStatus())) {
+                actionBtn.setText("START COOKING");
+                actionBtn.getStyleClass().add("btn-card-start");
+                
+                String warning = orderDAO.checkThresholdWarnings(order.getId());
+                final String finalWarning = warning;
+                actionBtn.setOnAction(e -> {
+                    if (finalWarning != null) {
+                        Alert warn = new Alert(Alert.AlertType.WARNING);
+                        warn.setTitle("Low Stock Warning");
+                        warn.setHeaderText("Starting this order will cause low stock for:");
+                        warn.setContentText(finalWarning);
+                        warn.getDialogPane().setStyle("-fx-background-color: #2e2410; -fx-border-color: #4a3820; -fx-border-width: 1;");
+                        warn.showAndWait();
+                    }
+                    updateStatus(order, "Preparing");
+                });
+            } else if ("Preparing".equals(order.getStatus())) {
+                actionBtn.setText("MARK AS READY");
+                actionBtn.getStyleClass().add("btn-card-ready");
+                actionBtn.setOnAction(e -> updateStatus(order, "Done"));
+            } else if ("Done".equals(order.getStatus())) {
+                actionBtn.setText("COMPLETE");
+                actionBtn.getStyleClass().add("btn-card-complete");
+                actionBtn.setOnAction(e -> updateStatus(order, "Completed"));
             }
-            final String finalWarning = warning;
-            actionBtn.setOnAction(e -> {
-                if (finalWarning != null) {
-                    Alert warn = new Alert(Alert.AlertType.WARNING);
-                    warn.setTitle("Low Stock Warning");
-                    warn.setHeaderText("Starting this order will cause low stock for:");
-                    warn.setContentText(finalWarning);
-                    warn.getDialogPane().setStyle("-fx-background-color: #2e2410; -fx-border-color: #4a3820; -fx-border-width: 1;");
-                    warn.showAndWait();
-                }
-                updateStatus(order, "Preparing");
-            });
-        } else if ("Preparing".equals(order.getStatus())) {
-            actionBtn.setText("Mark Ready");
-            actionBtn.setOnAction(e -> updateStatus(order, "Done"));
-        } else if ("Done".equals(order.getStatus())) {
-            actionBtn.setText("Complete");
-            actionBtn.setStyle("-fx-background-color: #4a8c3f;");
-            actionBtn.setOnAction(e -> updateStatus(order, "Completed")); 
-        } else {
-            actionBtn.setVisible(false);
-            actionBtn.setManaged(false);
+            
+            footer.getChildren().add(actionBtn);
         }
 
-        footer.getChildren().addAll(timer, footerSpacer, actionBtn);
         card.getChildren().add(footer);
 
         return card;
