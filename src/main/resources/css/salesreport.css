@@ -87,6 +87,67 @@
     -fx-padding: 8;
 }
 
-.webview-placeholder {
-    -fx-background-color: #1a1208;
+/* ── Premium Combo Box ──────────────────────────────── */
+.premium-combo {
+    -fx-background-color: rgba(200, 169, 122, 0.05);
+    -fx-border-color: rgba(200, 169, 122, 0.2);
+    -fx-border-width: 1;
+    -fx-border-radius: 8;
+    -fx-background-radius: 8;
+    -fx-padding: 0 4 0 8;
+    -fx-cursor: hand;
 }
+
+.premium-combo:hover {
+    -fx-border-color: #c8500a;
+    -fx-background-color: rgba(200, 80, 10, 0.05);
+}
+
+.premium-combo .label {
+    -fx-text-fill: #c4a882;
+    -fx-font-weight: bold;
+    -fx-font-size: 11px;
+    -fx-letter-spacing: 0.05em;
+}
+
+.premium-combo .arrow-button {
+    -fx-background-color: transparent;
+    -fx-padding: 0 8 0 8;
+}
+
+.premium-combo .arrow {
+    -fx-background-color: #8a7055;
+    -fx-shape: "M7,10l5,5l5-5H7z";
+}
+
+.premium-combo:hover .arrow {
+    -fx-background-color: #c8500a;
+}
+
+.premium-combo .list-view {
+    -fx-background-color: #221a0e;
+    -fx-border-color: #4a3820;
+    -fx-border-width: 1;
+    -fx-background-radius: 8;
+    -fx-border-radius: 8;
+    -fx-padding: 4;
+}
+
+.premium-combo .list-cell {
+    -fx-background-color: transparent;
+    -fx-text-fill: #c4a882;
+    -fx-padding: 8 12 8 12;
+    -fx-font-size: 12px;
+}
+
+.premium-combo .list-cell:hover {
+    -fx-background-color: rgba(200, 80, 10, 0.1);
+    -fx-text-fill: #f5ede0;
+}
+
+.premium-combo .list-cell:selected {
+    -fx-background-color: #c8500a;
+    -fx-text-fill: white;
+    -fx-font-weight: bold;
+}
+

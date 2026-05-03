@@ -122,7 +122,6 @@
         <HBox styleClass="topbar" prefHeight="64" alignment="CENTER_LEFT">
             <padding><Insets top="16" right="24" bottom="16" left="24"/></padding>
             <VBox spacing="2">
-                <Label text="MANAGEMENT" styleClass="eyebrow"/>
                 <Label styleClass="topbar-title" text="Menu Items" style="-fx-font-family: 'Playfair Display'; -fx-font-size: 24;"/>
             </VBox>
             <Region HBox.hgrow="ALWAYS"/>

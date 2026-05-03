@@ -6,6 +6,7 @@ import java.sql.SQLException;
 import java.util.Properties;
 import java.io.InputStream;
 import java.io.IOException;
+import com.myapp.util.EnvLoader;
 
 public class DatabaseConnection {
 
@@ -32,8 +33,8 @@ public class DatabaseConnection {
         String host = props.getProperty("db.host");
         String port = props.getProperty("db.port");
         String name = props.getProperty("db.name");
-        dbUser = props.getProperty("db.user");
-        dbPassword = props.getProperty("db.password");
+        dbUser = EnvLoader.get("db_user");
+        dbPassword = EnvLoader.get("db_password");
 
         if (host == null || host.startsWith("YOUR_")) {
             System.out.println("Database not configured - running without database");
