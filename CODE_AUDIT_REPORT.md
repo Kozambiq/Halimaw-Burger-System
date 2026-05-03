@@ -185,7 +185,7 @@ No test files exist in this project. While not "unnecessary," this represents si
 
 | Attribute | Value |
 |-----------|-------|
-| **Location** | Various controllers |
+| **Location** | Various controllers |es FXML scenes but only provides
 | **Severity** | **Low** |
 
 Some controllers may have unused FXML-injected fields or local variables.

@@ -16,8 +16,13 @@ import javafx.scene.control.TextField;
 import javafx.scene.shape.SVGPath;
 import javafx.stage.Stage;
 import javafx.stage.StageStyle;
+import java.util.regex.Pattern;
 
 public class LoginController {
+
+    private static final Pattern EMAIL_PATTERN = Pattern.compile(
+        "^[A-Za-z0-9+_.-]+@[A-Za-z0-9.-]+\\.[A-Za-z]{2,}$"
+    );
 
     @FXML private TextField emailField;
     @FXML private PasswordField passwordField;
@@ -86,7 +91,7 @@ public class LoginController {
     }
 
     private boolean isValidEmail(String email) {
-        return email.contains("@") && email.indexOf('@') < email.lastIndexOf('.') && email.lastIndexOf('.') > email.indexOf('@');
+        return email != null && EMAIL_PATTERN.matcher(email).matches();
     }
 
     private String sanitizeInput(String input) {
