@@ -48,3 +48,5 @@ credentials.json
 secret/
 keys/
 *.sql
+
+CODE_AUDIT_REPORT.md
