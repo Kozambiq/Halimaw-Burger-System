@@ -4,6 +4,7 @@ import com.myapp.dao.MenuItemDAO;
 import com.myapp.dao.MenuItemDAO.MenuItemIngredient;
 import com.myapp.model.Ingredient;
 import com.myapp.model.MenuItemModel;
+import com.myapp.service.MenuItemService;
 import com.myapp.util.OrderNotificationService;
 import javafx.application.Platform;
 import javafx.collections.FXCollections;
@@ -68,7 +69,7 @@ public class MenuItemsController extends BaseController {
     @FXML private Button catOthers;
     @FXML private Label topbarDate;
 
-    private MenuItemDAO menuItemDAO = new MenuItemDAO();
+    private MenuItemService menuItemService = new MenuItemService();
     private boolean alreadyLoaded = false;
     private List<MenuItemModel> allMenuItems;
     private String selectedCategory = "All Items";
@@ -136,7 +137,7 @@ public class MenuItemsController extends BaseController {
         suggestionPopup.setAutoHide(true);
         suggestionPopup.getContent().add(suggestionList);
 
-        List<String> allMenuItemNames = menuItemDAO.searchByName("");
+        List<String> allMenuItemNames = menuItemService.searchByName("");
 
         searchField.textProperty().addListener(obs -> {
             String query = searchField.getText().trim().toLowerCase();
@@ -232,7 +233,7 @@ public class MenuItemsController extends BaseController {
         categoryCombo.getStyleClass().add("premium-combo");
         categoryCombo.setMaxWidth(Double.MAX_VALUE); // Fill width
         categoryCombo.setPromptText("Select Category");
-        categoryCombo.getItems().addAll(menuItemDAO.getAllCategories());
+        categoryCombo.getItems().addAll(menuItemService.getAllCategories());
         catBox.getChildren().addAll(catEyebrow, categoryCombo);
 
         // Price Field
@@ -315,7 +316,7 @@ public class MenuItemsController extends BaseController {
 
         // --- Logic & Events ---
         List<MenuItemIngredient> ingredientDataList = new ArrayList<>();
-        List<String> allIngredientNames = menuItemDAO.searchIngredients("").stream().map(Ingredient::getName).collect(Collectors.toList());
+        List<String> allIngredientNames = menuItemService.searchIngredients("").stream().map(Ingredient::getName).collect(Collectors.toList());
 
         // Validation Logic
         Runnable validateIngredient = () -> {
@@ -331,7 +332,7 @@ public class MenuItemsController extends BaseController {
 
             try {
                 double qty = Double.parseDouble(qtyStr);
-                String unit = menuItemDAO.getIngredientUnit(name);
+                String unit = menuItemService.getIngredientUnit(name);
                 
                 if (unit == null) {
                     unitErrorLabel.setText("Ingredient does not exist");
@@ -405,7 +406,7 @@ public class MenuItemsController extends BaseController {
             
             try {
                 double q = Double.parseDouble(qtxt);
-                List<Ingredient> res = menuItemDAO.searchIngredients(txt);
+                List<Ingredient> res = menuItemService.searchIngredients(txt);
                 
                 // Find exact match (case-insensitive) to avoid fuzzy match bugs (e.g. egg matching veggies)
                 Ingredient i = res.stream()
@@ -449,9 +450,9 @@ public class MenuItemsController extends BaseController {
             }
             try {
                 double p = Double.parseDouble(ptxt);
-                int nid = menuItemDAO.insertAndGetId(name, cat, p);
+                int nid = menuItemService.insertAndGetId(name, cat, p);
                 if (nid > 0) {
-                    menuItemDAO.updateMenuItemIngredients(nid, ingredientDataList);
+                    menuItemService.updateMenuItemIngredients(nid, ingredientDataList);
                     loadMenuItems();
                     dialog.close();
                 }
@@ -560,14 +561,14 @@ public class MenuItemsController extends BaseController {
                 if ("Unavailable".equals(menuItem.getAvailability())) {
                     MenuItem enable = new MenuItem("Enable Item");
                     enable.setOnAction(e -> {
-                        menuItemDAO.updateAvailability(menuItem.getId(), "Available");
+                        menuItemService.updateAvailability(menuItem.getId(), "Available");
                         loadMenuItems();
                     });
                     menuBtn.getItems().addAll(edit, enable);
                 } else {
                     MenuItem disable = new MenuItem("Disable Item");
                     disable.setOnAction(e -> {
-                        menuItemDAO.updateAvailability(menuItem.getId(), "Unavailable");
+                        menuItemService.updateAvailability(menuItem.getId(), "Unavailable");
                         loadMenuItems();
                     });
                     menuBtn.getItems().addAll(edit, disable);
@@ -596,9 +597,9 @@ public class MenuItemsController extends BaseController {
         mainLayout.setPadding(new Insets(30, 40, 30, 40));
         mainLayout.setAlignment(javafx.geometry.Pos.TOP_CENTER);
 
-        MenuItemModel fullItem = menuItemDAO.findById(menuItem.getId());
-        List<MenuItemIngredient> currentIngredients = menuItemDAO.getIngredientsForMenuItem(menuItem.getId());
-        List<String> categories = menuItemDAO.getAllCategories();
+        MenuItemModel fullItem = menuItemService.findById(menuItem.getId());
+        List<MenuItemIngredient> currentIngredients = menuItemService.getIngredientsForMenuItem(menuItem.getId());
+        List<String> categories = menuItemService.getAllCategories();
 
         // LEFT COLUMN: Identity
         VBox colLeft = new VBox(28);
@@ -718,7 +719,7 @@ public class MenuItemsController extends BaseController {
 
             try {
                 double qty = Double.parseDouble(qtyStr);
-                String unit = menuItemDAO.getIngredientUnit(name);
+                String unit = menuItemService.getIngredientUnit(name);
                 
                 if (unit == null) {
                     unitErrorLabel.setText("Ingredient does not exist");
@@ -757,7 +758,7 @@ public class MenuItemsController extends BaseController {
         qtyField.textProperty().addListener((obs, old, newVal) -> validateIngredient.run());
 
         // Ingredient Autocomplete
-        List<String> allIngredientNames = menuItemDAO.searchIngredients("").stream().map(Ingredient::getName).collect(Collectors.toList());
+        List<String> allIngredientNames = menuItemService.searchIngredients("").stream().map(Ingredient::getName).collect(Collectors.toList());
         javafx.scene.control.ListView<String> suggestionList = new javafx.scene.control.ListView<>();
         suggestionList.getStyleClass().add("suggestion-list");
         suggestionList.getStylesheets().add(getClass().getResource("/css/common.css").toExternalForm());
@@ -792,7 +793,7 @@ public class MenuItemsController extends BaseController {
             if (txt.isEmpty() || qtxt.isEmpty()) return;
             try {
                 double q = Double.parseDouble(qtxt);
-                List<Ingredient> res = menuItemDAO.searchIngredients(txt);
+                List<Ingredient> res = menuItemService.searchIngredients(txt);
                 
                 // Find exact match (case-insensitive) to avoid fuzzy match bugs (e.g. egg matching veggies)
                 Ingredient i = res.stream()
@@ -831,8 +832,8 @@ public class MenuItemsController extends BaseController {
             }
             try {
                 double p = Double.parseDouble(ptxt);
-                if (menuItemDAO.updateMenuItem(menuItem.getId(), name, cat, p)) {
-                    menuItemDAO.updateMenuItemIngredients(menuItem.getId(), ingredientDataList);
+                if (menuItemService.updateMenuItem(menuItem.getId(), name, cat, p)) {
+                    menuItemService.updateMenuItemIngredients(menuItem.getId(), ingredientDataList);
                     loadMenuItems();
                     dialog.close();
                 }
@@ -902,7 +903,7 @@ public class MenuItemsController extends BaseController {
         javafx.scene.control.Button okButton = (javafx.scene.control.Button) alert.getDialogPane().lookupButton(okType);
         okButton.setStyle("-fx-background-color: #c8500a; -fx-text-fill: #f5ede0; -fx-border-radius: 6; -fx-padding: 8 16 8 16; -fx-font-size: 12px; -fx-font-weight: bold;");
         okButton.setOnAction(e -> {
-            menuItemDAO.updateAvailability(menuItem.getId(), "Unavailable");
+            menuItemService.updateAvailability(menuItem.getId(), "Unavailable");
             loadMenuItems();
         });
 
@@ -954,7 +955,7 @@ public class MenuItemsController extends BaseController {
         javafx.scene.control.Button okButton = (javafx.scene.control.Button) alert.getDialogPane().lookupButton(okType);
         okButton.setStyle("-fx-background-color: #4CAF50; -fx-text-fill: #f5ede0; -fx-border-radius: 6; -fx-padding: 8 16 8 16; -fx-font-size: 12px; -fx-font-weight: bold;");
         okButton.setOnAction(e -> {
-            menuItemDAO.updateAvailability(menuItem.getId(), "Available");
+            menuItemService.updateAvailability(menuItem.getId(), "Available");
             loadMenuItems();
         });
 
@@ -966,13 +967,13 @@ public class MenuItemsController extends BaseController {
 
     private void loadMenuItems() {
         try {
-            menuItemDAO.syncAvailabilityToDatabase();
+            menuItemService.syncAvailabilityToDatabase();
 
-            int total = menuItemDAO.getTotalCount();
-            int available = menuItemDAO.getAvailableCount();
-            int low = menuItemDAO.getLowStockCount();
-            int out = menuItemDAO.getOutOfStockCount();
-            allMenuItems = menuItemDAO.findAllWithIngredientStatus();
+            int total = menuItemService.getTotalCount();
+            int available = menuItemService.getAvailableCount();
+            int low = menuItemService.getLowStockCount();
+            int out = menuItemService.getOutOfStockCount();
+            allMenuItems = menuItemService.findAllWithIngredientStatus();
 
             Platform.runLater(() -> {
                 lblTotal.setText(String.valueOf(total));

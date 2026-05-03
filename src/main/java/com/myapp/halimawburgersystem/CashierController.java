@@ -10,6 +10,7 @@ import com.myapp.model.Order;
 import com.myapp.model.OrderItem;
 import com.myapp.model.Staff;
 import com.myapp.model.Ingredient;
+import com.myapp.service.CashierService;
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
@@ -66,10 +67,7 @@ public class CashierController {
     @FXML private Button btnCatDrinks;
     @FXML private Button btnCatOthers;
 
-    private MenuItemDAO menuItemDAO = new MenuItemDAO();
-    private ComboDAO comboDAO = new ComboDAO();
-    private OrderDAO orderDAO = new OrderDAO();
-    private IngredientDAO ingredientDAO = new IngredientDAO();
+    private CashierService cashierService = new CashierService();
     private Map<Integer, Integer> orderItems = new HashMap<>();
     private Map<Integer, Double> itemPrices = new HashMap<>();
     private Map<Integer, Double> comboPrices = new HashMap<>();
@@ -86,7 +84,7 @@ public class CashierController {
 
     @FXML
     public void initialize() {
-        orderNumber = orderDAO.getNextOrderNumber();
+        orderNumber = cashierService.getNextOrderNumber();
         updateOrderNumber();
         updateTotals();
         setActiveToggle(btnDineIn);
@@ -152,8 +150,8 @@ public class CashierController {
     private int loadFilteredMenuItems(int startRow, String searchText) {
         try {
             if (allMenuItems == null) {
-                menuItemDAO.syncAvailabilityToDatabase();
-                allMenuItems = menuItemDAO.findAllWithIngredientStatus();
+                cashierService.syncAvailabilityToDatabase();
+                allMenuItems = cashierService.findAllWithIngredientStatus();
             }
             
             menuGrid.getColumnConstraints().clear();
@@ -228,7 +226,7 @@ public class CashierController {
     private int loadFilteredCombos(int startRow, String searchText) {
         try {
             if (allCombos == null) {
-                allCombos = comboDAO.findAll();
+                allCombos = cashierService.findAll();
             }
 
             if (allCombos.isEmpty()) return startRow;
@@ -638,16 +636,16 @@ public class CashierController {
             }
         }
 
-        int orderId = orderDAO.insert(order, items);
+        int orderId = cashierService.insert(order, items);
         if (orderId > 0) {
-            String reserveError = orderDAO.reserveIngredientsForOrder(orderId);
+            String reserveError = cashierService.reserveIngredientsForOrder(orderId);
             if (reserveError != null) {
                 showErrorAlert("Insufficient Stock", reserveError);
-                orderDAO.releaseReservationsForOrder(orderId);
-                orderDAO.updateStatus(orderId, "Cancelled");
+                cashierService.releaseReservationsForOrder(orderId);
+                cashierService.updateStatus(orderId, "Cancelled");
                 return;
             }
-orderNumber = orderDAO.getNextOrderNumber();
+orderNumber = cashierService.getNextOrderNumber();
 orderItems.clear();
 subtotal = 0.0;
 txtOrderNotes.clear();
@@ -710,11 +708,11 @@ OrderNotificationService.broadcastUpdate();
             } else {
                 MenuItemModel item = findMenuItemById(-id);
                 if (item != null) {
-                    List<MenuItemDAO.MenuItemIngredient> ingredients = menuItemDAO.getIngredientsForMenuItem(item.getId());
+                    List<MenuItemDAO.MenuItemIngredient> ingredients = cashierService.getIngredientsForMenuItem(item.getId());
                     for (MenuItemDAO.MenuItemIngredient ing : ingredients) {
-                        int ingId = ingredientDAO.findIdByName(ing.getIngredientName());
+                        int ingId = cashierService.findIdByName(ing.getIngredientName());
                         if (ingId > 0) {
-                            double availableStock = ingredientDAO.getAvailableStock(ingId);
+                            double availableStock = cashierService.getAvailableStock(ingId);
                             double needed = ing.getQuantity() * orderQty;
                             if (availableStock < needed) {
                                 String display = item.getName() + " - " + ing.getIngredientName() +
@@ -739,11 +737,11 @@ OrderNotificationService.broadcastUpdate();
         String[] items = includes.split(",");
         for (String itemName : items) {
             itemName = itemName.trim();
-            List<MenuItemDAO.MenuItemIngredient> ingredients = menuItemDAO.getIngredientsForMenuItemByName(itemName);
+            List<MenuItemDAO.MenuItemIngredient> ingredients = cashierService.getIngredientsForMenuItemByName(itemName);
             for (MenuItemDAO.MenuItemIngredient ing : ingredients) {
-                int ingId = ingredientDAO.findIdByName(ing.getIngredientName());
+                int ingId = cashierService.findIdByName(ing.getIngredientName());
                 if (ingId > 0) {
-                    double availableStock = ingredientDAO.getAvailableStock(ingId);
+                    double availableStock = cashierService.getAvailableStock(ingId);
                     double needed = ing.getQuantity() * orderQty;
                     if (availableStock < needed) {
                         String display = itemName + " - " + ing.getIngredientName() +
