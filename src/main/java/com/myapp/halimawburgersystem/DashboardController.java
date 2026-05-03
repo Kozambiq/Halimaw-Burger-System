@@ -38,6 +38,7 @@ import com.myapp.util.OrderNotificationService;
 public class DashboardController {
 
     @FXML private Label pageTitle;
+    @FXML private Label topbarDate;
 
     @FXML private Label sidebarAvatarText;
     @FXML private Label sidebarUserName;
@@ -77,19 +78,20 @@ public class DashboardController {
 
     @FXML
     public void initialize() {
+        updateTopbarDate();
         setupUserInfo();
         setupTableColumns();
         loadDashboardData();
 
         // Subscribe to instant notifications for live dashboard data
-        OrderNotificationService.subscribeToNewOrders(this::loadDashboardData);
+        OrderNotificationService.subscribe(this::loadDashboardData);
 
         refreshService = Executors.newSingleThreadScheduledExecutor(r -> {
             Thread t = new Thread(r);
             t.setDaemon(true);
             return t;
         });
-        refreshService.scheduleAtFixedRate(() -> Platform.runLater(this::loadRecentOrders), 10, 10, TimeUnit.SECONDS);
+        refreshService.scheduleAtFixedRate(() -> Platform.runLater(this::loadRecentOrders), 60, 60, TimeUnit.SECONDS);
     }
 
     private void setupUserInfo() {
@@ -98,6 +100,13 @@ public class DashboardController {
             sidebarAvatarText.setText(staff.getInitials());
             sidebarUserName.setText(staff.getName());
             sidebarUserRole.setText(staff.getRole());
+        }
+    }
+
+    private void updateTopbarDate() {
+        if (topbarDate != null) {
+            String date = java.time.LocalDate.now().format(java.time.format.DateTimeFormatter.ofPattern("EEE, MMM d yyyy"));
+            topbarDate.setText(date);
         }
     }
 

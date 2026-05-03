@@ -3,6 +3,7 @@ package com.myapp.halimawburgersystem;
 import com.myapp.dao.StaffDAO;
 import com.myapp.dao.UserDAO;
 import com.myapp.model.Staff;
+import com.myapp.util.OrderNotificationService;
 import javafx.application.Platform;
 import javafx.collections.FXCollections;
 import javafx.event.ActionEvent;
@@ -60,6 +61,7 @@ public class StaffController {
     @FXML private Button btnInventory;
     @FXML private Button btnSales;
     @FXML private Button btnStaff;
+    @FXML private Label topbarDate;
 
     private StaffDAO staffDAO = new StaffDAO();
     private boolean alreadyLoaded = false;
@@ -70,9 +72,13 @@ public class StaffController {
         if (alreadyLoaded) return;
         alreadyLoaded = true;
 
+        updateTopbarDate();
         setActiveNav("Staff");
         setupTableColumns();
         loadStaff();
+
+        // Subscribe to instant updates (e.g., when other staff change status)
+        OrderNotificationService.subscribe(this::loadStaff);
     }
 
     private void setupTableColumns() {
@@ -180,8 +186,11 @@ public class StaffController {
     }
 
     private void updateStatus(int id, String status) {
-        staffDAO.updateStatus(id, status);
-        loadStaff();
+        if (staffDAO.updateStatus(id, status)) {
+            // Signal to others (Dashboard) that staff status changed
+            OrderNotificationService.broadcastUpdate();
+            loadStaff();
+        }
     }
 
     private void loadStaff() {
@@ -1073,6 +1082,13 @@ public class StaffController {
             Main.showLogin();
         } catch (Exception e) {
             e.printStackTrace();
+        }
+    }
+
+    private void updateTopbarDate() {
+        if (topbarDate != null) {
+            String date = java.time.LocalDate.now().format(java.time.format.DateTimeFormatter.ofPattern("EEE, MMM d yyyy"));
+            topbarDate.setText(date);
         }
     }
 }

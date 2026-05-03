@@ -4,6 +4,7 @@ import com.myapp.dao.MenuItemDAO;
 import com.myapp.dao.MenuItemDAO.MenuItemIngredient;
 import com.myapp.model.Ingredient;
 import com.myapp.model.MenuItemModel;
+import com.myapp.util.OrderNotificationService;
 import javafx.application.Platform;
 import javafx.collections.FXCollections;
 import javafx.fxml.FXML;
@@ -65,6 +66,7 @@ public class MenuItemsController {
     @FXML private Button catSides;
     @FXML private Button catDrinks;
     @FXML private Button catOthers;
+    @FXML private Label topbarDate;
 
     private MenuItemDAO menuItemDAO = new MenuItemDAO();
     private boolean alreadyLoaded = false;
@@ -76,10 +78,14 @@ public class MenuItemsController {
         if (alreadyLoaded) return;
         alreadyLoaded = true;
 
+        updateTopbarDate();
         setActiveNav("Menu Items");
         setupTableColumns();
         setupSearchAutocomplete();
         loadMenuItems();
+
+        // Subscribe to instant updates (e.g., when stock levels change)
+        OrderNotificationService.subscribe(this::loadMenuItems);
     }
 
     private void applyFilters() {
@@ -1101,6 +1107,13 @@ public class MenuItemsController {
             Main.showStaff();
         } catch (Exception e) {
             e.printStackTrace();
+        }
+    }
+
+    private void updateTopbarDate() {
+        if (topbarDate != null) {
+            String date = java.time.LocalDate.now().format(java.time.format.DateTimeFormatter.ofPattern("EEE, MMM d yyyy"));
+            topbarDate.setText(date);
         }
     }
 }

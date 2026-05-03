@@ -5,6 +5,7 @@ import com.myapp.dao.StaffDAO;
 import com.myapp.model.Order;
 import com.myapp.model.OrderItem;
 import com.myapp.model.Staff;
+import com.myapp.util.OrderNotificationService;
 import javafx.application.Platform;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
@@ -81,6 +82,7 @@ public class OrdersController {
     @FXML private Label detailsDiscount;
     @FXML private Label detailsTotal;
     @FXML private Label detailsStatus;
+    @FXML private Label topbarDate;
     @FXML private Button btnPrintOrder;
     @FXML private Button btnCancelOrder;
 
@@ -92,18 +94,22 @@ public class OrdersController {
 
     @FXML
     public void initialize() {
+        updateTopbarDate();
         setupUserInfo();
         setupFilters();
         setupTableColumns();
         loadOrders();
+
+        // Subscribe to instant updates (new orders or status changes)
+        OrderNotificationService.subscribe(this::loadOrders);
         
-        // Dynamic Refresh
+        // Dynamic Refresh as backup (failsafe)
         refreshService = Executors.newSingleThreadScheduledExecutor(r -> {
             Thread t = new Thread(r);
             t.setDaemon(true);
             return t;
         });
-        refreshService.scheduleAtFixedRate(() -> Platform.runLater(this::loadOrders), 10, 10, TimeUnit.SECONDS);
+        refreshService.scheduleAtFixedRate(() -> Platform.runLater(this::loadOrders), 60, 60, TimeUnit.SECONDS);
     }
 
     private void setupUserInfo() {
@@ -115,6 +121,13 @@ public class OrdersController {
             sidebarAvatarText.setText(initials);
             sidebarUserName.setText(staff.getName());
             sidebarUserRole.setText(staff.getRole());
+        }
+    }
+
+    private void updateTopbarDate() {
+        if (topbarDate != null) {
+            String date = java.time.LocalDate.now().format(java.time.format.DateTimeFormatter.ofPattern("EEE, MMM d yyyy"));
+            topbarDate.setText(date);
         }
     }
 
@@ -357,6 +370,8 @@ public class OrdersController {
             
             if (confirmed) {
                 if (orderDAO.updateStatus(selectedOrder.getId(), "Cancelled")) {
+                    // Notify other modules (Kitchen, Dashboard, Inventory) instantly
+                    OrderNotificationService.broadcastUpdate();
                     loadOrders();
                     onCloseDetails();
                 }

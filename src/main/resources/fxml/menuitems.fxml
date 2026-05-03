@@ -126,7 +126,7 @@
                 <Label styleClass="topbar-title" text="Menu Items" style="-fx-font-family: 'Playfair Display'; -fx-font-size: 24;"/>
             </VBox>
             <Region HBox.hgrow="ALWAYS"/>
-            <Label styleClass="topbar-date" text=""/>
+            <Label fx:id="topbarDate" styleClass="topbar-date" text=""/>
         </HBox>
 
         <StackPane VBox.vgrow="ALWAYS" maxHeight="Infinity" styleClass="content-area">

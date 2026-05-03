@@ -655,8 +655,8 @@ updateOrderNumber();
 updateOrderDisplay();
 updateTotals();
 
-// Notify other modules (like Cook Panel) instantly
-OrderNotificationService.notifyNewOrder();
+// Notify other modules (like Cook Panel and Inventory) instantly
+OrderNotificationService.broadcastUpdate();
             updateOrderNumber();
             reloadMenu();
         } else {

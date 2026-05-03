@@ -5,6 +5,7 @@ import com.myapp.dao.StaffDAO;
 import com.myapp.model.Order;
 import com.myapp.model.OrderItem;
 import com.myapp.model.Staff;
+import com.myapp.util.OrderNotificationService;
 import javafx.application.Platform;
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
@@ -28,6 +29,7 @@ import java.util.concurrent.TimeUnit;
 public class KitchenController {
 
     @FXML private Label pageTitle;
+    @FXML private Label topbarDate;
     @FXML private Label userDisplayName;
     @FXML private Label userDisplayRole;
     @FXML private Label sidebarAvatarText;
@@ -57,17 +59,21 @@ public class KitchenController {
 
     @FXML
     public void initialize() {
+        updateTopbarDate();
         loadUserInfo();
         setActiveNav("Kitchen Queue");
         loadQueue();
         
-        // Refresh every 5 seconds for dynamic updates
+        // Subscribe to instant notifications from the Cashier and Cook Panel
+        OrderNotificationService.subscribe(this::loadQueue);
+        
+        // Refresh every 60 seconds as a backup (failsafe)
         timerService = Executors.newSingleThreadScheduledExecutor(r -> {
             Thread t = new Thread(r);
             t.setDaemon(true);
             return t;
         });
-        timerService.scheduleAtFixedRate(() -> Platform.runLater(this::loadQueue), 5, 5, TimeUnit.SECONDS);
+        timerService.scheduleAtFixedRate(() -> Platform.runLater(this::loadQueue), 60, 60, TimeUnit.SECONDS);
     }
 
     private void loadUserInfo() {
@@ -79,6 +85,13 @@ public class KitchenController {
             if (sidebarAvatarText != null) sidebarAvatarText.setText(initials);
             if (sidebarUserName != null) sidebarUserName.setText(staff.getName());
             if (sidebarUserRole != null) sidebarUserRole.setText(staff.getRole());
+        }
+    }
+
+    private void updateTopbarDate() {
+        if (topbarDate != null) {
+            String date = java.time.LocalDate.now().format(java.time.format.DateTimeFormatter.ofPattern("EEE, MMM d yyyy"));
+            topbarDate.setText(date);
         }
     }
 
@@ -214,6 +227,8 @@ public class KitchenController {
 
     private void updateStatus(Order order, String newStatus) {
         if (orderDAO.updateStatus(order.getId(), newStatus)) {
+            // Signal to others (Dashboard, Cook Panel) that an order status changed
+            OrderNotificationService.broadcastUpdate();
             loadQueue();
         }
     }

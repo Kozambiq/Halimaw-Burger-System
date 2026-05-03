@@ -8,16 +8,16 @@ This is a shared service that acts as a "Broadcaster." It maintains a list of li
 ```java
 // Location: com.myapp.util.OrderNotificationService
 public class OrderNotificationService {
-    private static final List<Runnable> orderListeners = new ArrayList<>();
+    private static final List<Runnable> listeners = new ArrayList<>();
 
-    // Panels (Cook, Admin) use this to sign up for alerts
-    public static synchronized void subscribeToNewOrders(Runnable listener) {
-        orderListeners.add(listener);
+    // Panels (Cook, Admin, Inventory) use this to sign up for alerts
+    public static synchronized void subscribe(Runnable listener) {
+        listeners.add(listener);
     }
 
-    // The Cashier uses this to "Shout" to the rest of the system
-    public static synchronized void notifyNewOrder() {
-        for (Runnable listener : orderListeners) {
+    // The Cashier or Cook uses this to "Shout" to the rest of the system
+    public static synchronized void broadcastUpdate() {
+        for (Runnable listener : listeners) {
             // Platform.runLater ensures the UI update happens on the main thread
             javafx.application.Platform.runLater(listener);
         }
@@ -34,13 +34,13 @@ private void processOrder(String paymentType) {
     // ... logic to save order to database ...
     
     if (orderSavedSuccessfully) {
-        // Broadcast the signal!
-        OrderNotificationService.notifyNewOrder();
+        // Broadcast the signal to the entire system!
+        OrderNotificationService.broadcastUpdate();
     }
 }
 ```
 
-## 3. The Listener (Cook Panel / Admin)
+## 3. The Listener (Cook Panel / Admin / Inventory)
 Panels that need real-time data "subscribe" during their initialization.
 
 **Implementation in `CookController.java` or `DashboardController.java`:**
@@ -50,8 +50,8 @@ public void initialize() {
     // ... basic setup ...
 
     // Subscribe to instant notifications
-    // Whenever a new order is notified, it will run the loadQueue() method
-    OrderNotificationService.subscribeToNewOrders(this::loadQueue);
+    // Whenever any module shouts an update, it will run the loadQueue() method
+    OrderNotificationService.subscribe(this::loadQueue);
 }
 ```
 

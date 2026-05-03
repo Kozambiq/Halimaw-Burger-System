@@ -38,6 +38,7 @@ import com.myapp.util.OrderNotificationService;
 public class CookController {
 
     @FXML private Label pageTitle;
+    @FXML private Label topbarDate;
     @FXML private Label userDisplayName;
     @FXML private Label userDisplayRole;
     @FXML private Label sidebarAvatarText;
@@ -59,11 +60,12 @@ public class CookController {
 
     @FXML
     public void initialize() {
+        updateTopbarDate();
         loadUserInfo();
         loadQueue();
         
-        // Subscribe to instant notifications from the Cashier
-        OrderNotificationService.subscribeToNewOrders(this::loadQueue);
+        // Subscribe to instant notifications from the Cashier and Kitchen
+        OrderNotificationService.subscribe(this::loadQueue);
         
         timerService = Executors.newSingleThreadScheduledExecutor(r -> {
             Thread t = new Thread(r);
@@ -71,14 +73,14 @@ public class CookController {
             return t;
         });
         
-        // Polling as a backup, with safety net to prevent silent crashes
+        // Polling as a backup (failsafe)
         timerService.scheduleAtFixedRate(() -> {
             try {
                 Platform.runLater(this::loadQueue);
             } catch (Exception e) {
                 System.err.println("Error in Cook Queue timer: " + e.getMessage());
             }
-        }, 5, 5, TimeUnit.SECONDS);
+        }, 60, 60, TimeUnit.SECONDS);
     }
 
     private void loadUserInfo() {
@@ -90,6 +92,13 @@ public class CookController {
             if (sidebarAvatarText != null) sidebarAvatarText.setText(initials);
             if (sidebarUserName != null) sidebarUserName.setText(staff.getName());
             if (sidebarUserRole != null) sidebarUserRole.setText(staff.getRole());
+        }
+    }
+
+    private void updateTopbarDate() {
+        if (topbarDate != null) {
+            String date = java.time.LocalDate.now().format(java.time.format.DateTimeFormatter.ofPattern("EEE, MMM d yyyy"));
+            topbarDate.setText(date);
         }
     }
 
@@ -276,6 +285,8 @@ public class CookController {
         }
         
         if (orderDAO.updateStatus(order.getId(), newStatus)) {
+            // Signal to others (Dashboard, Kitchen) that an order status changed
+            OrderNotificationService.broadcastUpdate();
             loadQueue();
         }
     }

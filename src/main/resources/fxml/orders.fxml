@@ -121,7 +121,7 @@
                 <Label fx:id="userDisplayName" styleClass="topbar-user" text="Maria G."/>
                 <Label styleClass="topbar-separator" text="·"/>
                 <Label fx:id="userDisplayRole" styleClass="topbar-role" text="Manager"/>
-                <Label styleClass="topbar-date" text=""/>
+                <Label fx:id="topbarDate" styleClass="topbar-date" text=""/>
             </HBox>
 
             <StackPane VBox.vgrow="ALWAYS" maxHeight="Infinity" maxWidth="Infinity" styleClass="content-area">

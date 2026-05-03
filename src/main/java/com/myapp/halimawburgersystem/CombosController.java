@@ -2,6 +2,7 @@ package com.myapp.halimawburgersystem;
 
 import com.myapp.dao.ComboDAO;
 import com.myapp.model.Combo;
+import com.myapp.util.OrderNotificationService;
 import javafx.application.Platform;
 import javafx.collections.FXCollections;
 import javafx.fxml.FXML;
@@ -60,6 +61,7 @@ public class CombosController {
 
     @FXML private TextField searchField;
     @FXML private Button btnSearch;
+    @FXML private Label topbarDate;
 
     private ComboDAO comboDAO = new ComboDAO();
     private boolean alreadyLoaded = false;
@@ -70,10 +72,14 @@ public class CombosController {
         if (alreadyLoaded) return;
         alreadyLoaded = true;
 
+        updateTopbarDate();
         setActiveNav("Combos & Promos");
         setupTableColumns();
         setupSearchAutocomplete();
         loadCombos();
+
+        // Subscribe to instant updates
+        OrderNotificationService.subscribe(this::loadCombos);
     }
 
     private void setupSearchAutocomplete() {
@@ -748,4 +754,11 @@ public class CombosController {
     @FXML private void onNavigateInventory() { try { Main.showInventory(); } catch (Exception e) {} }
     @FXML private void onNavigateSales() { try { Main.showSalesReport(); } catch (Exception e) {} }
     @FXML private void onNavigateStaff() { try { Main.showStaff(); } catch (Exception e) {} }
+
+    private void updateTopbarDate() {
+        if (topbarDate != null) {
+            String date = java.time.LocalDate.now().format(java.time.format.DateTimeFormatter.ofPattern("EEE, MMM d yyyy"));
+            topbarDate.setText(date);
+        }
+    }
 }
