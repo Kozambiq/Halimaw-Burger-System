@@ -20,7 +20,7 @@ import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
 import java.util.List;
 
-public class SalesReportController {
+public class SalesReportController extends BaseController {
 
     @FXML private Button btnDashboard;
     @FXML private Button btnOrders;
@@ -84,18 +84,9 @@ public class SalesReportController {
         loadReport();
     }
 
-    public void setActiveNav(String page) {
-        if (btnDashboard != null) btnDashboard.getStyleClass().remove("nav-item-active");
-        if (btnOrders != null)    btnOrders.getStyleClass().remove("nav-item-active");
-        if (btnKitchen != null)   btnKitchen.getStyleClass().remove("nav-item-active");
-        if (btnMenuItems != null) btnMenuItems.getStyleClass().remove("nav-item-active");
-        if (btnCombos != null)    btnCombos.getStyleClass().remove("nav-item-active");
-        if (btnInventory != null) btnInventory.getStyleClass().remove("nav-item-active");
-        if (btnSales != null)     btnSales.getStyleClass().remove("nav-item-active");
-        if (btnStaff != null)     btnStaff.getStyleClass().remove("nav-item-active");
-
-        if (page.equals("Sales Reports") && btnSales != null)
-            btnSales.getStyleClass().add("nav-item-active");
+    @Override
+    protected Button[] getNavButtons() {
+        return new Button[] {btnDashboard, btnOrders, btnKitchen, btnMenuItems, btnCombos, btnInventory, btnSales, btnStaff};
     }
 
     @FXML

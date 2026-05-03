@@ -29,7 +29,7 @@ import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
 
-public class OrdersController {
+public class OrdersController extends BaseController {
 
     @FXML private Label pageTitle;
     @FXML private Label userDisplayName;
@@ -467,11 +467,8 @@ public class OrdersController {
         }
     }
 
-    public void setActiveNav(String navName) {
-        Button[] buttons = {btnDashboard, btnOrders, btnKitchen, btnMenuItems, btnCombos, btnInventory, btnSales, btnStaff};
-        for (Button btn : buttons) {
-            if (btn != null) btn.getStyleClass().remove("nav-item-active");
-        }
-        if (btnOrders != null) btnOrders.getStyleClass().add("nav-item-active");
+    @Override
+    protected Button[] getNavButtons() {
+        return new Button[] {btnDashboard, btnOrders, btnKitchen, btnMenuItems, btnCombos, btnInventory, btnSales, btnStaff};
     }
 }

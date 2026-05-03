@@ -26,7 +26,7 @@ import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
 
-public class KitchenController {
+public class KitchenController extends BaseController {
 
     @FXML private Label pageTitle;
     @FXML private Label topbarDate;
@@ -251,12 +251,9 @@ public class KitchenController {
         }
     }
 
-    public void setActiveNav(String navName) {
-        Button[] buttons = {btnDashboard, btnOrders, btnKitchen, btnMenuItems, btnCombos, btnInventory, btnSales, btnStaff};
-        for (Button btn : buttons) {
-            if (btn != null) btn.getStyleClass().remove("nav-item-active");
-        }
-        if (btnKitchen != null) btnKitchen.getStyleClass().add("nav-item-active");
+    @Override
+    protected Button[] getNavButtons() {
+        return new Button[] {btnDashboard, btnOrders, btnKitchen, btnMenuItems, btnCombos, btnInventory, btnSales, btnStaff};
     }
 
     @FXML

@@ -4,7 +4,6 @@ import com.myapp.model.User;
 import com.myapp.util.DatabaseConnection;
 import org.mindrot.jbcrypt.BCrypt;
 
-import java.lang.reflect.Method;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
@@ -117,9 +116,9 @@ public class UserDAO {
                 return false;
             }
         }
-        
-        // Plain text comparison for backwards compatibility
-        return password.equals(storedHash);
+
+        // Not BCrypt format - reject
+        return false;
     }
 
     public Optional<String> findPasswordHashByStaffId(int staffId) {

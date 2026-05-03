@@ -39,7 +39,7 @@ import java.util.List;
 
 import javafx.scene.control.ComboBox;
 
-public class StaffController {
+public class StaffController extends BaseController {
 
     @FXML private Label lblTotal;
     @FXML private Label lblOnShift;
@@ -968,44 +968,9 @@ public class StaffController {
         return String.format("%02d:%02d", h, minute);
     }
 
-    public void setActiveNav(String navName) {
-        clearAllHighlights();
-        switch(navName) {
-            case "Dashboard":
-                if (btnDashboard != null) btnDashboard.getStyleClass().add("nav-item-active");
-                break;
-            case "Orders":
-                if (btnOrders != null) btnOrders.getStyleClass().add("nav-item-active");
-                break;
-            case "Kitchen Queue":
-                if (btnKitchen != null) btnKitchen.getStyleClass().add("nav-item-active");
-                break;
-            case "Menu Items":
-                if (btnMenuItems != null) btnMenuItems.getStyleClass().add("nav-item-active");
-                break;
-            case "Combos & Promos":
-                if (btnCombos != null) btnCombos.getStyleClass().add("nav-item-active");
-                break;
-            case "Inventory":
-                if (btnInventory != null) btnInventory.getStyleClass().add("nav-item-active");
-                break;
-            case "Sales Reports":
-                if (btnSales != null) btnSales.getStyleClass().add("nav-item-active");
-                break;
-            case "Staff":
-                if (btnStaff != null) btnStaff.getStyleClass().add("nav-item-active");
-                break;
-        }
-    }
-
-    private void clearAllHighlights() {
-        Button[] buttons = {btnDashboard, btnOrders, btnKitchen, btnMenuItems, btnCombos, btnInventory, btnSales, btnStaff};
-        if (buttons == null) return;
-        for (Button btn : buttons) {
-            if (btn != null) {
-                btn.getStyleClass().remove("nav-item-active");
-            }
-        }
+    @Override
+    protected Button[] getNavButtons() {
+        return new Button[] {btnDashboard, btnOrders, btnKitchen, btnMenuItems, btnCombos, btnInventory, btnSales, btnStaff};
     }
 
     @FXML
