@@ -2,6 +2,7 @@ package com.myapp.halimawburgersystem;
 
 import com.myapp.dao.IngredientDAO;
 import com.myapp.model.Ingredient;
+import com.myapp.service.InventoryService;
 import com.myapp.util.OrderNotificationService;
 import javafx.application.Platform;
 import javafx.collections.FXCollections;
@@ -64,7 +65,7 @@ public class InventoryController extends BaseController {
     @FXML private TextField searchField;
     @FXML private Button btnSearch;
 
-    private IngredientDAO ingredientDAO = new IngredientDAO();
+    private InventoryService inventoryService = new InventoryService();
     private boolean alreadyLoaded = false;
     private List<Ingredient> allIngredients;
     private ScheduledExecutorService timerService;
@@ -103,7 +104,7 @@ public class InventoryController extends BaseController {
         suggestionPopup.setAutoHide(true);
         suggestionPopup.getContent().add(suggestionList);
 
-        List<String> allIngredientNames = ingredientDAO.searchByName("");
+        List<String> allIngredientNames = inventoryService.searchByName("");
 
         searchField.textProperty().addListener(obs -> {
             String query = searchField.getText().trim().toLowerCase();
@@ -150,7 +151,7 @@ public class InventoryController extends BaseController {
             return;
         }
 
-        List<Ingredient> results = ingredientDAO.findByName(searchText);
+        List<Ingredient> results = inventoryService.findByName(searchText);
 
         Platform.runLater(() -> {
             if (!results.isEmpty()) {
@@ -327,7 +328,7 @@ public class InventoryController extends BaseController {
                 if ("Unavailable".equals(availabilityStatus)) {
                     MenuItem enable = new MenuItem("Enable Item");
                     enable.setOnAction(e -> {
-                        ingredientDAO.updateAvailabilityStatus(ingredient.getId(), "Available");
+                        inventoryService.updateAvailabilityStatus(ingredient.getId(), "Available");
                         OrderNotificationService.broadcastUpdate();
                         loadInventory();
                     });
@@ -335,7 +336,7 @@ public class InventoryController extends BaseController {
                 } else {
                     MenuItem disable = new MenuItem("Disable Item");
                     disable.setOnAction(e -> {
-                        ingredientDAO.updateAvailabilityStatus(ingredient.getId(), "Unavailable");
+                        inventoryService.updateAvailabilityStatus(ingredient.getId(), "Unavailable");
                         OrderNotificationService.broadcastUpdate();
                         loadInventory();
                     });
@@ -354,7 +355,7 @@ public class InventoryController extends BaseController {
         String name = nameField.getText().trim();
         if (name.isEmpty() || !name.matches("^[a-zA-Z\\s]+$")) {
             valid = false;
-        } else if (ingredientDAO.existsByName(name)) {
+        } else if (inventoryService.existsByName(name)) {
             valid = false;
         }
 
@@ -400,10 +401,10 @@ public class InventoryController extends BaseController {
 
     private void loadInventory() {
         try {
-            int total = ingredientDAO.getTotalCount();
-            int low = ingredientDAO.getLowStockCount();
-            int out = ingredientDAO.getOutOfStockCount();
-            allIngredients = ingredientDAO.findAll();
+            int total = inventoryService.getTotalCount();
+            int low = inventoryService.getLowStockCount();
+            int out = inventoryService.getOutOfStockCount();
+            allIngredients = inventoryService.findAll();
 
             Platform.runLater(() -> {
                 lblTotal.setText(String.valueOf(total));
@@ -512,7 +513,7 @@ public class InventoryController extends BaseController {
 
         dialog.showAndWait().ifPresent(qty -> {
             if (qty != null && qty > 0) {
-                ingredientDAO.updateQuantity(ingredient.getId(), ingredient.getQuantity() + qty);
+                inventoryService.updateQuantity(ingredient.getId(), ingredient.getQuantity() + qty);
                 OrderNotificationService.broadcastUpdate();
                 loadInventory();
             }
@@ -615,7 +616,7 @@ public class InventoryController extends BaseController {
 
         dialog.showAndWait().ifPresent(qty -> {
             if (qty != null && qty > 0) {
-                ingredientDAO.updateQuantity(ingredient.getId(), ingredient.getQuantity() - qty);
+                inventoryService.updateQuantity(ingredient.getId(), ingredient.getQuantity() - qty);
                 OrderNotificationService.broadcastUpdate();
                 loadInventory();
             }
@@ -737,8 +738,8 @@ public class InventoryController extends BaseController {
         dialog.showAndWait().ifPresent(result -> {
             if (result) {
                 try {
-                    ingredientDAO.updateThreshold(ingredient.getId(), Double.parseDouble(minField.getText()));
-                    ingredientDAO.updateMaxStock(ingredient.getId(), Double.parseDouble(maxField.getText()));
+                    inventoryService.updateThreshold(ingredient.getId(), Double.parseDouble(minField.getText()));
+                    inventoryService.updateMaxStock(ingredient.getId(), Double.parseDouble(maxField.getText()));
                     OrderNotificationService.broadcastUpdate();
                     loadInventory();
                 } catch (Exception ex) {}
@@ -819,7 +820,7 @@ public class InventoryController extends BaseController {
         javafx.scene.control.Button okButton = (javafx.scene.control.Button) alert.getDialogPane().lookupButton(okType);
         okButton.setStyle("-fx-background-color: #c8500a; -fx-text-fill: #f5ede0; -fx-border-radius: 6; -fx-padding: 8 16 8 16; -fx-font-size: 12px; -fx-font-weight: bold;");
         okButton.setOnAction(e -> {
-            ingredientDAO.updateAvailabilityStatus(ingredient.getId(), "Unavailable");
+            inventoryService.updateAvailabilityStatus(ingredient.getId(), "Unavailable");
             OrderNotificationService.broadcastUpdate();
             loadInventory();
         });
@@ -872,7 +873,7 @@ public class InventoryController extends BaseController {
         javafx.scene.control.Button okButton = (javafx.scene.control.Button) alert.getDialogPane().lookupButton(okType);
         okButton.setStyle("-fx-background-color: #4CAF50; -fx-text-fill: #f5ede0; -fx-border-radius: 6; -fx-padding: 8 16 8 16; -fx-font-size: 12px; -fx-font-weight: bold;");
         okButton.setOnAction(e -> {
-            ingredientDAO.updateAvailabilityStatus(ingredient.getId(), "Available");
+            inventoryService.updateAvailabilityStatus(ingredient.getId(), "Available");
             OrderNotificationService.broadcastUpdate();
             loadInventory();
         });
@@ -988,7 +989,7 @@ private void onAddIngredient() {
         boolean valid = true;
         String name = nameField.getText().trim();
         if (name.isEmpty()) valid = false;
-        else if (ingredientDAO.existsByName(name)) {
+        else if (inventoryService.existsByName(name)) {
             nameError.setText("Already exists");
             nameError.setVisible(true); nameError.setManaged(true);
             valid = false;
@@ -1043,7 +1044,7 @@ private void onAddIngredient() {
     dialog.showAndWait().ifPresent(result -> {
         if (result) {
             try {
-                ingredientDAO.insert(nameField.getText().trim(), unitField.getText().trim(),
+                inventoryService.insert(nameField.getText().trim(), unitField.getText().trim(),
                     Double.parseDouble(qtyField.getText().trim()),
                     Double.parseDouble(minField.getText().trim()),
                     Double.parseDouble(maxField.getText().trim()));

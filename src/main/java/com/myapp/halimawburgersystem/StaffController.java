@@ -3,6 +3,7 @@ package com.myapp.halimawburgersystem;
 import com.myapp.dao.StaffDAO;
 import com.myapp.dao.UserDAO;
 import com.myapp.model.Staff;
+import com.myapp.service.StaffService;
 import com.myapp.util.OrderNotificationService;
 import javafx.application.Platform;
 import javafx.collections.FXCollections;
@@ -63,7 +64,7 @@ public class StaffController extends BaseController {
     @FXML private Button btnStaff;
     @FXML private Label topbarDate;
 
-    private StaffDAO staffDAO = new StaffDAO();
+    private StaffService staffService = new StaffService();
     private boolean alreadyLoaded = false;
     private List<Staff> allStaff;
 
@@ -186,7 +187,7 @@ public class StaffController extends BaseController {
     }
 
     private void updateStatus(int id, String status) {
-        if (staffDAO.updateStatus(id, status)) {
+        if (staffService.updateStatus(id, status)) {
             // Signal to others (Dashboard) that staff status changed
             OrderNotificationService.broadcastUpdate();
             loadStaff();
@@ -195,10 +196,10 @@ public class StaffController extends BaseController {
 
     private void loadStaff() {
         try {
-            int total = staffDAO.getTotalCount();
-            int active = staffDAO.getActiveCount();
-            int onBreak = staffDAO.getOnBreakCount();
-            allStaff = staffDAO.findAll();
+            int total = staffService.getTotalCount();
+            int active = staffService.getActiveCount();
+            int onBreak = staffService.getOnBreakCount();
+            allStaff = staffService.findAll();
 
             Platform.runLater(() -> {
                 lblTotal.setText(String.valueOf(total));
@@ -238,10 +239,9 @@ public class StaffController extends BaseController {
         javafx.scene.layout.StackPane passwordBox = new javafx.scene.layout.StackPane();
         PasswordField passwordField = new PasswordField();
         TextField passwordVisibleField = new TextField();
-        final UserDAO userDAO = new UserDAO();
         String originalPassword = "";
-        if (userDAO.findPasswordHashByStaffId(staff.getId()).isPresent()) {
-            String hash = userDAO.findPasswordHashByStaffId(staff.getId()).get();
+        if (staffService.findPasswordHashByStaffId(staff.getId()).isPresent()) {
+            String hash = staffService.findPasswordHashByStaffId(staff.getId()).get();
             if (hash.startsWith("$2") && hash.length() == 60) {
                 originalPassword = "••••••••";
             } else {
@@ -537,26 +537,26 @@ public class StaffController extends BaseController {
                 String endTime = result[5];
 
                 if (!name.isEmpty()) {
-                    staffDAO.updateName(staff.getId(), name);
+                    staffService.updateName(staff.getId(), name);
                     staff.setName(name);
 
                     if (!email.isEmpty() && !email.equals(staff.getEmail())) {
-                        staffDAO.updateEmail(staff.getId(), email);
+                        staffService.updateEmail(staff.getId(), email);
                         staff.setEmail(email);
                     }
 
                     if (password != null && !password.equals(finalOriginalPassword) && !password.isEmpty() && !password.equals("••••••••")) {
-                        userDAO.updatePasswordByStaffId(staff.getId(), password);
+                        staffService.updatePasswordByStaffId(staff.getId(), password);
                     }
 
-                    staffDAO.updateRole(staff.getId(), role);
+                    staffService.updateRole(staff.getId(), role);
                     staff.setRole(role);
 
                     try {
                         LocalTime start = startTime != null ? LocalTime.parse(startTime) : null;
                         LocalTime end = endTime != null ? LocalTime.parse(endTime) : null;
                         if (start != null && end != null) {
-                            staffDAO.updateShift(staff.getId(), start, end);
+                            staffService.updateShift(staff.getId(), start, end);
                         }
                     } catch (Exception e) {
                         System.err.println("Invalid time format: " + e.getMessage());
@@ -582,7 +582,7 @@ public class StaffController extends BaseController {
         Button removeBtn = (Button) alert.getDialogPane().lookupButton(removeType);
         removeBtn.setStyle("-fx-background-color: #c8500a; -fx-text-fill: #f5ede0; -fx-border-radius: 6; -fx-padding: 8 16 8 16; -fx-font-size: 12px; -fx-font-weight: bold;");
         removeBtn.setOnAction(e -> {
-            staffDAO.delete(staff.getId());
+            staffService.delete(staff.getId());
             loadStaff();
         });
 
@@ -863,7 +863,7 @@ public class StaffController extends BaseController {
                 nameError.setVisible(true);
                 nameField.setStyle(fieldStyle + "-fx-border-color: #e07070;");
                 valid = false;
-            } else if (staffDAO.existsByName(name)) {
+            } else if (staffService.existsByName(name)) {
                 nameError.setText("Already exists");
                 nameError.setVisible(true);
                 nameField.setStyle(fieldStyle + "-fx-border-color: #e07070;");
@@ -883,7 +883,7 @@ public class StaffController extends BaseController {
                 emailError.setVisible(true);
                 emailField.setStyle(fieldStyle + "-fx-border-color: #e07070;");
                 valid = false;
-            } else if (staffDAO.existsByEmail(email)) {
+            } else if (staffService.existsByEmail(email)) {
                 emailError.setText("Email already exists");
                 emailError.setVisible(true);
                 emailField.setStyle(fieldStyle + "-fx-border-color: #e07070;");
@@ -951,7 +951,7 @@ public class StaffController extends BaseController {
                     try {
                         LocalTime start = LocalTime.parse(startTime);
                         LocalTime end = LocalTime.parse(endTime);
-                        staffDAO.insert(name, email, password, role, start, end);
+                        staffService.insert(name, email, password, role, start, end);
                         loadStaff();
                     } catch (Exception e) {
                         System.err.println("Invalid time format: " + e.getMessage());
