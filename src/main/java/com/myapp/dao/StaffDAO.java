@@ -11,8 +11,13 @@ import java.sql.SQLException;
 import java.time.LocalTime;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.regex.Pattern;
 
 public class StaffDAO {
+
+    private static final Pattern EMAIL_PATTERN = Pattern.compile(
+        "^[A-Za-z0-9+_.-]+@[A-Za-z0-9.-]+\\.[A-Za-z]{2,}$"
+    );
 
     public Staff findById(int id) {
         String sql = "SELECT id, name, email, role, shift_start, shift_end, status FROM staff WHERE id = ?";
@@ -143,6 +148,15 @@ public class StaffDAO {
     }
 
     public boolean insert(String name, String email, String password, String role, LocalTime shiftStart, LocalTime shiftEnd) {
+        if (name == null || name.trim().isEmpty()) {
+            System.err.println("Validation error: name cannot be empty");
+            return false;
+        }
+        if (email == null || !EMAIL_PATTERN.matcher(email).matches()) {
+            System.err.println("Validation error: invalid email format");
+            return false;
+        }
+
         try {
             String hashedPassword = org.mindrot.jbcrypt.BCrypt.hashpw(password, org.mindrot.jbcrypt.BCrypt.gensalt());
 
