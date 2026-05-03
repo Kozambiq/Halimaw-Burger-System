@@ -2,6 +2,7 @@ package com.myapp.halimawburgersystem;
 
 import com.myapp.dao.ComboDAO;
 import com.myapp.model.Combo;
+import com.myapp.service.ComboService;
 import com.myapp.util.OrderNotificationService;
 import javafx.application.Platform;
 import javafx.collections.FXCollections;
@@ -63,7 +64,7 @@ public class CombosController extends BaseController {
     @FXML private Button btnSearch;
     @FXML private Label topbarDate;
 
-    private ComboDAO comboDAO = new ComboDAO();
+    private ComboService comboService = new ComboService();
     private boolean alreadyLoaded = false;
     private List<Combo> allCombos;
 
@@ -93,7 +94,7 @@ public class CombosController extends BaseController {
         suggestionPopup.setAutoHide(true);
         suggestionPopup.getContent().add(suggestionList);
 
-        List<String> allComboNames = comboDAO.searchByName("");
+        List<String> allComboNames = comboService.searchByName("");
 
         searchField.textProperty().addListener(obs -> {
             String query = searchField.getText().trim().toLowerCase();
@@ -140,7 +141,7 @@ public class CombosController extends BaseController {
             return;
         }
 
-        List<Combo> results = comboDAO.findByName(searchText);
+        List<Combo> results = comboService.findByName(searchText);
 
         Platform.runLater(() -> {
             if (!results.isEmpty()) {
@@ -242,7 +243,7 @@ public class CombosController extends BaseController {
                 boolean isActive = "Active".equals(combo.getStatus());
                 MenuItem toggle = new MenuItem(isActive ? "Disable Promo" : "Enable Promo");
                 toggle.setOnAction(e -> {
-                    comboDAO.updateStatus(combo.getId(), isActive ? "Disabled" : "Active");
+                    comboService.updateStatus(combo.getId(), isActive ? "Disabled" : "Active");
                     loadCombos();
                 });
 
@@ -255,9 +256,9 @@ public class CombosController extends BaseController {
 
     private void loadCombos() {
         try {
-            int total = comboDAO.getTotalCount();
-            int active = comboDAO.getActiveCount();
-            allCombos = comboDAO.findAll();
+            int total = comboService.getTotalCount();
+            int active = comboService.getActiveCount();
+            allCombos = comboService.findAll();
 
             Platform.runLater(() -> {
                 lblTotal.setText(String.valueOf(total));
@@ -407,9 +408,9 @@ public class CombosController extends BaseController {
                     String[] sub = p.split(" x ");
                     int qty = Integer.parseInt(sub[0]);
                     String name = sub[1];
-                    inclusionList.add(new InclusionData(name, qty, comboDAO.getMenuItemPrice(name)));
+                    inclusionList.add(new InclusionData(name, qty, comboService.getMenuItemPrice(name)));
                 } else {
-                    inclusionList.add(new InclusionData(p, 1, comboDAO.getMenuItemPrice(p)));
+                    inclusionList.add(new InclusionData(p, 1, comboService.getMenuItemPrice(p)));
                 }
             } catch (Exception ex) {}
         }
@@ -422,7 +423,7 @@ public class CombosController extends BaseController {
             validateInclusion(qtyField, inclusionErrorLabel, addBtn);
         });
 
-        List<String> allMenuItemNames = comboDAO.searchMenuItems("");
+        List<String> allMenuItemNames = comboService.searchMenuItems("");
         setupAutocomplete(itemSearchField, itemSearchWrapper, allMenuItemNames);
 
         addBtn.setOnAction(e -> {
@@ -431,7 +432,7 @@ public class CombosController extends BaseController {
             if (item.isEmpty() || qtxt.isEmpty()) return;
             try {
                 int qty = Integer.parseInt(qtxt);
-                double unitPrice = comboDAO.getMenuItemPrice(item);
+                double unitPrice = comboService.getMenuItemPrice(item);
                 if (unitPrice <= 0) return;
                 InclusionData existing = inclusionList.stream().filter(i -> i.name.equalsIgnoreCase(item)).findFirst().orElse(null);
                 if (existing != null) { existing.qty += qty; }
@@ -458,7 +459,7 @@ public class CombosController extends BaseController {
                 double promoPrice = Double.parseDouble(pPrice);
                 double originalPrice = Double.parseDouble(originalPriceField.getText());
                 String inclusionStr = inclusionList.stream().map(id -> id.qty + " x " + id.name).collect(Collectors.joining(" + "));
-                comboDAO.update(existingCombo.getId(), name, inclusionStr, promoPrice, originalPrice, java.sql.Date.valueOf(date));
+                comboService.update(existingCombo.getId(), name, inclusionStr, promoPrice, originalPrice, java.sql.Date.valueOf(date));
                 loadCombos();
                 dialog.close();
             } catch (Exception ex) { e.consume(); }
@@ -565,7 +566,7 @@ public class CombosController extends BaseController {
         List<InclusionData> inclusionList = new ArrayList<>();
         qtyField.textProperty().addListener((obs, old, nv) -> validateInclusion(qtyField, inclusionErrorLabel, addBtn));
 
-        List<String> allMenuItemNames = comboDAO.searchMenuItems("");
+        List<String> allMenuItemNames = comboService.searchMenuItems("");
         setupAutocomplete(itemSearchField, itemSearchWrapper, allMenuItemNames);
 
         addBtn.setOnAction(e -> {
@@ -574,7 +575,7 @@ public class CombosController extends BaseController {
             if (item.isEmpty() || qtxt.isEmpty()) return;
             try {
                 int qty = Integer.parseInt(qtxt);
-                double unitPrice = comboDAO.getMenuItemPrice(item);
+                double unitPrice = comboService.getMenuItemPrice(item);
                 if (unitPrice <= 0) return;
                 InclusionData existing = inclusionList.stream().filter(i -> i.name.equalsIgnoreCase(item)).findFirst().orElse(null);
                 if (existing != null) { existing.qty += qty; }
@@ -601,7 +602,7 @@ public class CombosController extends BaseController {
                 double promoPrice = Double.parseDouble(pPrice);
                 double originalPrice = Double.parseDouble(originalPriceField.getText());
                 String inclusionStr = inclusionList.stream().map(id -> id.qty + " x " + id.name).collect(Collectors.joining(" + "));
-                comboDAO.insert(name, inclusionStr, promoPrice, originalPrice, java.sql.Date.valueOf(date));
+                comboService.insert(name, inclusionStr, promoPrice, originalPrice, java.sql.Date.valueOf(date));
                 loadCombos();
                 dialog.close();
             } catch (Exception ex) { e.consume(); }
@@ -700,7 +701,7 @@ public class CombosController extends BaseController {
 
         alert.showAndWait().ifPresent(btn -> {
             if (btn == okType) {
-                comboDAO.delete(combo.getId());
+                comboService.delete(combo.getId());
                 loadCombos();
             }
         });
