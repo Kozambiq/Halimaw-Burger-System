@@ -71,7 +71,7 @@ This import is never used.
 The `GEMINI_API_KEY` is stored in a plain text `.env` file:
 
 ```
-GEMINI_API_KEY=REDACTED
+aa
 ```
 
 While this file is in `.gitignore`, it represents a secret that could be accidentally committed or exposed.
