@@ -22,6 +22,8 @@ import javafx.scene.control.Button;
 import javafx.scene.control.Label;
 import javafx.scene.control.ScrollPane;
 import javafx.scene.control.TextField;
+import javafx.scene.control.DialogPane;
+import javafx.scene.control.ButtonType;
 import javafx.scene.input.MouseEvent;
 import javafx.scene.layout.Background;
 import javafx.scene.layout.BackgroundFill;
@@ -665,26 +667,34 @@ OrderNotificationService.broadcastUpdate();
 
     private void showErrorAlert(String header, String content) {
         Alert alert = new Alert(Alert.AlertType.WARNING);
-        alert.setTitle("Warning");
+        alert.setTitle("System Message");
         alert.setHeaderText(header);
         alert.setContentText(content);
-        alert.getDialogPane().setStyle("-fx-background-color: #2e2410; -fx-border-color: #4a3820; -fx-border-width: 1; -fx-border-radius: 12; -fx-background-radius: 12;");
+        alert.setGraphic(null);
 
-        javafx.scene.control.Label headerText = (javafx.scene.control.Label) alert.getDialogPane().lookup(".header");
-        if (headerText != null) {
-            headerText.setStyle("-fx-text-fill: #e07070; -fx-font-size: 14px; -fx-font-weight: bold;");
+        DialogPane dialogPane = alert.getDialogPane();
+        dialogPane.getStylesheets().add(getClass().getResource("/css/common.css").toExternalForm());
+        dialogPane.getStylesheets().add(getClass().getResource("/css/dialog.css").toExternalForm());
+        dialogPane.getStyleClass().add("dialog-root");
+
+        // Style header text
+        javafx.scene.control.Label headerLabel = (javafx.scene.control.Label) dialogPane.lookup(".header-panel .label");
+        if (headerLabel != null) {
+            headerLabel.setStyle("-fx-text-fill: #e07070; -fx-font-family: 'DM Sans'; -fx-font-size: 18px; -fx-font-weight: 800;");
         }
 
-        javafx.scene.Node contentNode = alert.getDialogPane().lookup(".content");
+        // Style content text
+        javafx.scene.Node contentNode = dialogPane.lookup(".content");
         if (contentNode != null) {
-            contentNode.setStyle("-fx-text-fill: #f5ede0; -fx-font-size: 13px;");
+            contentNode.setStyle("-fx-text-fill: #c4a882; -fx-font-family: 'DM Sans'; -fx-font-size: 14px; -fx-padding: 20;");
         }
 
-        alert.getDialogPane().getButtonTypes().clear();
-        alert.getDialogPane().getButtonTypes().add(javafx.scene.control.ButtonType.OK);
-
-        javafx.scene.control.Button okButton = (javafx.scene.control.Button) alert.getDialogPane().lookupButton(javafx.scene.control.ButtonType.OK);
-        okButton.setStyle("-fx-background-color: #c8500a; -fx-text-fill: #f5ede0; -fx-border-radius: 6; -fx-padding: 8 16 8 16; -fx-font-size: 12px; -fx-font-weight: bold;");
+        // Style buttons
+        dialogPane.getButtonTypes().clear();
+        dialogPane.getButtonTypes().add(ButtonType.OK);
+        Button okButton = (Button) dialogPane.lookupButton(ButtonType.OK);
+        okButton.getStyleClass().add("dialog-button-save");
+        okButton.setText("UNDERSTOOD");
 
         alert.showAndWait();
     }
@@ -760,46 +770,40 @@ OrderNotificationService.broadcastUpdate();
 
     private void showOutOfStockWarning(List<String> outOfStockItems) {
         Alert alert = new Alert(Alert.AlertType.WARNING);
-        alert.setTitle("Out of Stock Warning");
-        alert.setHeaderText("Some ingredients are out of stock");
+        alert.setTitle("Inventory Alert");
+        alert.setHeaderText("Insufficient Stock Detected");
+        alert.setGraphic(null);
 
-        StringBuilder content = new StringBuilder("The following items cannot be prepared:\n\n");
+        StringBuilder content = new StringBuilder("The following items cannot be prepared at this time:\n\n");
         for (String item : outOfStockItems) {
-            content.append("• ").append(item).append("\n");
+            content.append("  • ").append(item).append("\n");
         }
-        content.append("\nPlease remove these items from the order or notify the kitchen.");
+        content.append("\nPlease adjust the order or update the inventory.");
         alert.setContentText(content.toString());
 
-        alert.getDialogPane().setStyle(
-            "-fx-background-color: #2e2410; " +
-            "-fx-border-color: #e07070; " +
-            "-fx-border-width: 2; " +
-            "-fx-border-radius: 12; " +
-            "-fx-background-radius: 12;"
-        );
+        DialogPane dialogPane = alert.getDialogPane();
+        dialogPane.getStylesheets().add(getClass().getResource("/css/common.css").toExternalForm());
+        dialogPane.getStylesheets().add(getClass().getResource("/css/dialog.css").toExternalForm());
+        dialogPane.getStyleClass().add("dialog-root");
 
-        javafx.scene.control.Label headerText = (javafx.scene.control.Label) alert.getDialogPane().lookup(".header");
-        if (headerText != null) {
-            headerText.setStyle("-fx-text-fill: #e07070; -fx-font-size: 16px; -fx-font-weight: bold;");
+        // Style header text
+        javafx.scene.control.Label headerLabel = (javafx.scene.control.Label) dialogPane.lookup(".header-panel .label");
+        if (headerLabel != null) {
+            headerLabel.setStyle("-fx-text-fill: #e07070; -fx-font-family: 'DM Sans'; -fx-font-size: 18px; -fx-font-weight: 800;");
         }
 
-        javafx.scene.Node contentNode = alert.getDialogPane().lookup(".content");
+        // Style content text
+        javafx.scene.Node contentNode = dialogPane.lookup(".content");
         if (contentNode != null) {
-            contentNode.setStyle("-fx-text-fill: #f5ede0; -fx-font-size: 13px;");
+            contentNode.setStyle("-fx-text-fill: #c4a882; -fx-font-family: 'DM Sans'; -fx-font-size: 13px; -fx-padding: 20; -fx-line-spacing: 4;");
         }
 
-        alert.getDialogPane().getButtonTypes().clear();
-        alert.getDialogPane().getButtonTypes().add(javafx.scene.control.ButtonType.OK);
-
-        javafx.scene.control.Button okButton = (javafx.scene.control.Button) alert.getDialogPane().lookupButton(javafx.scene.control.ButtonType.OK);
-        okButton.setStyle(
-            "-fx-background-color: #c8500a; " +
-            "-fx-text-fill: #f5ede0; " +
-            "-fx-border-radius: 6; " +
-            "-fx-padding: 8 24 8 24; " +
-            "-fx-font-size: 13px; " +
-            "-fx-font-weight: bold;"
-        );
+        // Style buttons
+        dialogPane.getButtonTypes().clear();
+        dialogPane.getButtonTypes().add(ButtonType.OK);
+        Button okButton = (Button) dialogPane.lookupButton(ButtonType.OK);
+        okButton.getStyleClass().add("dialog-button-save");
+        okButton.setText("REVISE ORDER");
 
         alert.showAndWait();
     }
