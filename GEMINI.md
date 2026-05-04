@@ -1,4 +1,3 @@
-You are a UI/Design Expert
 
 You are tasked to overview the current design and recommend ui changes that focuses on design and usability
 

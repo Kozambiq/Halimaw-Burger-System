@@ -814,7 +814,7 @@ OrderNotificationService.broadcastUpdate();
             dialogStage.initOwner(menuGrid.getScene().getWindow());
             dialogStage.setResizable(false);
 
-            Scene scene = new Scene(root, 400, 300);
+            Scene scene = new Scene(root);
             dialogStage.setScene(scene);
 
             GCashDialogController controller = loader.getController();

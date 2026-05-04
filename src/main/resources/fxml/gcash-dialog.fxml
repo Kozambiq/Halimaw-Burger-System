@@ -7,34 +7,55 @@
 <?import javafx.scene.layout.HBox?>
 <?import javafx.scene.layout.Region?>
 <?import javafx.scene.layout.VBox?>
+<?import javafx.scene.shape.SVGPath?>
 
 <VBox xmlns="http://javafx.com/javafx/17"
       xmlns:fx="http://javafx.com/fxml/1"
       fx:controller="com.myapp.halimawburgersystem.GCashDialogController"
-      styleClass="dialog-container"
-      stylesheets="@../css/dialog.css"
-      spacing="20"
+      styleClass="dialog-pane"
+      stylesheets="@../css/common.css, @../css/dialog.css"
       prefWidth="400"
-      prefHeight="280">
+      prefHeight="320"
+      spacing="0">
 
-    <VBox styleClass="dialog-header">
-        <Label styleClass="dialog-title" text="GCash Payment"/>
-        <Label styleClass="dialog-subtitle" text="Enter the reference number from your GCash transaction"/>
+    <!-- Header Section -->
+    <VBox styleClass="header-panel" spacing="2">
+        <Label styleClass="dialog-eyebrow" text="PAYMENT METHOD"/>
+        <HBox alignment="CENTER_LEFT" spacing="12">
+            <Label styleClass="dialog-header-text" text="GCash Checkout" style="-fx-font-size: 20px;"/>
+            <Region HBox.hgrow="ALWAYS"/>
+            <SVGPath content="M21 7.28V5c0-1.1-.9-2-2-2H5c-1.11 0-2 .9-2 2v14c0 1.1.89 2 2 2h14c1.1 0 2-.9 2-2v-2.28c.59-.35 1-.98 1-1.72V9c0-.74-.41-1.37-1-1.72zM20 9v6h-7V9h7zM5 19V5h14v2h-6c-1.1 0-2 .9-2 2v6c0 1.1.9 2 2 2h6v2H5z" 
+                     fill="#007dfe" scaleX="1.1" scaleY="1.1"/>
+        </HBox>
     </VBox>
 
-    <VBox styleClass="dialog-content" spacing="12">
-        <Label styleClass="dialog-label" text="Reference Number"/>
-        <TextField fx:id="txtReferenceNumber"
-                   styleClass="dialog-input"
-                   promptText="Enter reference number"
-                   maxWidth="Infinity"/>
-        <Label fx:id="lblError" styleClass="dialog-error" text="" visible="false" managed="false"/>
+    <!-- Content Section -->
+    <VBox spacing="16" styleClass="dialog-content-area" VBox.vgrow="ALWAYS">
+        <padding><Insets top="16" right="32" bottom="16" left="32"/></padding>
+        
+        <VBox styleClass="dialog-section-card" spacing="12" VBox.vgrow="ALWAYS">
+            <padding><Insets top="12" right="16" bottom="12" left="16"/></padding>
+            <VBox spacing="4">
+                <Label styleClass="dialog-eyebrow" text="TRANSACTION DETAILS" style="-fx-text-fill: #8a7055; -fx-font-size: 10px;"/>
+                <Label text="Enter the 13-digit reference number."
+                       wrapText="true" style="-fx-text-fill: #c4a882; -fx-font-size: 12px;"/>
+            </VBox>
+
+            <VBox spacing="6">
+                <Label styleClass="field-label" text="REFERENCE NUMBER" style="-fx-font-size: 10px;"/>
+                <TextField fx:id="txtReferenceNumber"
+                           styleClass="premium-field"
+                           promptText="Reference No."
+                           maxWidth="Infinity"/>
+                <Label fx:id="lblError" styleClass="dialog-error" text="" visible="false" managed="false"/>
+            </VBox>
+        </VBox>
     </VBox>
 
-    <HBox styleClass="dialog-buttons" spacing="12">
-        <Region HBox.hgrow="ALWAYS"/>
-        <Button fx:id="btnCancel" styleClass="btn-dialog-cancel" text="Cancel" onAction="#onCancel"/>
-        <Button fx:id="btnConfirm" styleClass="btn-dialog-primary" text="Save" onAction="#onConfirm" disable="true"/>
+    <!-- Footer / Button Bar -->
+    <HBox styleClass="button-bar" spacing="12" alignment="CENTER_RIGHT">
+        <Button fx:id="btnCancel" styleClass="dialog-button-cancel" text="Cancel" onAction="#onCancel" style="-fx-padding: 8 20 8 20;"/>
+        <Button fx:id="btnConfirm" styleClass="dialog-button-save" text="Confirm Payment" onAction="#onConfirm" disable="true" style="-fx-padding: 8 24 8 24;"/>
     </HBox>
 
 </VBox>
