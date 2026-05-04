@@ -452,3 +452,65 @@
 .premium-date-picker:showing > .arrow-button > .arrow {
     -fx-background-color: #c8500a;
 }
+
+/* ── Sidebar Footer & User Profile ─────────────────────────── */
+.sidebar-footer {
+    -fx-border-color: #4a3820;
+    -fx-border-width: 1 0 0 0;
+    -fx-padding: 16 12 16 12;
+    -fx-background-color: rgba(0, 0, 0, 0.1);
+}
+
+.sidebar-avatar {
+    -fx-background-color: linear-gradient(to bottom right, #d4591e, #c8500a);
+    -fx-background-radius: 50;
+    -fx-border-radius: 50;
+    -fx-border-color: rgba(245, 237, 224, 0.3);
+    -fx-border-width: 1;
+    -fx-effect: dropshadow(gaussian, rgba(200, 80, 10, 0.4), 10, 0, 0, 0);
+}
+
+.sidebar-avatar-text {
+    -fx-text-fill: #ffffff;
+    -fx-font-family: "DM Sans", sans-serif;
+    -fx-font-weight: 900;
+    -fx-font-size: 11px;
+}
+
+.sidebar-user-name {
+    -fx-text-fill: #f5ede0;
+    -fx-font-family: "DM Sans", sans-serif;
+    -fx-font-weight: 800;
+    -fx-font-size: 14px;
+}
+
+.sidebar-user-role {
+    -fx-text-fill: #c4a882;
+    -fx-font-family: "DM Sans", sans-serif;
+    -fx-font-weight: 700;
+    -fx-font-size: 10px;
+    -fx-text-transform: uppercase;
+    -fx-letter-spacing: 0.08em;
+    -fx-opacity: 0.8;
+}
+
+.btn-logout {
+    -fx-background-color: transparent;
+    -fx-background-radius: 10;
+    -fx-padding: 8;
+    -fx-cursor: hand;
+}
+
+.btn-logout:hover {
+    -fx-background-color: rgba(255, 107, 107, 0.1);
+}
+
+.btn-logout .nav-svg {
+    -fx-fill: #8a7055;
+    -fx-transition: all 0.2s ease;
+}
+
+.btn-logout:hover .nav-svg {
+    -fx-fill: #ff6b6b;
+    -fx-effect: dropshadow(gaussian, rgba(255, 107, 107, 0.6), 12, 0, 0, 0);
+}

@@ -279,15 +279,3 @@
     -fx-padding: 32;
     -fx-background-color: #1a1208;
 }
-
-.sidebar-avatar {
-    -fx-background-color: rgba(200, 80, 10, 0.12);
-    -fx-border-color: #c8500a;
-    -fx-border-width: 1.5;
-    -fx-background-radius: 50;
-    -fx-border-radius: 50;
-}
-
-.btn-logout:hover .nav-svg {
-    -fx-fill: #ff6b6b;
-}
