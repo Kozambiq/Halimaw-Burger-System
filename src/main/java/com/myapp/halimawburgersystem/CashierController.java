@@ -5,6 +5,7 @@ import com.myapp.dao.MenuItemDAO;
 import com.myapp.dao.OrderDAO;
 import com.myapp.dao.IngredientDAO;
 import com.myapp.model.Combo;
+import com.myapp.model.MenuItemIngredient;
 import com.myapp.model.MenuItemModel;
 import com.myapp.model.Order;
 import com.myapp.model.OrderItem;
@@ -708,8 +709,8 @@ OrderNotificationService.broadcastUpdate();
             } else {
                 MenuItemModel item = findMenuItemById(-id);
                 if (item != null) {
-                    List<MenuItemDAO.MenuItemIngredient> ingredients = cashierService.getIngredientsForMenuItem(item.getId());
-                    for (MenuItemDAO.MenuItemIngredient ing : ingredients) {
+                    List<MenuItemIngredient> ingredients = cashierService.getIngredientsForMenuItem(item.getId());
+                    for (MenuItemIngredient ing : ingredients) {
                         int ingId = cashierService.findIdByName(ing.getIngredientName());
                         if (ingId > 0) {
                             double availableStock = cashierService.getAvailableStock(ingId);
@@ -737,8 +738,8 @@ OrderNotificationService.broadcastUpdate();
         String[] items = includes.split(",");
         for (String itemName : items) {
             itemName = itemName.trim();
-            List<MenuItemDAO.MenuItemIngredient> ingredients = cashierService.getIngredientsForMenuItemByName(itemName);
-            for (MenuItemDAO.MenuItemIngredient ing : ingredients) {
+            List<MenuItemIngredient> ingredients = cashierService.getIngredientsForMenuItemByName(itemName);
+            for (MenuItemIngredient ing : ingredients) {
                 int ingId = cashierService.findIdByName(ing.getIngredientName());
                 if (ingId > 0) {
                     double availableStock = cashierService.getAvailableStock(ingId);

@@ -1,7 +1,7 @@
 package com.myapp.halimawburgersystem;
 
 import com.myapp.dao.MenuItemDAO;
-import com.myapp.dao.MenuItemDAO.MenuItemIngredient;
+import com.myapp.model.MenuItemIngredient;
 import com.myapp.model.Ingredient;
 import com.myapp.model.MenuItemModel;
 import com.myapp.service.MenuItemService;

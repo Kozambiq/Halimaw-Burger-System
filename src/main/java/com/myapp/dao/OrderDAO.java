@@ -3,7 +3,7 @@ package com.myapp.dao;
 import com.myapp.model.Order;
 import com.myapp.model.OrderItem;
 import com.myapp.util.DatabaseConnection;
-import com.myapp.dao.MenuItemDAO.MenuItemIngredient;
+import com.myapp.model.MenuItemIngredient;
 
 import java.sql.*;
 import java.time.LocalDateTime;

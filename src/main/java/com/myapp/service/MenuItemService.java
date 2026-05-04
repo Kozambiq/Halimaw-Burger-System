@@ -1,7 +1,7 @@
 package com.myapp.service;
 
 import com.myapp.dao.MenuItemDAO;
-import com.myapp.dao.MenuItemDAO.MenuItemIngredient;
+import com.myapp.model.MenuItemIngredient;
 import com.myapp.dao.MenuItemDAO.TopSellingItem;
 import com.myapp.model.Ingredient;
 import com.myapp.model.MenuItemModel;

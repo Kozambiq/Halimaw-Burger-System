@@ -1,6 +1,7 @@
 package com.myapp.dao;
 
 import com.myapp.model.Ingredient;
+import com.myapp.model.MenuItemIngredient;
 import com.myapp.model.MenuItemModel;
 import com.myapp.util.DatabaseConnection;
 
@@ -13,26 +14,6 @@ public class MenuItemDAO {
     private static final String STATUS_OK = "Available";
     private static final String STATUS_LOW = "Low Stock";
     private static final String STATUS_OUT = "Out of Stock";
-
-    public static class MenuItemIngredient {
-        private int ingredientId;
-        private String ingredientName;
-        private String unit;
-        private double quantity;
-
-        public MenuItemIngredient(int ingredientId, String ingredientName, String unit, double quantity) {
-            this.ingredientId = ingredientId;
-            this.ingredientName = ingredientName;
-            this.unit = unit;
-            this.quantity = quantity;
-        }
-
-        public int getIngredientId() { return ingredientId; }
-        public String getIngredientName() { return ingredientName; }
-        public String getUnit() { return unit; }
-        public double getQuantity() { return quantity; }
-        public void setQuantity(double quantity) { this.quantity = quantity; }
-    }
 
     public List<MenuItemModel> findAllWithIngredientStatus() {
         List<MenuItemModel> menuItems = new ArrayList<>();

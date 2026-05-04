@@ -6,6 +6,7 @@ import com.myapp.dao.MenuItemDAO;
 import com.myapp.dao.OrderDAO;
 import com.myapp.model.Combo;
 import com.myapp.model.Ingredient;
+import com.myapp.model.MenuItemIngredient;
 import com.myapp.model.MenuItemModel;
 import com.myapp.model.Order;
 import com.myapp.model.OrderItem;
@@ -54,8 +55,12 @@ public class CashierService {
         return orderDAO.updateStatus(orderId, status);
     }
 
-    public List<MenuItemDAO.MenuItemIngredient> getIngredientsForMenuItem(int itemId) {
+public List<MenuItemIngredient> getIngredientsForMenuItem(int itemId) {
         return menuItemDAO.getIngredientsForMenuItem(itemId);
+    }
+
+    public List<MenuItemIngredient> getIngredientsForMenuItemByName(String itemName) {
+        return menuItemDAO.getIngredientsForMenuItemByName(itemName);
     }
 
     public int findIdByName(String name) {
@@ -64,9 +69,5 @@ public class CashierService {
 
     public double getAvailableStock(int ingredientId) {
         return ingredientDAO.getAvailableStock(ingredientId);
-    }
-
-    public List<MenuItemDAO.MenuItemIngredient> getIngredientsForMenuItemByName(String itemName) {
-        return menuItemDAO.getIngredientsForMenuItemByName(itemName);
     }
 }
