@@ -103,15 +103,12 @@
     <!-- ===== MAIN CONTENT ===== -->
     <VBox styleClass="main-content" HBox.hgrow="ALWAYS">
 
-        <!-- Topbar -->
-        <HBox styleClass="topbar" prefHeight="56" alignment="CENTER_LEFT">
+        <HBox styleClass="topbar" prefHeight="56" alignment="CENTER_LEFT" spacing="20">
             <padding><Insets top="16" right="24" bottom="16" left="24"/></padding>
             <Label fx:id="pageTitle" styleClass="topbar-title" text="Sales Reports"/>
             <Region HBox.hgrow="ALWAYS"/>
             <Button text="EXPORT" onAction="#onExport" styleClass="btn-secondary" style="-fx-font-weight: 900; -fx-letter-spacing: 0.05em; -fx-padding: 8 20 8 20;"/>
-            <Label fx:id="topbarDate" styleClass="topbar-date" text="">
-                <padding><Insets left="16"/></padding>
-            </Label>
+            <Label fx:id="topbarDate" styleClass="topbar-date" text=""/>
         </HBox>
 
         <ScrollPane fitToWidth="true" VBox.vgrow="ALWAYS" styleClass="content-scroll">

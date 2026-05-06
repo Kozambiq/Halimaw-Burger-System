@@ -16,9 +16,11 @@ import com.lowagie.text.pdf.PdfWriter;
 
 import java.awt.Color;
 import java.io.FileOutputStream;
+import java.text.NumberFormat;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.List;
+import java.util.Locale;
 import java.util.Map;
 
 public class ReportPdfBuilder {
@@ -125,10 +127,26 @@ public class ReportPdfBuilder {
         document.add(p);
     }
 
+    private String formatCurrency(String value) {
+        if (value == null || value.isEmpty() || "No sales yet".equalsIgnoreCase(value) || "N/A".equalsIgnoreCase(value)) {
+            return value;
+        }
+        try {
+            // Remove existing symbol or commas if any
+            String cleanValue = value.replace("₱", "").replace(",", "").trim();
+            double amount = Double.parseDouble(cleanValue);
+            NumberFormat phFormat = NumberFormat.getCurrencyInstance(new Locale("en", "PH"));
+            return phFormat.format(amount);
+        } catch (Exception e) {
+            return value;
+        }
+    }
+
     private void addDataTable(Document document, String[] headers, List<String[]> data) throws DocumentException {
         PdfPTable table = new PdfPTable(headers.length);
         table.setWidthPercentage(100);
         table.setHeaderRows(1);
+        table.setKeepTogether(true);
 
         for (String h : headers) {
             PdfPCell c = new PdfPCell(new Phrase(h.toUpperCase(), fontTableHeader));
@@ -142,10 +160,15 @@ public class ReportPdfBuilder {
         int rowCount = 0;
         for (String[] row : data) {
             Color bgColor = (rowCount % 2 == 0) ? Color.WHITE : altRowColor;
-            for (String val : row) {
+            for (int i = 0; i < row.length; i++) {
+                String val = row[i];
                 String displayVal = val;
-                // Auto-peso for currency-like strings
-                if (val.matches("\\d+\\.\\d{2}")) displayVal = "₱" + val;
+                
+                // Auto-peso for currency-like strings (usually column 1 for Daily/Hourly or 2 for Top Items/Categories)
+                String header = headers[i].toLowerCase();
+                if (header.contains("revenue") || header.contains("sales") || header.contains("price") || val.matches("\\d+\\.\\d{2}")) {
+                    displayVal = formatCurrency(val);
+                }
                 
                 PdfPCell c = new PdfPCell(new Phrase(displayVal, fontBody));
                 c.setBackgroundColor(bgColor);
@@ -192,6 +215,7 @@ public class ReportPdfBuilder {
         table.setWidthPercentage(100);
         table.setSpacingBefore(10);
         table.setSpacingAfter(10);
+        table.setKeepTogether(true);
 
         for (Map<String, String> metric : metrics) {
             String label = metric.getOrDefault("label", "Metric");
@@ -199,7 +223,7 @@ public class ReportPdfBuilder {
             
             // Format currency if it's a financial metric
             if (label.toLowerCase().contains("revenue") || label.toLowerCase().contains("sales") || label.toLowerCase().contains("value")) {
-                if (!value.startsWith("₱")) value = "₱" + value;
+                value = formatCurrency(value);
             }
 
             PdfPCell cell = new PdfPCell();
@@ -226,6 +250,7 @@ public class ReportPdfBuilder {
         PdfPTable table = new PdfPTable(columns.size());
         table.setWidthPercentage(100);
         table.setHeaderRows(1);
+        table.setKeepTogether(true);
 
         // Header
         for (String col : columns) {
@@ -246,9 +271,7 @@ public class ReportPdfBuilder {
                 
                 // Format currency in table if detected
                 if (col.toLowerCase().contains("total") || col.toLowerCase().contains("price") || col.toLowerCase().contains("revenue")) {
-                    if (!value.startsWith("₱") && value.matches("\\d+\\.?\\d*")) {
-                        value = "₱" + value;
-                    }
+                    value = formatCurrency(value);
                 }
 
                 PdfPCell cell = new PdfPCell(new Phrase(value, fontBody));
