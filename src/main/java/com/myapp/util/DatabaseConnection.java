@@ -41,8 +41,8 @@ public class DatabaseConnection {
             return;
         }
 
-        String ssl = props.getProperty("db.ssl", "false");
-        dbUrl = String.format("jdbc:mariadb://%s:%s/%s?ssl=%s", host, port, name, ssl);
+        String sslMode = props.getProperty("db.sslMode", "disable");
+        dbUrl = String.format("jdbc:mariadb://%s:%s/%s?sslMode=%s", host, port, name, sslMode);
 
         try {
             DriverManager.getConnection(dbUrl, dbUser, dbPassword).close();
