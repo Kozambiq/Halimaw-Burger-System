@@ -226,66 +226,7 @@ public class KitchenController extends BaseController {
         footer.getChildren().add(timer);
         card.getChildren().add(footer);
 
-        card.setOnMouseClicked(event -> {
-            if (!"Cancelled".equals(order.getStatus())) {
-                showCancelConfirmation(order);
-            }
-        });
-
         return card;
-    }
-
-    private void showCancelConfirmation(Order order) {
-        Dialog<Boolean> dialog = new Dialog<>();
-        dialog.setTitle("CANCEL ORDER");
-        dialog.getDialogPane().getStyleClass().add("dialog-pane");
-        dialog.getDialogPane().getStylesheets().add(getClass().getResource("/css/common.css").toExternalForm());
-        dialog.getDialogPane().getStylesheets().add(getClass().getResource("/css/dialog.css").toExternalForm());
-
-        Label headerLabel = new Label("Cancel Order #" + String.format("%04d", order.getOrderNumber()) + "?");
-        headerLabel.getStyleClass().add("dialog-header-text");
-        dialog.getDialogPane().setHeader(headerLabel);
-
-        VBox content = new VBox(20);
-        content.setPadding(new Insets(30, 40, 30, 40));
-        content.setAlignment(Pos.CENTER);
-        content.setPrefWidth(400);
-
-        VBox infoBox = new VBox(12);
-        infoBox.getStyleClass().add("dialog-section-card");
-        infoBox.setAlignment(Pos.CENTER);
-
-        Label warningIcon = new Label("⚠");
-        warningIcon.setStyle("-fx-font-size: 48px; -fx-text-fill: #ff6b6b;");
-        
-        Label message = new Label("Are you sure you want to cancel this order? This action will mark the order as cancelled and notify the cashier.");
-        message.setStyle("-fx-text-fill: #f5ede0; -fx-font-size: 14px; -fx-text-alignment: center;");
-        message.setWrapText(true);
-        message.setMaxWidth(320);
-
-        infoBox.getChildren().addAll(warningIcon, message);
-        content.getChildren().add(infoBox);
-
-        dialog.getDialogPane().setContent(content);
-        
-        ButtonType cancelBtnType = new ButtonType("KEEP ORDER", ButtonBar.ButtonData.CANCEL_CLOSE);
-        ButtonType confirmBtnType = new ButtonType("CANCEL ORDER", ButtonBar.ButtonData.OK_DONE);
-        dialog.getDialogPane().getButtonTypes().addAll(cancelBtnType, confirmBtnType);
-
-        Button confirmBtn = (Button) dialog.getDialogPane().lookupButton(confirmBtnType);
-        confirmBtn.getStyleClass().add("dialog-button-save");
-        confirmBtn.setStyle("-fx-background-color: #ff6b6b;"); // Override with red for cancellation
-
-        Button cancelBtn = (Button) dialog.getDialogPane().lookupButton(cancelBtnType);
-        cancelBtn.getStyleClass().add("dialog-button-cancel");
-
-        dialog.setResultConverter(btn -> btn == confirmBtnType);
-
-        dialog.showAndWait().ifPresent(confirmed -> {
-            if (confirmed) {
-                updateStatus(order, "Cancelled");
-            }
-        });
     }
 
     private void updateStatus(Order order, String newStatus) {
