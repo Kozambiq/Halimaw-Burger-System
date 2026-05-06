@@ -5,6 +5,8 @@ module com.myapp.halimawburgersystem {
     requires jbcrypt;
     requires javafx.web;
     requires java.net.http;
+    requires java.desktop;
+    requires com.github.librepdf.openpdf;
 
 
     opens com.myapp.halimawburgersystem to javafx.fxml;

@@ -20,6 +20,21 @@ import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
 import java.util.List;
 
+import com.myapp.util.ReportPdfBuilder;
+import javafx.scene.control.ButtonBar;
+import javafx.scene.control.ButtonType;
+import javafx.scene.control.Dialog;
+import javafx.scene.control.DatePicker;
+import javafx.scene.layout.VBox;
+import javafx.scene.layout.HBox;
+import javafx.geometry.Insets;
+import javafx.stage.FileChooser;
+import java.io.File;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.Map;
+import java.time.LocalDateTime;
+
 public class SalesReportController extends BaseController {
 
     @FXML private Button btnDashboard;
@@ -106,6 +121,175 @@ public class SalesReportController extends BaseController {
         } catch (Exception e) {
             e.printStackTrace();
         }
+    }
+
+    @FXML
+    private void onExport() {
+        showExportRangeDialog();
+    }
+
+    private void showExportRangeDialog() {
+        Dialog<Map<String, LocalDateTime>> dialog = new Dialog<>();
+        dialog.setTitle("EXPORT SALES REPORT");
+        dialog.getDialogPane().getStyleClass().add("dialog-pane");
+        dialog.getDialogPane().getStylesheets().add(getClass().getResource("/css/common.css").toExternalForm());
+        dialog.getDialogPane().getStylesheets().add(getClass().getResource("/css/dialog.css").toExternalForm());
+
+        Label headerLabel = new Label("Export Sales Analysis");
+        headerLabel.getStyleClass().add("dialog-header-text");
+        dialog.getDialogPane().setHeader(headerLabel);
+
+        VBox content = new VBox(20);
+        content.setPadding(new Insets(24, 40, 24, 40));
+        content.setPrefWidth(420);
+
+        VBox selectionBox = new VBox(16);
+        selectionBox.getStyleClass().add("dialog-section-card");
+
+        VBox typeBox = new VBox(6);
+        Label typeEyebrow = new Label("SELECT DATE RANGE");
+        typeEyebrow.getStyleClass().add("dialog-eyebrow");
+        ComboBox<String> rangeCombo = new ComboBox<>(FXCollections.observableArrayList(
+            "Today", "Last 7 Days", "Last 30 Days", "This Month", "Custom Range"
+        ));
+        rangeCombo.setValue("Today");
+        rangeCombo.setMaxWidth(Double.MAX_VALUE);
+        rangeCombo.getStyleClass().add("premium-combo");
+        typeBox.getChildren().addAll(typeEyebrow, rangeCombo);
+
+        VBox customBox = new VBox(12);
+        customBox.setVisible(false);
+        customBox.setManaged(false);
+
+        HBox dateInputs = new HBox(12);
+        VBox fromBox = new VBox(6);
+        Label fromLabel = new Label("FROM");
+        fromLabel.getStyleClass().add("dialog-eyebrow");
+        DatePicker dpFrom = new DatePicker(LocalDate.now());
+        dpFrom.getStyleClass().add("premium-field");
+        fromBox.getChildren().addAll(fromLabel, dpFrom);
+
+        VBox toBox = new VBox(6);
+        Label toLabel = new Label("TO");
+        toLabel.getStyleClass().add("dialog-eyebrow");
+        DatePicker dpTo = new DatePicker(LocalDate.now());
+        dpTo.getStyleClass().add("premium-field");
+        toBox.getChildren().addAll(toLabel, dpTo);
+
+        dateInputs.getChildren().addAll(fromBox, toBox);
+        customBox.getChildren().add(dateInputs);
+
+        rangeCombo.setOnAction(e -> {
+            boolean isCustom = "Custom Range".equals(rangeCombo.getValue());
+            customBox.setVisible(isCustom);
+            customBox.setManaged(isCustom);
+            dialog.getDialogPane().getScene().getWindow().sizeToScene();
+        });
+
+        selectionBox.getChildren().addAll(typeBox, customBox);
+        content.getChildren().add(selectionBox);
+
+        dialog.getDialogPane().setContent(content);
+        
+        ButtonType exportBtnType = new ButtonType("GENERATE PDF", ButtonBar.ButtonData.OK_DONE);
+        dialog.getDialogPane().getButtonTypes().addAll(ButtonType.CANCEL, exportBtnType);
+
+        Button exportBtn = (Button) dialog.getDialogPane().lookupButton(exportBtnType);
+        exportBtn.getStyleClass().add("dialog-button-save");
+        
+        Button cancelBtn = (Button) dialog.getDialogPane().lookupButton(ButtonType.CANCEL);
+        cancelBtn.getStyleClass().add("dialog-button-cancel");
+
+        dialog.setResultConverter(btn -> {
+            if (btn == exportBtnType) {
+                Map<String, LocalDateTime> range = new HashMap<>();
+                LocalDateTime start, end = LocalDateTime.now().withHour(23).withMinute(59).withSecond(59);
+                
+                String selection = rangeCombo.getValue();
+                switch (selection) {
+                    case "Today" -> start = LocalDate.now().atStartOfDay();
+                    case "Last 7 Days" -> start = LocalDate.now().minusDays(7).atStartOfDay();
+                    case "Last 30 Days" -> start = LocalDate.now().minusDays(30).atStartOfDay();
+                    case "This Month" -> start = LocalDate.now().withDayOfMonth(1).atStartOfDay();
+                    case "Custom Range" -> {
+                        start = dpFrom.getValue().atStartOfDay();
+                        end = dpTo.getValue().atTime(23, 59, 59);
+                    }
+                    default -> start = LocalDate.now().atStartOfDay();
+                }
+                range.put("start", start);
+                range.put("end", end);
+                return range;
+            }
+            return null;
+        });
+
+        dialog.showAndWait().ifPresent(range -> {
+            processExport(range.get("start"), range.get("end"));
+        });
+    }
+
+    private void processExport(LocalDateTime start, LocalDateTime end) {
+        try {
+            SalesSummary summary = SalesReportService.fetchRangeSummary(start, end);
+            
+            FileChooser fileChooser = new FileChooser();
+            fileChooser.setTitle("Save Sales Report");
+            fileChooser.setInitialFileName("Halimaw_Sales_Report_" + 
+                LocalDateTime.now().format(DateTimeFormatter.ofPattern("yyyyMMdd_HHmm")) + ".pdf");
+            fileChooser.getExtensionFilters().add(new FileChooser.ExtensionFilter("PDF Files", "*.pdf"));
+            
+            File file = fileChooser.showSaveDialog(pageTitle.getScene().getWindow());
+            if (file != null) {
+                List<Map<String, String>> metrics = new ArrayList<>();
+                metrics.add(createMetric("TOTAL REVENUE", String.format("%.2f", summary.revenueToday)));
+                metrics.add(createMetric("TOTAL ORDERS", String.valueOf(summary.ordersToday)));
+                
+                double avg = summary.ordersToday > 0 ? summary.revenueToday / summary.ordersToday : 0;
+                metrics.add(createMetric("AVG ORDER VALUE", String.format("%.2f", avg)));
+                
+                String bestItem = (summary.topItems != null && !summary.topItems.isEmpty()) ? summary.topItems.get(0)[0] : "N/A";
+                metrics.add(createMetric("BEST SELLING", bestItem));
+
+                ReportPdfBuilder builder = new ReportPdfBuilder();
+                String dateRangeStr = start.format(DateTimeFormatter.ofPattern("MMM dd, yyyy")) + " to " + 
+                                     end.format(DateTimeFormatter.ofPattern("MMM dd, yyyy"));
+                
+                String staffName = Main.getCurrentStaff() != null ? Main.getCurrentStaff().getName() : "System Admin";
+
+                builder.generateFullSalesReport(
+                    start.format(DateTimeFormatter.ofPattern("yyyy-MM-dd")),
+                    end.format(DateTimeFormatter.ofPattern("yyyy-MM-dd")),
+                    staffName,
+                    metrics,
+                    summary.dailyRevenue,
+                    summary.topItems,
+                    summary.categoryBreakdown,
+                    file.getAbsolutePath()
+                );
+
+                // Show success
+                javafx.scene.control.Alert success = new javafx.scene.control.Alert(javafx.scene.control.Alert.AlertType.INFORMATION);
+                success.setTitle("Report Generated");
+                success.setHeaderText("Sales report exported successfully!");
+                success.setContentText("File saved to: " + file.getName());
+                success.show();
+            }
+        } catch (Exception ex) {
+            ex.printStackTrace();
+            javafx.scene.control.Alert error = new javafx.scene.control.Alert(javafx.scene.control.Alert.AlertType.ERROR);
+            error.setTitle("Export Failed");
+            error.setHeaderText("An error occurred during PDF generation");
+            error.setContentText(ex.getMessage());
+            error.show();
+        }
+    }
+
+    private Map<String, String> createMetric(String label, String value) {
+        Map<String, String> m = new HashMap<>();
+        m.put("label", label);
+        m.put("value", value);
+        return m;
     }
 
     @FXML

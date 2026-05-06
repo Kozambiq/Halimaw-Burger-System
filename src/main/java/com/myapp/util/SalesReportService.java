@@ -206,5 +206,86 @@ public class SalesReportService {
         }
 
         return sb.toString();
-    }
-}
+        }
+
+        public static SalesSummary fetchRangeSummary(java.time.LocalDateTime start, java.time.LocalDateTime end) throws SQLException {
+        SalesSummary s = new SalesSummary();
+
+        try (Connection conn = DatabaseConnection.getConnection()) {
+            // 1. Core Totals
+            String totalSQL = "SELECT COALESCE(SUM(total),0), COUNT(*) FROM orders "
+                    + "WHERE created_at BETWEEN ? AND ? AND status = 'Completed'";
+            try (PreparedStatement ps = conn.prepareStatement(totalSQL)) {
+                ps.setTimestamp(1, Timestamp.valueOf(start));
+                ps.setTimestamp(2, Timestamp.valueOf(end));
+                ResultSet rs = ps.executeQuery();
+                if (rs.next()) {
+                    s.revenueToday = rs.getDouble(1); // Reusing field for range revenue
+                    s.ordersToday  = rs.getInt(2);    // Reusing field for range orders
+                }
+            }
+
+            // 2. Top Selling Items
+            String topSQL = "SELECT oi.item_name, SUM(oi.quantity) AS qty, "
+                    + "SUM(oi.total_price) AS revenue "
+                    + "FROM order_items oi "
+                    + "JOIN orders o ON oi.order_id = o.id "
+                    + "WHERE o.created_at BETWEEN ? AND ? AND o.status = 'Completed' "
+                    + "GROUP BY oi.item_name ORDER BY qty DESC LIMIT 15";
+            s.topItems = new ArrayList<>();
+            try (PreparedStatement ps = conn.prepareStatement(topSQL)) {
+                ps.setTimestamp(1, Timestamp.valueOf(start));
+                ps.setTimestamp(2, Timestamp.valueOf(end));
+                ResultSet rs = ps.executeQuery();
+                while (rs.next()) {
+                    s.topItems.add(new String[]{
+                            rs.getString("item_name"),
+                            String.valueOf(rs.getInt("qty")),
+                            String.format("%.2f", rs.getDouble("revenue"))
+                    });
+                }
+            }
+
+            // 3. Category Breakdown
+            String catSQL = "SELECT mi.category, SUM(oi.quantity) AS qty, SUM(oi.total_price) AS revenue "
+                    + "FROM order_items oi "
+                    + "JOIN orders o ON oi.order_id = o.id "
+                    + "LEFT JOIN menu_items mi ON oi.item_id = mi.id AND oi.item_type = 'MenuItem' "
+                    + "WHERE o.created_at BETWEEN ? AND ? AND o.status = 'Completed' "
+                    + "GROUP BY mi.category ORDER BY revenue DESC";
+            s.categoryBreakdown = new ArrayList<>();
+            try (PreparedStatement ps = conn.prepareStatement(catSQL)) {
+                ps.setTimestamp(1, Timestamp.valueOf(start));
+                ps.setTimestamp(2, Timestamp.valueOf(end));
+                ResultSet rs = ps.executeQuery();
+                while (rs.next()) {
+                    String cat = rs.getString("category");
+                    s.categoryBreakdown.add(new String[]{
+                            cat != null ? cat : "Combo",
+                            String.valueOf(rs.getInt("qty")),
+                            String.format("%.2f", rs.getDouble("revenue"))
+                    });
+                }
+            }
+
+            // 4. Daily Breakdown for the table
+            String dailySQL = "SELECT DATE(created_at) AS sale_date, COALESCE(SUM(total),0) AS rev, COUNT(*) as ord "
+                    + "FROM orders WHERE created_at BETWEEN ? AND ? AND status = 'Completed' "
+                    + "GROUP BY sale_date ORDER BY sale_date";
+            s.dailyRevenue = new ArrayList<>();
+            try (PreparedStatement ps = conn.prepareStatement(dailySQL)) {
+                ps.setTimestamp(1, Timestamp.valueOf(start));
+                ps.setTimestamp(2, Timestamp.valueOf(end));
+                ResultSet rs = ps.executeQuery();
+                while (rs.next()) {
+                    s.dailyRevenue.add(new String[]{
+                            rs.getDate("sale_date").toString(),
+                            String.format("%.2f", rs.getDouble("rev")),
+                            String.valueOf(rs.getInt("ord"))
+                    });
+                }
+            }
+        }
+        return s;
+        }
+        }

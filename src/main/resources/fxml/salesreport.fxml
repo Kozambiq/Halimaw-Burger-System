@@ -108,7 +108,10 @@
             <padding><Insets top="16" right="24" bottom="16" left="24"/></padding>
             <Label fx:id="pageTitle" styleClass="topbar-title" text="Sales Reports"/>
             <Region HBox.hgrow="ALWAYS"/>
-            <Label fx:id="topbarDate" styleClass="topbar-date" text=""/>
+            <Button text="EXPORT" onAction="#onExport" styleClass="btn-secondary" style="-fx-font-weight: 900; -fx-letter-spacing: 0.05em; -fx-padding: 8 20 8 20;"/>
+            <Label fx:id="topbarDate" styleClass="topbar-date" text="">
+                <padding><Insets left="16"/></padding>
+            </Label>
         </HBox>
 
         <ScrollPane fitToWidth="true" VBox.vgrow="ALWAYS" styleClass="content-scroll">
