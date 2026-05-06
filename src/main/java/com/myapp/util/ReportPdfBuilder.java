@@ -71,7 +71,8 @@ public class ReportPdfBuilder {
             String dateTo,
             String generatedBy,
             List<Map<String, String>> metrics,
-            List<String[]> dailyData,
+            List<String[]> timeData,
+            boolean isHourly,
             List<String[]> topItems,
             List<String[]> categories,
             String outputPath) throws Exception {
@@ -91,10 +92,15 @@ public class ReportPdfBuilder {
             addSummaryBoxes(document, metrics);
         }
 
-        if (dailyData != null && !dailyData.isEmpty()) {
+        if (timeData != null && !timeData.isEmpty()) {
             document.add(new Paragraph("\n"));
-            addSectionHeader(document, "DAILY REVENUE BREAKDOWN");
-            addDataTable(document, new String[]{"Date", "Revenue", "Orders"}, dailyData);
+            if (isHourly) {
+                addSectionHeader(document, "HOURLY REVENUE FLOW");
+                addDataTable(document, new String[]{"Time Block", "Revenue", "Orders"}, timeData);
+            } else {
+                addSectionHeader(document, "DAILY PERFORMANCE OVERVIEW");
+                addDataTable(document, new String[]{"Date", "Revenue", "Orders"}, timeData);
+            }
         }
 
         if (topItems != null && !topItems.isEmpty()) {

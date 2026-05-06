@@ -248,21 +248,23 @@ public class SalesReportController extends BaseController {
                 double avg = summary.ordersToday > 0 ? summary.revenueToday / summary.ordersToday : 0;
                 metrics.add(createMetric("AVG ORDER VALUE", String.format("%.2f", avg)));
                 
-                String bestItem = (summary.topItems != null && !summary.topItems.isEmpty()) ? summary.topItems.get(0)[0] : "N/A";
+                String bestItem = (summary.topItems != null && !summary.topItems.isEmpty()) ? summary.topItems.get(0)[0] : "No sales yet";
                 metrics.add(createMetric("BEST SELLING", bestItem));
 
                 ReportPdfBuilder builder = new ReportPdfBuilder();
-                String dateRangeStr = start.format(DateTimeFormatter.ofPattern("MMM dd, yyyy")) + " to " + 
-                                     end.format(DateTimeFormatter.ofPattern("MMM dd, yyyy"));
-                
                 String staffName = Main.getCurrentStaff() != null ? Main.getCurrentStaff().getName() : "System Admin";
+                
+                // Determine if we show Hourly or Daily
+                boolean isHourly = java.time.temporal.ChronoUnit.DAYS.between(start.toLocalDate(), end.toLocalDate()) == 0;
+                List<String[]> timeData = isHourly ? summary.hourlyRevenue : summary.dailyRevenue;
 
                 builder.generateFullSalesReport(
                     start.format(DateTimeFormatter.ofPattern("yyyy-MM-dd")),
                     end.format(DateTimeFormatter.ofPattern("yyyy-MM-dd")),
                     staffName,
                     metrics,
-                    summary.dailyRevenue,
+                    timeData,
+                    isHourly,
                     summary.topItems,
                     summary.categoryBreakdown,
                     file.getAbsolutePath()
