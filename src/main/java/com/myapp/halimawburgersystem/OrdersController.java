@@ -224,6 +224,21 @@ public class OrdersController extends BaseController {
             }
         });
 
+        ordersTable.setRowFactory(tv -> new TableRow<Order>() {
+            @Override
+            protected void updateItem(Order item, boolean empty) {
+                super.updateItem(item, empty);
+                if (item == null || empty) {
+                    setStyle("");
+                    setOpacity(1.0);
+                } else if ("Cancelled".equals(item.getStatus())) {
+                    setOpacity(0.4);
+                } else {
+                    setOpacity(1.0);
+                }
+            }
+        });
+
         ordersTable.setItems(ordersList);
         ordersTable.setColumnResizePolicy(TableView.CONSTRAINED_RESIZE_POLICY);
     }
@@ -380,45 +395,50 @@ public class OrdersController extends BaseController {
     }
 
     private boolean showStyledConfirm(String title, String header, String content) {
-        Alert alert = new Alert(Alert.AlertType.CONFIRMATION);
-        alert.setTitle(title);
-        alert.setHeaderText(null);
-        alert.setGraphic(null);
+        Dialog<ButtonType> dialog = new Dialog<>();
+        dialog.setTitle(title);
+        dialog.getDialogPane().getStyleClass().add("dialog-pane");
+        dialog.getDialogPane().getStylesheets().add(getClass().getResource("/css/common.css").toExternalForm());
+        dialog.getDialogPane().getStylesheets().add(getClass().getResource("/css/dialog.css").toExternalForm());
+
+        Label headerLabel = new Label(header);
+        headerLabel.getStyleClass().add("dialog-header-text");
+        dialog.getDialogPane().setHeader(headerLabel);
+
+        VBox layout = new VBox(20);
+        layout.setPadding(new Insets(30, 40, 30, 40));
+        layout.setAlignment(Pos.CENTER);
+        layout.setPrefWidth(420);
+
+        VBox infoBox = new VBox(12);
+        infoBox.getStyleClass().add("dialog-section-card");
+        infoBox.setAlignment(Pos.CENTER);
+
+        Label warningIcon = new Label("⚠");
+        warningIcon.setStyle("-fx-font-size: 48px; -fx-text-fill: #ff6b6b;");
         
-        // Style the DialogPane
-        DialogPane dialogPane = alert.getDialogPane();
-        dialogPane.getStylesheets().add(getClass().getResource("/css/common.css").toExternalForm());
-        dialogPane.getStylesheets().add(getClass().getResource("/css/dialog.css").toExternalForm());
-        dialogPane.getStyleClass().add("premium-dialog");
+        Label message = new Label(content);
+        message.setStyle("-fx-text-fill: #f5ede0; -fx-font-size: 14px; -fx-text-alignment: center;");
+        message.setWrapText(true);
+        message.setMaxWidth(340);
+
+        infoBox.getChildren().addAll(warningIcon, message);
+        layout.getChildren().add(infoBox);
+
+        dialog.getDialogPane().setContent(layout);
         
-        VBox layout = new VBox(15);
-        layout.setPadding(new Insets(20));
-        layout.setAlignment(Pos.CENTER_LEFT);
-        
-        Label lblTitle = new Label(title);
-        lblTitle.getStyleClass().add("dialog-badge-danger");
-        
-        Label lblHeader = new Label(header);
-        lblHeader.getStyleClass().add("dialog-header-text");
-        lblHeader.setWrapText(true);
-        
-        Label lblContent = new Label(content);
-        lblContent.getStyleClass().add("dialog-content-text");
-        lblContent.setWrapText(true);
-        
-        layout.getChildren().addAll(lblTitle, lblHeader, lblContent);
-        dialogPane.setContent(layout);
-        
-        // Custom Buttons
-        Button okButton = (Button) dialogPane.lookupButton(ButtonType.OK);
-        okButton.setText("CONFIRM VOID");
-        okButton.getStyleClass().addAll("btn-dialog-danger");
-        
-        Button cancelButton = (Button) dialogPane.lookupButton(ButtonType.CANCEL);
-        cancelButton.setText("KEEP ORDER");
-        cancelButton.getStyleClass().addAll("btn-dialog-secondary");
-        
-        return alert.showAndWait().filter(response -> response == ButtonType.OK).isPresent();
+        ButtonType cancelBtnType = new ButtonType("KEEP ORDER", ButtonBar.ButtonData.CANCEL_CLOSE);
+        ButtonType confirmBtnType = new ButtonType("CONFIRM VOID", ButtonBar.ButtonData.OK_DONE);
+        dialog.getDialogPane().getButtonTypes().addAll(cancelBtnType, confirmBtnType);
+
+        Button confirmBtn = (Button) dialog.getDialogPane().lookupButton(confirmBtnType);
+        confirmBtn.getStyleClass().add("dialog-button-save");
+        confirmBtn.setStyle("-fx-background-color: #ff6b6b;");
+
+        Button cancelBtn = (Button) dialog.getDialogPane().lookupButton(cancelBtnType);
+        cancelBtn.getStyleClass().add("dialog-button-cancel");
+
+        return dialog.showAndWait().filter(response -> response == confirmBtnType).isPresent();
     }
 
     @FXML
