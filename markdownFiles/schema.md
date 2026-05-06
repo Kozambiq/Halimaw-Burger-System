@@ -76,13 +76,16 @@ CREATE TABLE IF NOT EXISTS menu_item_ingredients (
 );
 
 CREATE TABLE IF NOT EXISTS restock_logs (
-    id             INT AUTO_INCREMENT PRIMARY KEY,
-    ingredient_id  INT           NOT NULL,
-    quantity_added DECIMAL(10,2) NOT NULL,
-    restocked_by   INT           NOT NULL,
-    restocked_at   DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
-    FOREIGN KEY (ingredient_id) REFERENCES ingredients(id),
-    FOREIGN KEY (restocked_by)  REFERENCES staff(id)
+    id                INT AUTO_INCREMENT PRIMARY KEY,
+    ingredient_id     INT            NOT NULL,
+    quantity_added    DECIMAL(10,2)  NOT NULL,
+    previous_quantity DECIMAL(10,2)  NULL,
+    unit_cost         DECIMAL(10,2)  NULL,
+    restocked_by      INT            NOT NULL,
+    restocked_at      DATETIME       NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    notes             VARCHAR(255)   NULL,
+    FOREIGN KEY (ingredient_id) REFERENCES ingredients(id) ON DELETE RESTRICT,
+    FOREIGN KEY (restocked_by)  REFERENCES staff(id)       ON DELETE RESTRICT
 );
 
 CREATE TABLE IF NOT EXISTS combos (

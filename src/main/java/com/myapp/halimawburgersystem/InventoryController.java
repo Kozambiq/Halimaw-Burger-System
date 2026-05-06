@@ -417,8 +417,17 @@ public class InventoryController extends BaseController {
         }
     }
 
+    private static class StockUpdateResult {
+        final double quantity;
+        final String notes;
+        StockUpdateResult(double quantity, String notes) {
+            this.quantity = quantity;
+            this.notes = notes;
+        }
+    }
+
     private void showAddStockDialog(Ingredient ingredient) {
-        Dialog<Double> dialog = new Dialog<>();
+        Dialog<StockUpdateResult> dialog = new Dialog<>();
         dialog.setTitle("RESTOCK INGREDIENT");
         dialog.getDialogPane().getStyleClass().add("dialog-pane");
         
@@ -429,22 +438,22 @@ public class InventoryController extends BaseController {
         headerLabel.getStyleClass().add("dialog-header-text");
         dialog.getDialogPane().setHeader(headerLabel);
 
-        VBox content = new VBox(24);
-        content.setPadding(new Insets(30, 40, 30, 40));
+        VBox content = new VBox(20);
+        content.setPadding(new Insets(24, 40, 24, 40));
         content.setAlignment(Pos.TOP_CENTER);
-        content.setPrefWidth(400);
+        content.setPrefWidth(420);
 
-        VBox infoBox = new VBox(20);
+        VBox infoBox = new VBox(16);
         infoBox.getStyleClass().add("dialog-section-card");
 
-        VBox nameBox = new VBox(8);
+        VBox nameBox = new VBox(6);
         Label nameEyebrow = new Label("ITEM BEING RESTOCKED");
         nameEyebrow.getStyleClass().add("dialog-eyebrow");
         Label nameLabel = new Label(ingredient.getName().toUpperCase());
         nameLabel.getStyleClass().add("chip-name");
         nameBox.getChildren().addAll(nameEyebrow, nameLabel);
 
-        VBox qtyBox = new VBox(8);
+        VBox qtyBox = new VBox(6);
         Label qtyEyebrow = new Label("QUANTITY TO ADD (" + ingredient.getUnit().toLowerCase() + ")");
         qtyEyebrow.getStyleClass().add("dialog-eyebrow");
         TextField quantityField = new TextField();
@@ -456,7 +465,23 @@ public class InventoryController extends BaseController {
         qtyError.setManaged(false);
         qtyBox.getChildren().addAll(qtyEyebrow, quantityField, qtyError);
 
-        infoBox.getChildren().addAll(nameBox, qtyBox);
+        VBox notesBox = new VBox(6);
+        HBox notesHeader = new HBox();
+        Label notesEyebrow = new Label("NOTES");
+        notesEyebrow.getStyleClass().add("dialog-eyebrow");
+        Region spacer = new Region();
+        HBox.setHgrow(spacer, javafx.scene.layout.Priority.ALWAYS);
+        Label charCounter = new Label("0/255");
+        charCounter.getStyleClass().add("dialog-eyebrow");
+        charCounter.setStyle("-fx-text-fill: #5c4828;");
+        notesHeader.getChildren().addAll(notesEyebrow, spacer, charCounter);
+
+        TextField notesField = new TextField();
+        notesField.setPromptText("e.g. Supplier Delivery");
+        notesField.getStyleClass().add("premium-field");
+        notesBox.getChildren().addAll(notesHeader, notesField);
+
+        infoBox.getChildren().addAll(nameBox, qtyBox, notesBox);
         content.getChildren().add(infoBox);
 
         dialog.getDialogPane().setContent(content);
@@ -466,14 +491,27 @@ public class InventoryController extends BaseController {
         );
 
         Button okButton = (Button) dialog.getDialogPane().lookupButton(javafx.scene.control.ButtonType.OK);
-        okButton.setText("CONFIRM RESTOCK");
+        okButton.setText("CONFIRM");
         okButton.getStyleClass().add("dialog-button-save");
+        okButton.setDisable(true);
 
         Button cancelButton = (Button) dialog.getDialogPane().lookupButton(javafx.scene.control.ButtonType.CANCEL);
         cancelButton.getStyleClass().add("dialog-button-cancel");
 
         boolean isPcs = "pcs".equalsIgnoreCase(ingredient.getUnit());
         String numberPattern = isPcs ? "^\\d+$" : "^\\d*\\.?\\d+$";
+
+        notesField.textProperty().addListener((obs, oldVal, newVal) -> {
+            if (newVal.length() > 255) {
+                notesField.setText(oldVal);
+            }
+            charCounter.setText(notesField.getText().length() + "/255");
+            if (notesField.getText().length() >= 240) {
+                charCounter.setStyle("-fx-text-fill: #ff6b6b;");
+            } else {
+                charCounter.setStyle("-fx-text-fill: #5c4828;");
+            }
+        });
 
         quantityField.textProperty().addListener(obs -> {
             String qtyText = quantityField.getText().trim();
@@ -485,7 +523,9 @@ public class InventoryController extends BaseController {
             } else {
                 try {
                     double qty = Double.parseDouble(qtyText);
-                    if (ingredient.getQuantity() + qty > ingredient.getMaxStock()) {
+                    if (qty <= 0) {
+                        errorMsg = "Must be greater than 0";
+                    } else if (ingredient.getQuantity() + qty > ingredient.getMaxStock()) {
                         errorMsg = "Exceeds capacity (" + ingredient.getMaxStock() + ")";
                     } else {
                         okButton.setDisable(false);
@@ -506,14 +546,17 @@ public class InventoryController extends BaseController {
 
         dialog.setResultConverter(btn -> {
             if (btn == javafx.scene.control.ButtonType.OK) {
-                try { return Double.parseDouble(quantityField.getText()); } catch (Exception ex) { return null; }
+                try { 
+                    return new StockUpdateResult(Double.parseDouble(quantityField.getText()), notesField.getText().trim()); 
+                } catch (Exception ex) { return null; }
             }
             return null;
         });
 
-        dialog.showAndWait().ifPresent(qty -> {
-            if (qty != null && qty > 0) {
-                inventoryService.updateQuantity(ingredient.getId(), ingredient.getQuantity() + qty);
+        dialog.showAndWait().ifPresent(result -> {
+            if (result != null && result.quantity > 0) {
+                int currentStaffId = Main.getCurrentStaff() != null ? Main.getCurrentStaff().getId() : 1;
+                inventoryService.logTransaction(ingredient.getId(), result.quantity, currentStaffId, result.notes);
                 OrderNotificationService.broadcastUpdate();
                 loadInventory();
             }
@@ -521,7 +564,7 @@ public class InventoryController extends BaseController {
     }
 
     private void showReduceStockDialog(Ingredient ingredient) {
-        Dialog<Double> dialog = new Dialog<>();
+        Dialog<StockUpdateResult> dialog = new Dialog<>();
         dialog.setTitle("REDUCE STOCK");
         dialog.getDialogPane().getStyleClass().add("dialog-pane");
         
@@ -532,22 +575,22 @@ public class InventoryController extends BaseController {
         headerLabel.getStyleClass().add("dialog-header-text");
         dialog.getDialogPane().setHeader(headerLabel);
 
-        VBox content = new VBox(24);
-        content.setPadding(new Insets(30, 40, 30, 40));
+        VBox content = new VBox(20);
+        content.setPadding(new Insets(24, 40, 24, 40));
         content.setAlignment(Pos.TOP_CENTER);
-        content.setPrefWidth(400);
+        content.setPrefWidth(420);
 
-        VBox infoBox = new VBox(20);
+        VBox infoBox = new VBox(16);
         infoBox.getStyleClass().add("dialog-section-card");
 
-        VBox nameBox = new VBox(8);
+        VBox nameBox = new VBox(6);
         Label nameEyebrow = new Label("ITEM BEING REDUCED");
         nameEyebrow.getStyleClass().add("dialog-eyebrow");
         Label nameLabel = new Label(ingredient.getName().toUpperCase());
         nameLabel.getStyleClass().add("chip-name");
         nameBox.getChildren().addAll(nameEyebrow, nameLabel);
 
-        VBox qtyBox = new VBox(8);
+        VBox qtyBox = new VBox(6);
         Label qtyEyebrow = new Label("QUANTITY TO REMOVE (" + ingredient.getUnit().toLowerCase() + ")");
         qtyEyebrow.getStyleClass().add("dialog-eyebrow");
         TextField quantityField = new TextField();
@@ -559,7 +602,23 @@ public class InventoryController extends BaseController {
         qtyError.setManaged(false);
         qtyBox.getChildren().addAll(qtyEyebrow, quantityField, qtyError);
 
-        infoBox.getChildren().addAll(nameBox, qtyBox);
+        VBox notesBox = new VBox(6);
+        HBox notesHeader = new HBox();
+        Label notesEyebrow = new Label("NOTES");
+        notesEyebrow.getStyleClass().add("dialog-eyebrow");
+        Region spacer = new Region();
+        HBox.setHgrow(spacer, javafx.scene.layout.Priority.ALWAYS);
+        Label charCounter = new Label("0/255");
+        charCounter.getStyleClass().add("dialog-eyebrow");
+        charCounter.setStyle("-fx-text-fill: #5c4828;");
+        notesHeader.getChildren().addAll(notesEyebrow, spacer, charCounter);
+
+        TextField notesField = new TextField();
+        notesField.setPromptText("e.g. Spillage / Expiration");
+        notesField.getStyleClass().add("premium-field");
+        notesBox.getChildren().addAll(notesHeader, notesField);
+
+        infoBox.getChildren().addAll(nameBox, qtyBox, notesBox);
         content.getChildren().add(infoBox);
 
         dialog.getDialogPane().setContent(content);
@@ -569,14 +628,27 @@ public class InventoryController extends BaseController {
         );
 
         Button okButton = (Button) dialog.getDialogPane().lookupButton(javafx.scene.control.ButtonType.OK);
-        okButton.setText("CONFIRM REDUCTION");
+        okButton.setText("CONFIRM");
         okButton.getStyleClass().add("dialog-button-save");
+        okButton.setDisable(true);
 
         Button cancelButton = (Button) dialog.getDialogPane().lookupButton(javafx.scene.control.ButtonType.CANCEL);
         cancelButton.getStyleClass().add("dialog-button-cancel");
 
         boolean isPcs = "pcs".equalsIgnoreCase(ingredient.getUnit());
         String numberPattern = isPcs ? "^\\d+$" : "^\\d*\\.?\\d+$";
+
+        notesField.textProperty().addListener((obs, oldVal, newVal) -> {
+            if (newVal.length() > 255) {
+                notesField.setText(oldVal);
+            }
+            charCounter.setText(notesField.getText().length() + "/255");
+            if (notesField.getText().length() >= 240) {
+                charCounter.setStyle("-fx-text-fill: #ff6b6b;");
+            } else {
+                charCounter.setStyle("-fx-text-fill: #5c4828;");
+            }
+        });
 
         quantityField.textProperty().addListener(obs -> {
             String qtyText = quantityField.getText().trim();
@@ -588,7 +660,9 @@ public class InventoryController extends BaseController {
             } else {
                 try {
                     double qty = Double.parseDouble(qtyText);
-                    if (qty > ingredient.getQuantity()) {
+                    if (qty <= 0) {
+                        errorMsg = "Must be greater than 0";
+                    } else if (qty > ingredient.getQuantity()) {
                         errorMsg = "Not enough stock (" + ingredient.getQuantity() + ")";
                     } else {
                         okButton.setDisable(false);
@@ -609,14 +683,17 @@ public class InventoryController extends BaseController {
 
         dialog.setResultConverter(btn -> {
             if (btn == javafx.scene.control.ButtonType.OK) {
-                try { return Double.parseDouble(quantityField.getText()); } catch (Exception ex) { return null; }
+                try { 
+                    return new StockUpdateResult(Double.parseDouble(quantityField.getText()), notesField.getText().trim()); 
+                } catch (Exception ex) { return null; }
             }
             return null;
         });
 
-        dialog.showAndWait().ifPresent(qty -> {
-            if (qty != null && qty > 0) {
-                inventoryService.updateQuantity(ingredient.getId(), ingredient.getQuantity() - qty);
+        dialog.showAndWait().ifPresent(result -> {
+            if (result != null && result.quantity > 0) {
+                int currentStaffId = Main.getCurrentStaff() != null ? Main.getCurrentStaff().getId() : 1;
+                inventoryService.logTransaction(ingredient.getId(), -result.quantity, currentStaffId, result.notes);
                 OrderNotificationService.broadcastUpdate();
                 loadInventory();
             }

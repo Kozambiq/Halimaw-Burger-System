@@ -109,8 +109,12 @@ public class IngredientDAO {
     }
 
     public boolean addRestock(int ingredientId, double quantityAdded, int staffId) {
+        return addRestock(ingredientId, quantityAdded, staffId, null);
+    }
+
+    public boolean addRestock(int ingredientId, double quantityAdded, int staffId, String notes) {
         String updateSql = "UPDATE ingredients SET quantity = quantity + ? WHERE id = ?";
-        String logSql = "INSERT INTO restock_logs (ingredient_id, quantity_added, restocked_by) VALUES (?, ?, ?)";
+        String logSql = "INSERT INTO restock_logs (ingredient_id, quantity_added, previous_quantity, restocked_by, notes) VALUES (?, ?, ?, ?, ?)";
 
         try (Connection conn = DatabaseConnection.getConnection()) {
             conn.setAutoCommit(false);
@@ -118,13 +122,29 @@ public class IngredientDAO {
             try (PreparedStatement updateStmt = conn.prepareStatement(updateSql);
                  PreparedStatement logStmt = conn.prepareStatement(logSql)) {
 
+                // We need previous quantity before update
+                double prevQty = 0;
+                String selectSql = "SELECT quantity FROM ingredients WHERE id = ?";
+                try (PreparedStatement selStmt = conn.prepareStatement(selectSql)) {
+                    selStmt.setInt(1, ingredientId);
+                    try (ResultSet rs = selStmt.executeQuery()) {
+                        if (rs.next()) prevQty = rs.getDouble(1);
+                    }
+                }
+
                 updateStmt.setDouble(1, quantityAdded);
                 updateStmt.setInt(2, ingredientId);
                 updateStmt.executeUpdate();
 
                 logStmt.setInt(1, ingredientId);
                 logStmt.setDouble(2, quantityAdded);
-                logStmt.setInt(3, staffId);
+                logStmt.setDouble(3, prevQty);
+                logStmt.setInt(4, staffId);
+                if (notes == null || notes.trim().isEmpty()) {
+                    logStmt.setNull(5, java.sql.Types.VARCHAR);
+                } else {
+                    logStmt.setString(5, notes);
+                }
                 logStmt.executeUpdate();
 
                 conn.commit();
@@ -137,6 +157,11 @@ public class IngredientDAO {
             System.err.println("Error with connection: " + e.getMessage());
         }
         return false;
+    }
+
+    public boolean logTransaction(int ingredientId, double quantityChange, int staffId, String notes) {
+        // reuse addRestock as it does exactly what we need (quantityChange can be negative)
+        return addRestock(ingredientId, quantityChange, staffId, notes);
     }
 
     public boolean delete(int id) {

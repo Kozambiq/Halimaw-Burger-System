@@ -56,6 +56,10 @@ public class InventoryService {
         return ingredientDAO.insert(name, unit, quantity, minThreshold, maxStock);
     }
 
+    public boolean logTransaction(int ingredientId, double quantityChange, int staffId, String notes) {
+        return ingredientDAO.logTransaction(ingredientId, quantityChange, staffId, notes);
+    }
+
     public boolean addRestock(int ingredientId, double quantityAdded, int staffId) {
         return ingredientDAO.addRestock(ingredientId, quantityAdded, staffId);
     }
