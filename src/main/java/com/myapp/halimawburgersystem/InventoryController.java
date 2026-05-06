@@ -2,6 +2,7 @@ package com.myapp.halimawburgersystem;
 
 import com.myapp.dao.IngredientDAO;
 import com.myapp.model.Ingredient;
+import com.myapp.model.RestockLog;
 import com.myapp.service.InventoryService;
 import com.myapp.util.OrderNotificationService;
 import javafx.application.Platform;
@@ -33,6 +34,7 @@ import javafx.geometry.Pos;
 import javafx.util.Callback;
 import javafx.scene.paint.Color;
 
+import java.time.LocalDateTime;
 import java.util.List;
 import java.util.stream.Collectors;
 import java.util.concurrent.Executors;
@@ -1130,6 +1132,119 @@ private void onAddIngredient() {
         }
     });
 }
+    @FXML
+    private void onShowRestockLogs() {
+        showRestockLogsDialog();
+    }
+
+    private void showRestockLogsDialog() {
+        Dialog<Void> dialog = new Dialog<>();
+        dialog.setTitle("RESTOCK & TRANSACTION LOGS");
+        dialog.getDialogPane().getStyleClass().add("dialog-pane");
+        dialog.getDialogPane().getStylesheets().add(getClass().getResource("/css/common.css").toExternalForm());
+        dialog.getDialogPane().getStylesheets().add(getClass().getResource("/css/dashboard.css").toExternalForm());
+        dialog.getDialogPane().getStylesheets().add(getClass().getResource("/css/inventory.css").toExternalForm());
+        dialog.getDialogPane().getStylesheets().add(getClass().getResource("/css/dialog.css").toExternalForm());
+
+        Label headerLabel = new Label("Restock & Inventory Logs");
+        headerLabel.getStyleClass().add("dialog-header-text");
+        dialog.getDialogPane().setHeader(headerLabel);
+
+        VBox content = new VBox(20);
+        content.setPadding(new Insets(20, 30, 20, 30));
+        content.setPrefSize(900, 600);
+
+        TableView<RestockLog> logTable = new TableView<>();
+        logTable.getStyleClass().add("inventory-table");
+        logTable.setColumnResizePolicy(TableView.CONSTRAINED_RESIZE_POLICY);
+
+        TableColumn<RestockLog, String> colTimestamp = new TableColumn<>("DATE & TIME");
+        colTimestamp.setCellValueFactory(cellData -> {
+            LocalDateTime dt = cellData.getValue().getRestockedAt();
+            return new javafx.beans.property.SimpleStringProperty(
+                dt.format(java.time.format.DateTimeFormatter.ofPattern("MMM dd, yyyy • hh:mm a"))
+            );
+        });
+        colTimestamp.setPrefWidth(180);
+
+        TableColumn<RestockLog, String> colIngredient = new TableColumn<>("INGREDIENT");
+        colIngredient.setCellValueFactory(new PropertyValueFactory<>("ingredientName"));
+        colIngredient.setCellFactory(col -> new TableCell<RestockLog, String>() {
+            @Override protected void updateItem(String item, boolean empty) {
+                super.updateItem(item, empty);
+                if (empty || item == null) setText(null);
+                else { setText(item.toUpperCase()); getStyleClass().add("cell-name"); }
+            }
+        });
+
+        TableColumn<RestockLog, String> colBefore = new TableColumn<>("BEFORE");
+        colBefore.setCellValueFactory(cellData -> new javafx.beans.property.SimpleStringProperty(
+            String.format("%.1f %s", cellData.getValue().getPreviousQuantity(), cellData.getValue().getUnit())
+        ));
+        colBefore.getStyleClass().add("cell-mono");
+
+        TableColumn<RestockLog, String> colChange = new TableColumn<>("CHANGE");
+        colChange.setCellValueFactory(cellData -> {
+            double qty = cellData.getValue().getQuantityAdded();
+            String prefix = qty > 0 ? "+" : "";
+            return new javafx.beans.property.SimpleStringProperty(
+                String.format("%s%.1f %s", prefix, qty, cellData.getValue().getUnit())
+            );
+        });
+        colChange.setCellFactory(col -> new TableCell<RestockLog, String>() {
+            @Override protected void updateItem(String item, boolean empty) {
+                super.updateItem(item, empty);
+                if (empty || item == null) {
+                    setText(null); setStyle("");
+                } else {
+                    setText(item);
+                    getStyleClass().add("cell-mono");
+                    if (item.startsWith("+")) {
+                        setStyle("-fx-text-fill: #7ec470; -fx-font-weight: bold;");
+                    } else if (item.startsWith("-")) {
+                        setStyle("-fx-text-fill: #e07070; -fx-font-weight: bold;");
+                    }
+                }
+            }
+        });
+
+        TableColumn<RestockLog, String> colAfter = new TableColumn<>("AFTER");
+        colAfter.setCellValueFactory(cellData -> new javafx.beans.property.SimpleStringProperty(
+            String.format("%.1f %s", cellData.getValue().getAfterQuantity(), cellData.getValue().getUnit())
+        ));
+        colAfter.getStyleClass().add("cell-mono");
+
+        TableColumn<RestockLog, String> colNotes = new TableColumn<>("NOTES");
+        colNotes.setCellValueFactory(new PropertyValueFactory<>("notes"));
+        colNotes.setCellFactory(col -> new TableCell<RestockLog, String>() {
+            @Override protected void updateItem(String item, boolean empty) {
+                super.updateItem(item, empty);
+                if (empty || item == null || item.isEmpty()) setText("—");
+                else { setText(item); setStyle("-fx-text-fill: #8a7055; -fx-font-style: italic;"); }
+            }
+        });
+        colNotes.setPrefWidth(200);
+
+        logTable.getColumns().addAll(colTimestamp, colIngredient, colBefore, colChange, colAfter, colNotes);
+
+        List<RestockLog> logs = inventoryService.findAllRestockLogs();
+        logTable.setItems(FXCollections.observableArrayList(logs));
+
+        StackPane tableWrapper = new StackPane(logTable);
+        tableWrapper.getStyleClass().add("table-wrap");
+        VBox.setVgrow(tableWrapper, javafx.scene.layout.Priority.ALWAYS);
+
+        content.getChildren().add(tableWrapper);
+        dialog.getDialogPane().setContent(content);
+        dialog.getDialogPane().getButtonTypes().add(javafx.scene.control.ButtonType.CLOSE);
+
+        Button closeButton = (Button) dialog.getDialogPane().lookupButton(javafx.scene.control.ButtonType.CLOSE);
+        closeButton.getStyleClass().add("dialog-button-cancel");
+        closeButton.setText("CLOSE LOGS");
+
+        dialog.showAndWait();
+    }
+
     @FXML
     private void onRestock() {
         Alert alert = new Alert(Alert.AlertType.INFORMATION);

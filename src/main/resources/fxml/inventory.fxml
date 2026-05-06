@@ -157,6 +157,7 @@
                     </VBox>
                     
                     <Region HBox.hgrow="ALWAYS"/>
+                    <Button styleClass="btn-secondary" text="RESTOCK LOGS" onAction="#onShowRestockLogs" prefWidth="160" style="-fx-font-weight: 900; -fx-letter-spacing: 0.05em;"/>
                     <Button styleClass="btn-primary" text="+ ADD ITEM" onAction="#onAddIngredient" prefWidth="150" style="-fx-font-weight: 900; -fx-letter-spacing: 0.05em;"/>
                 </HBox>
 

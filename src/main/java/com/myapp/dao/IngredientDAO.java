@@ -7,8 +7,11 @@ import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.sql.Timestamp;
+import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
+import com.myapp.model.RestockLog;
 
 public class IngredientDAO {
 
@@ -162,6 +165,36 @@ public class IngredientDAO {
     public boolean logTransaction(int ingredientId, double quantityChange, int staffId, String notes) {
         // reuse addRestock as it does exactly what we need (quantityChange can be negative)
         return addRestock(ingredientId, quantityChange, staffId, notes);
+    }
+
+    public List<RestockLog> findAllRestockLogs() {
+        List<RestockLog> logs = new ArrayList<>();
+        String sql = "SELECT l.id, l.ingredient_id, i.name as ingredient_name, i.unit, l.quantity_added, " +
+                     "l.previous_quantity, l.restocked_at, l.notes " +
+                     "FROM restock_logs l " +
+                     "JOIN ingredients i ON l.ingredient_id = i.id " +
+                     "ORDER BY l.restocked_at DESC";
+
+        try (Connection conn = DatabaseConnection.getConnection();
+             PreparedStatement stmt = conn.prepareStatement(sql);
+             ResultSet rs = stmt.executeQuery()) {
+
+            while (rs.next()) {
+                logs.add(new RestockLog(
+                    rs.getInt("id"),
+                    rs.getInt("ingredient_id"),
+                    rs.getString("ingredient_name"),
+                    rs.getDouble("quantity_added"),
+                    rs.getDouble("previous_quantity"),
+                    rs.getTimestamp("restocked_at").toLocalDateTime(),
+                    rs.getString("notes"),
+                    rs.getString("unit")
+                ));
+            }
+        } catch (SQLException e) {
+            System.err.println("Error loading restock logs: " + e.getMessage());
+        }
+        return logs;
     }
 
     public boolean delete(int id) {

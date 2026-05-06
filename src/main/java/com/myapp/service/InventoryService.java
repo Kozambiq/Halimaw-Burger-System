@@ -2,6 +2,7 @@ package com.myapp.service;
 
 import com.myapp.dao.IngredientDAO;
 import com.myapp.model.Ingredient;
+import com.myapp.model.RestockLog;
 import java.util.List;
 
 public class InventoryService {
@@ -10,6 +11,10 @@ public class InventoryService {
 
     public List<Ingredient> findAll() {
         return ingredientDAO.findAll();
+    }
+
+    public List<RestockLog> findAllRestockLogs() {
+        return ingredientDAO.findAllRestockLogs();
     }
 
     public List<Ingredient> findByName(String name) {

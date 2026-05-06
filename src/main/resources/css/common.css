@@ -141,6 +141,27 @@
     -fx-background-color: #e05c0a;
 }
 
+/* ── Secondary Button ─────────────────────────────────────── */
+.btn-secondary {
+    -fx-background-color: transparent;
+    -fx-text-fill: #c4a882;
+    -fx-border-color: #4a3820;
+    -fx-border-width: 1.5;
+    -fx-border-radius: 10;
+    -fx-background-radius: 10;
+    -fx-font-weight: 800;
+    -fx-font-family: 'DM Sans', sans-serif;
+    -fx-padding: 10 20 10 20;
+    -fx-cursor: hand;
+    -fx-transition: all 0.2s ease;
+}
+
+.btn-secondary:hover {
+    -fx-background-color: rgba(200, 80, 10, 0.05);
+    -fx-border-color: #c8500a;
+    -fx-text-fill: #f5ede0;
+}
+
 /* ── Standardized Management Table ─────────────────────── */
 .table-view {
     -fx-background-color: transparent;
