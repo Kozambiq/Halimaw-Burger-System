@@ -409,7 +409,7 @@ public class InventoryController extends BaseController {
         }
     }
 
-    private void loadInventory() {
+    public void loadInventory() {
         try {
             int total = inventoryService.getTotalCount();
             int low = inventoryService.getLowStockCount();

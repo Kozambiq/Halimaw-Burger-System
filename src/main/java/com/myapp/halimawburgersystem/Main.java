@@ -24,6 +24,7 @@ public class Main extends Application {
     private static Parent ordersRoot;
     private static Parent kitchenRoot;
     private static DashboardController dashboardController;
+    private static InventoryController inventoryController;
     private static MenuItemsController menuItemsController;
     private static CombosController combosController;
     private static StaffController staffController;
@@ -64,26 +65,20 @@ public class Main extends Application {
     }
 
     public static void showDashboard() throws Exception {
-        clearInventoryCache();
-        
         if (dashboardRoot == null) {
             FXMLLoader fxmlLoader = new FXMLLoader(Main.class.getResource("/fxml/dashboard.fxml"));
             dashboardRoot = fxmlLoader.load();
             dashboardController = fxmlLoader.getController();
         }
         
-        if (cachedScene == null) {
-            cachedScene = new Scene(dashboardRoot, 1280, 800);
-            mainStage.setScene(cachedScene);
-        } else {
-            cachedScene.setRoot(dashboardRoot);
-        }
-        
-        mainStage.setTitle("BurgerHQ - Staff Portal");
+        cachedScene.setRoot(dashboardRoot);
+        mainStage.setTitle("BurgerHQ - Dashboard");
         mainStage.show();
         
         if (dashboardController != null) {
             dashboardController.setActiveNav("Dashboard");
+            // Refresh data when returning to tab
+            dashboardController.loadDashboardData();
         }
     }
 
@@ -94,13 +89,7 @@ public class Main extends Application {
             kitchenController = fxmlLoader.getController();
         }
 
-        if (cachedScene == null) {
-            cachedScene = new Scene(kitchenRoot, 1280, 800);
-            mainStage.setScene(cachedScene);
-        } else {
-            cachedScene.setRoot(kitchenRoot);
-        }
-
+        cachedScene.setRoot(kitchenRoot);
         mainStage.setTitle("BurgerHQ - Kitchen Queue");
         mainStage.show();
 
@@ -111,114 +100,71 @@ public class Main extends Application {
     }
 
     public static void showInventory() throws Exception {
-        clearMenuItemsCache();
-
         if (inventoryRoot == null) {
             FXMLLoader fxmlLoader = new FXMLLoader(Main.class.getResource("/fxml/inventory.fxml"));
             inventoryRoot = fxmlLoader.load();
+            inventoryController = fxmlLoader.getController();
         }
         
-        if (cachedScene == null) {
-            cachedScene = new Scene(inventoryRoot, 1280, 800);
-            mainStage.setScene(cachedScene);
-        } else {
-            cachedScene.setRoot(inventoryRoot);
-        }
-        
+        cachedScene.setRoot(inventoryRoot);
         mainStage.setTitle("BurgerHQ - Inventory");
         mainStage.show();
         
-        if (dashboardController != null) {
-            dashboardController.setActiveNav("Inventory");
+        if (inventoryController != null) {
+            inventoryController.setActiveNav("Inventory");
+            inventoryController.loadInventory();
         }
     }
     
     public static void showMenuItems() throws Exception {
-        clearCombosCache();
-
         if (menuItemsRoot == null) {
             FXMLLoader fxmlLoader = new FXMLLoader(Main.class.getResource("/fxml/menuitems.fxml"));
             menuItemsRoot = fxmlLoader.load();
             menuItemsController = fxmlLoader.getController();
         }
 
-        if (cachedScene == null) {
-            cachedScene = new Scene(menuItemsRoot, 1280, 800);
-            mainStage.setScene(cachedScene);
-        } else {
-            cachedScene.setRoot(menuItemsRoot);
-        }
-
+        cachedScene.setRoot(menuItemsRoot);
         mainStage.setTitle("BurgerHQ - Menu Items");
         mainStage.show();
 
         if (menuItemsController != null) {
             menuItemsController.setActiveNav("Menu Items");
+            menuItemsController.loadMenuItems();
         }
     }
 
     public static void showCombos() throws Exception {
-        clearMenuItemsCache();
-
         if (combosRoot == null) {
             FXMLLoader fxmlLoader = new FXMLLoader(Main.class.getResource("/fxml/combos.fxml"));
             combosRoot = fxmlLoader.load();
             combosController = fxmlLoader.getController();
         }
 
-        if (cachedScene == null) {
-            cachedScene = new Scene(combosRoot, 1280, 800);
-            mainStage.setScene(cachedScene);
-        } else {
-            cachedScene.setRoot(combosRoot);
-        }
-
+        cachedScene.setRoot(combosRoot);
         mainStage.setTitle("BurgerHQ - Combos & Promos");
         mainStage.show();
 
         if (combosController != null) {
             combosController.setActiveNav("Combos & Promos");
+            combosController.loadCombos();
         }
     }
 
-    public static void clearInventoryCache() {
-        inventoryRoot = null;
-    }
-
-    public static void clearMenuItemsCache() {
-        menuItemsRoot = null;
-    }
-
     public static void showStaff() throws Exception {
-        clearCombosCache();
-
         if (staffRoot == null) {
             FXMLLoader fxmlLoader = new FXMLLoader(Main.class.getResource("/fxml/staff.fxml"));
             staffRoot = fxmlLoader.load();
             staffController = fxmlLoader.getController();
         }
 
-        if (cachedScene == null) {
-            cachedScene = new Scene(staffRoot, 1280, 800);
-            mainStage.setScene(cachedScene);
-        } else {
-            cachedScene.setRoot(staffRoot);
-        }
-
+        cachedScene.setRoot(staffRoot);
         mainStage.setTitle("BurgerHQ - Staff");
         mainStage.show();
 
         if (staffController != null) {
             staffController.setActiveNav("Staff");
+            staffController.loadStaff();
         }
-    }
-
-    public static void clearCombosCache() {
-        combosRoot = null;
-    }
-
-    public static void clearStaffCache() {
-        staffRoot = null;
     }
 
     public static void showOrders() throws Exception {
@@ -228,13 +174,7 @@ public class Main extends Application {
             ordersController = fxmlLoader.getController();
         }
 
-        if (cachedScene == null) {
-            cachedScene = new Scene(ordersRoot, 1280, 800);
-            mainStage.setScene(cachedScene);
-        } else {
-            cachedScene.setRoot(ordersRoot);
-        }
-
+        cachedScene.setRoot(ordersRoot);
         mainStage.setTitle("BurgerHQ - Orders");
         mainStage.show();
 
@@ -244,36 +184,20 @@ public class Main extends Application {
         }
     }
 
-    public static void clearOrdersCache() {
-        ordersRoot = null;
-    }
-
     public static void showCashier() throws Exception {
-        clearCashierCache();
-
         if (cashierRoot == null) {
             FXMLLoader fxmlLoader = new FXMLLoader(Main.class.getResource("/fxml/cashier.fxml"));
             cashierRoot = fxmlLoader.load();
             cashierController = fxmlLoader.getController();
         }
 
-        if (cachedScene == null) {
-            cachedScene = new Scene(cashierRoot, 1280, 800);
-            mainStage.setScene(cachedScene);
-        } else {
-            cachedScene.setRoot(cashierRoot);
-        }
-
+        cachedScene.setRoot(cashierRoot);
         mainStage.setTitle("BurgerHQ - Cashier");
         mainStage.show();
 
         if (cashierController != null) {
             cashierController.setActiveNav("Cashier");
         }
-    }
-
-    public static void clearCashierCache() {
-        cashierRoot = null;
     }
 
     public static void showSalesReport() throws Exception {
@@ -283,18 +207,13 @@ public class Main extends Application {
             salesReportController = fxmlLoader.getController();
         }
 
-        if (cachedScene == null) {
-            cachedScene = new Scene(salesReportRoot, 1280, 800);
-            mainStage.setScene(cachedScene);
-        } else {
-            cachedScene.setRoot(salesReportRoot);
-        }
-
+        cachedScene.setRoot(salesReportRoot);
         mainStage.setTitle("BurgerHQ - Sales Reports");
         mainStage.show();
 
         if (salesReportController != null) {
             salesReportController.setActiveNav("Sales Reports");
+            salesReportController.loadReport();
         }
     }
 
@@ -305,19 +224,61 @@ public class Main extends Application {
             cookController = fxmlLoader.getController();
         }
 
-        if (cachedScene == null) {
-            cachedScene = new Scene(cookRoot, 1280, 800);
-            mainStage.setScene(cachedScene);
-        } else {
-            cachedScene.setRoot(cookRoot);
-        }
-
+        cachedScene.setRoot(cookRoot);
         mainStage.setTitle("BurgerHQ - Kitchen Queue");
         mainStage.show();
 
         if (cookController != null) {
             cookController.loadQueue();
         }
+    }
+
+    public static void clearAllCaches() {
+        dashboardRoot = null;
+        inventoryRoot = null;
+        menuItemsRoot = null;
+        combosRoot = null;
+        staffRoot = null;
+        cashierRoot = null;
+        ordersRoot = null;
+        kitchenRoot = null;
+        salesReportRoot = null;
+        cookRoot = null;
+        
+        dashboardController = null;
+        inventoryController = null;
+        menuItemsController = null;
+        combosController = null;
+        staffController = null;
+        cashierController = null;
+        ordersController = null;
+        kitchenController = null;
+        salesReportController = null;
+        cookController = null;
+    }
+
+    public static void clearInventoryCache() {
+        inventoryRoot = null;
+    }
+
+    public static void clearMenuItemsCache() {
+        menuItemsRoot = null;
+    }
+
+    public static void clearCombosCache() {
+        combosRoot = null;
+    }
+
+    public static void clearStaffCache() {
+        staffRoot = null;
+    }
+
+    public static void clearOrdersCache() {
+        ordersRoot = null;
+    }
+
+    public static void clearCashierCache() {
+        cashierRoot = null;
     }
 
     public static void clearCookCache() {

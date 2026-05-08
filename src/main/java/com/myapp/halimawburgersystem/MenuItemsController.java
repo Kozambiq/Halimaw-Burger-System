@@ -131,7 +131,7 @@ public class MenuItemsController extends BaseController {
         suggestionList.getStylesheets().add(getClass().getResource("/css/common.css").toExternalForm());
         suggestionList.setFixedCellSize(40);
         suggestionList.setMaxHeight(240);
-        suggestionList.setPrefWidth(280);
+        suggestionList.setPrefWidth(300);
 
         javafx.stage.Popup suggestionPopup = new javafx.stage.Popup();
         suggestionPopup.setAutoHide(true);
@@ -965,7 +965,7 @@ public class MenuItemsController extends BaseController {
         alert.showAndWait();
     }
 
-    private void loadMenuItems() {
+    public void loadMenuItems() {
         try {
             menuItemService.syncAvailabilityToDatabase();
 

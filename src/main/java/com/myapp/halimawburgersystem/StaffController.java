@@ -194,7 +194,7 @@ public class StaffController extends BaseController {
         }
     }
 
-    private void loadStaff() {
+    public void loadStaff() {
         try {
             int total = staffService.getTotalCount();
             int active = staffService.getActiveCount();

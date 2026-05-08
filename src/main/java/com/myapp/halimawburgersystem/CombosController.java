@@ -254,7 +254,7 @@ public class CombosController extends BaseController {
         });
     }
 
-    private void loadCombos() {
+    public void loadCombos() {
         try {
             int total = comboService.getTotalCount();
             int active = comboService.getActiveCount();

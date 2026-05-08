@@ -194,7 +194,7 @@ public class DashboardController extends BaseController {
         recentOrdersTable.setColumnResizePolicy(TableView.CONSTRAINED_RESIZE_POLICY);
     }
 
-    private void loadDashboardData() {
+    public void loadDashboardData() {
         javafx.concurrent.Task<DashboardData> loadTask = new javafx.concurrent.Task<>() {
             @Override
             protected DashboardData call() throws Exception {

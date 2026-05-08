@@ -304,7 +304,7 @@ public class SalesReportController extends BaseController {
         }
     }
 
-    private void loadReport() {
+    public void loadReport() {
         setStatus(lblAnalysisStatus, "Loading...");
         setStatus(lblRecommendationStatus, "Loading...");
         loadHtml(analysisWebView, "<i style='color:#c8a97a'>Loading analysis...</i>");
