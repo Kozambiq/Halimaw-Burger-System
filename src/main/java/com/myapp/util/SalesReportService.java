@@ -3,6 +3,7 @@ package com.myapp.util;
 import com.myapp.util.DatabaseConnection;
 import java.sql.*;
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -23,14 +24,20 @@ public class SalesReportService {
     public static SalesSummary fetchSummary() throws SQLException {
         SalesSummary s = new SalesSummary();
         LocalDate today = LocalDate.now();
+        LocalDateTime todayStart = today.atStartOfDay();
+        LocalDateTime todayEnd = today.plusDays(1).atStartOfDay();
+        
         LocalDate yesterday = today.minusDays(1);
+        LocalDateTime yesterdayStart = yesterday.atStartOfDay();
+        LocalDateTime yesterdayEnd = today.atStartOfDay();
 
         try (Connection conn = DatabaseConnection.getConnection()) {
 
             String revenueSQL = "SELECT COALESCE(SUM(total),0), COUNT(*) FROM orders "
-                    + "WHERE DATE(created_at) = ? AND status = 'Completed'";
+                    + "WHERE created_at >= ? AND created_at < ? AND status = 'Completed'";
             try (PreparedStatement ps = conn.prepareStatement(revenueSQL)) {
-                ps.setDate(1, Date.valueOf(today));
+                ps.setTimestamp(1, Timestamp.valueOf(todayStart));
+                ps.setTimestamp(2, Timestamp.valueOf(todayEnd));
                 ResultSet rs = ps.executeQuery();
                 if (rs.next()) {
                     s.revenueToday = rs.getDouble(1);
@@ -39,7 +46,8 @@ public class SalesReportService {
             }
 
             try (PreparedStatement ps = conn.prepareStatement(revenueSQL)) {
-                ps.setDate(1, Date.valueOf(yesterday));
+                ps.setTimestamp(1, Timestamp.valueOf(yesterdayStart));
+                ps.setTimestamp(2, Timestamp.valueOf(yesterdayEnd));
                 ResultSet rs = ps.executeQuery();
                 if (rs.next()) {
                     s.revenueYesterday = rs.getDouble(1);
@@ -51,11 +59,12 @@ public class SalesReportService {
                     + "SUM(oi.total_price) AS revenue "
                     + "FROM order_items oi "
                     + "JOIN orders o ON oi.order_id = o.id "
-                    + "WHERE DATE(o.created_at) = ? AND o.status = 'Completed' "
+                    + "WHERE o.created_at >= ? AND o.created_at < ? AND o.status = 'Completed' "
                     + "GROUP BY oi.item_name ORDER BY qty DESC LIMIT 8";
             s.topItems = new ArrayList<>();
             try (PreparedStatement ps = conn.prepareStatement(topSQL)) {
-                ps.setDate(1, Date.valueOf(today));
+                ps.setTimestamp(1, Timestamp.valueOf(todayStart));
+                ps.setTimestamp(2, Timestamp.valueOf(todayEnd));
                 ResultSet rs = ps.executeQuery();
                 while (rs.next()) {
                     s.topItems.add(new String[]{
@@ -82,11 +91,12 @@ public class SalesReportService {
             }
 
             String hourlySQL = "SELECT HOUR(created_at) AS hr, COALESCE(SUM(total),0) AS rev "
-                    + "FROM orders WHERE DATE(created_at) = ? AND status = 'Completed' "
+                    + "FROM orders WHERE created_at >= ? AND created_at < ? AND status = 'Completed' "
                     + "GROUP BY hr ORDER BY hr";
             s.hourlyRevenue = new ArrayList<>();
             try (PreparedStatement ps = conn.prepareStatement(hourlySQL)) {
-                ps.setDate(1, Date.valueOf(today));
+                ps.setTimestamp(1, Timestamp.valueOf(todayStart));
+                ps.setTimestamp(2, Timestamp.valueOf(todayEnd));
                 ResultSet rs = ps.executeQuery();
                 while (rs.next()) {
                     int hr = rs.getInt("hr");
@@ -99,11 +109,12 @@ public class SalesReportService {
                     + "FROM order_items oi "
                     + "JOIN orders o ON oi.order_id = o.id "
                     + "LEFT JOIN menu_items mi ON oi.item_id = mi.id AND oi.item_type = 'MenuItem' "
-                    + "WHERE DATE(o.created_at) = ? AND o.status = 'Completed' "
+                    + "WHERE o.created_at >= ? AND o.created_at < ? AND o.status = 'Completed' "
                     + "GROUP BY mi.category ORDER BY revenue DESC";
             s.categoryBreakdown = new ArrayList<>();
             try (PreparedStatement ps = conn.prepareStatement(catSQL)) {
-                ps.setDate(1, Date.valueOf(today));
+                ps.setTimestamp(1, Timestamp.valueOf(todayStart));
+                ps.setTimestamp(2, Timestamp.valueOf(todayEnd));
                 ResultSet rs = ps.executeQuery();
                 while (rs.next()) {
                     String cat = rs.getString("category");
@@ -123,14 +134,17 @@ public class SalesReportService {
         List<String[]> dailyRevenue = new ArrayList<>();
         LocalDate endDate = LocalDate.now();
         LocalDate startDate = endDate.minusDays(days - 1);
+        
+        LocalDateTime startTs = startDate.atStartOfDay();
+        LocalDateTime endTs = endDate.plusDays(1).atStartOfDay();
 
         try (Connection conn = DatabaseConnection.getConnection()) {
             String dailySQL = "SELECT DATE(created_at) AS sale_date, COALESCE(SUM(total),0) AS rev "
-                    + "FROM orders WHERE DATE(created_at) BETWEEN ? AND ? AND status = 'Completed' "
+                    + "FROM orders WHERE created_at >= ? AND created_at < ? AND status = 'Completed' "
                     + "GROUP BY sale_date ORDER BY sale_date";
             try (PreparedStatement ps = conn.prepareStatement(dailySQL)) {
-                ps.setDate(1, Date.valueOf(startDate));
-                ps.setDate(2, Date.valueOf(endDate));
+                ps.setTimestamp(1, Timestamp.valueOf(startTs));
+                ps.setTimestamp(2, Timestamp.valueOf(endTs));
                 ResultSet rs = ps.executeQuery();
                 while (rs.next()) {
                     String dateStr = rs.getDate("sale_date").toString();

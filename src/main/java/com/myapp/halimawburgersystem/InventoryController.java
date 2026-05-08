@@ -112,8 +112,16 @@ public class InventoryController extends BaseController {
             String query = searchField.getText().trim().toLowerCase();
             if (query.isEmpty()) {
                 suggestionPopup.hide();
+                // Reset table when empty
+                inventoryTable.setItems(FXCollections.observableArrayList(allIngredients));
                 return;
             }
+
+            // Real-time table filtering
+            List<Ingredient> filtered = allIngredients.stream()
+                    .filter(ing -> ing.getName().toLowerCase().contains(query))
+                    .collect(Collectors.toList());
+            inventoryTable.setItems(FXCollections.observableArrayList(filtered));
 
             List<String> matches = allIngredientNames.stream()
                     .filter(name -> name.toLowerCase().contains(query))
