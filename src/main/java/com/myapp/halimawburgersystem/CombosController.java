@@ -255,19 +255,35 @@ public class CombosController extends BaseController {
     }
 
     public void loadCombos() {
-        try {
-            int total = comboService.getTotalCount();
-            int active = comboService.getActiveCount();
-            allCombos = comboService.findAll();
+        javafx.concurrent.Task<CombosData> loadTask = new javafx.concurrent.Task<>() {
+            @Override
+            protected CombosData call() throws Exception {
+                CombosData data = new CombosData();
+                data.total = comboService.getTotalCount();
+                data.active = comboService.getActiveCount();
+                data.combos = comboService.findAll();
+                return data;
+            }
+        };
 
-            Platform.runLater(() -> {
-                lblTotal.setText(String.valueOf(total));
-                lblActive.setText(String.valueOf(active));
-                combosTable.setItems(FXCollections.observableArrayList(allCombos));
-            });
-        } catch (Exception e) {
-            System.err.println("Error loading combos: " + e.getMessage());
-        }
+        loadTask.setOnSucceeded(e -> {
+            CombosData data = loadTask.getValue();
+            allCombos = data.combos;
+            lblTotal.setText(String.valueOf(data.total));
+            lblActive.setText(String.valueOf(data.active));
+            combosTable.setItems(FXCollections.observableArrayList(allCombos));
+        });
+
+        loadTask.setOnFailed(e -> {
+            System.err.println("Error loading combos: " + loadTask.getException().getMessage());
+        });
+
+        new Thread(loadTask).start();
+    }
+
+    private static class CombosData {
+        int total, active;
+        List<Combo> combos;
     }
 
     private static class InclusionData {

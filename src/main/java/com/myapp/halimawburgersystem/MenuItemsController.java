@@ -966,25 +966,40 @@ public class MenuItemsController extends BaseController {
     }
 
     public void loadMenuItems() {
-        try {
-            menuItemService.syncAvailabilityToDatabase();
+        javafx.concurrent.Task<MenuItemsData> loadTask = new javafx.concurrent.Task<>() {
+            @Override
+            protected MenuItemsData call() throws Exception {
+                menuItemService.syncAvailabilityToDatabase();
+                MenuItemsData data = new MenuItemsData();
+                data.total = menuItemService.getTotalCount();
+                data.available = menuItemService.getAvailableCount();
+                data.low = menuItemService.getLowStockCount();
+                data.out = menuItemService.getOutOfStockCount();
+                data.items = menuItemService.findAllWithIngredientStatus();
+                return data;
+            }
+        };
 
-            int total = menuItemService.getTotalCount();
-            int available = menuItemService.getAvailableCount();
-            int low = menuItemService.getLowStockCount();
-            int out = menuItemService.getOutOfStockCount();
-            allMenuItems = menuItemService.findAllWithIngredientStatus();
+        loadTask.setOnSucceeded(e -> {
+            MenuItemsData data = loadTask.getValue();
+            allMenuItems = data.items;
+            lblTotal.setText(String.valueOf(data.total));
+            lblAvailable.setText(String.valueOf(data.available));
+            lblLowStock.setText(String.valueOf(data.low));
+            lblOutOfStock.setText(String.valueOf(data.out));
+            menuItemsTable.setItems(FXCollections.observableArrayList(allMenuItems));
+        });
 
-            Platform.runLater(() -> {
-                lblTotal.setText(String.valueOf(total));
-                lblAvailable.setText(String.valueOf(available));
-                lblLowStock.setText(String.valueOf(low));
-                lblOutOfStock.setText(String.valueOf(out));
-                menuItemsTable.setItems(FXCollections.observableArrayList(allMenuItems));
-            });
-        } catch (Exception e) {
-            System.err.println("Error loading menu items: " + e.getMessage());
-        }
+        loadTask.setOnFailed(e -> {
+            System.err.println("Error loading menu items: " + loadTask.getException().getMessage());
+        });
+
+        new Thread(loadTask).start();
+    }
+
+    private static class MenuItemsData {
+        int total, available, low, out;
+        List<MenuItemModel> items;
     }
 
     private String hexToRgb(String hex) {

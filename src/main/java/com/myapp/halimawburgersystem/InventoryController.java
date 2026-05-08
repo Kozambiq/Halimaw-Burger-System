@@ -410,21 +410,37 @@ public class InventoryController extends BaseController {
     }
 
     public void loadInventory() {
-        try {
-            int total = inventoryService.getTotalCount();
-            int low = inventoryService.getLowStockCount();
-            int out = inventoryService.getOutOfStockCount();
-            allIngredients = inventoryService.findAll();
+        javafx.concurrent.Task<InventoryData> loadTask = new javafx.concurrent.Task<>() {
+            @Override
+            protected InventoryData call() throws Exception {
+                InventoryData data = new InventoryData();
+                data.total = inventoryService.getTotalCount();
+                data.low = inventoryService.getLowStockCount();
+                data.out = inventoryService.getOutOfStockCount();
+                data.ingredients = inventoryService.findAll();
+                return data;
+            }
+        };
 
-            Platform.runLater(() -> {
-                lblTotal.setText(String.valueOf(total));
-                lblLowStock.setText(String.valueOf(low));
-                lblOutOfStock.setText(String.valueOf(out));
-                inventoryTable.setItems(FXCollections.observableArrayList(allIngredients));
-            });
-        } catch (Exception e) {
-            System.err.println("Error loading inventory: " + e.getMessage());
-        }
+        loadTask.setOnSucceeded(e -> {
+            InventoryData data = loadTask.getValue();
+            allIngredients = data.ingredients;
+            lblTotal.setText(String.valueOf(data.total));
+            lblLowStock.setText(String.valueOf(data.low));
+            lblOutOfStock.setText(String.valueOf(data.out));
+            inventoryTable.setItems(FXCollections.observableArrayList(allIngredients));
+        });
+
+        loadTask.setOnFailed(e -> {
+            System.err.println("Error loading inventory: " + loadTask.getException().getMessage());
+        });
+
+        new Thread(loadTask).start();
+    }
+
+    private static class InventoryData {
+        int total, low, out;
+        List<Ingredient> ingredients;
     }
 
     private static class StockUpdateResult {

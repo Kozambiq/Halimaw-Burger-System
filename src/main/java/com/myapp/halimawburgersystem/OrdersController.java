@@ -246,7 +246,7 @@ public class OrdersController extends BaseController {
     public void loadOrders() {
         String orderType = cmbOrderType.getValue();
         if (orderType == null) orderType = "All Types";
-        
+
         String dateFilter = cmbDateFilter.getValue();
         LocalDateTime start = null;
         LocalDateTime end = LocalDateTime.now();
@@ -265,18 +265,43 @@ public class OrdersController extends BaseController {
             if (dateTo.getValue() != null) end = dateTo.getValue().atTime(23, 59, 59);
         }
 
-        List<Order> results = orderDAO.findByFilters(orderType, start, end);
-        ordersList.setAll(results);
-        loadStats();
+        final String finalOrderType = orderType;
+        final LocalDateTime finalStart = start;
+        final LocalDateTime finalEnd = end;
+
+        javafx.concurrent.Task<OrdersPageData> loadTask = new javafx.concurrent.Task<>() {
+            @Override
+            protected OrdersPageData call() throws Exception {
+                OrdersPageData data = new OrdersPageData();
+                data.orders = orderDAO.findByFilters(finalOrderType, finalStart, finalEnd);
+                data.total = orderDAO.getTotalCount();
+                data.preparing = orderDAO.getCountByStatus("Preparing");
+                data.completed = orderDAO.getCountByStatus("Completed");
+                data.cancelled = orderDAO.getCountByStatus("Cancelled");
+                return data;
+            }
+        };
+
+        loadTask.setOnSucceeded(e -> {
+            OrdersPageData data = loadTask.getValue();
+            ordersList.setAll(data.orders);
+            lblTotalOrders.setText(String.valueOf(data.total));
+            lblPreparing.setText(String.valueOf(data.preparing));
+            lblCompleted.setText(String.valueOf(data.completed));
+            lblCancelled.setText(String.valueOf(data.cancelled));
+        });
+
+        new Thread(loadTask).start();
+    }
+
+    private static class OrdersPageData {
+        List<Order> orders;
+        int total, preparing, completed, cancelled;
     }
 
     private void loadStats() {
-        lblTotalOrders.setText(String.valueOf(orderDAO.getTotalCount()));
-        lblPreparing.setText(String.valueOf(orderDAO.getCountByStatus("Preparing")));
-        lblCompleted.setText(String.valueOf(orderDAO.getCountByStatus("Completed")));
-        lblCancelled.setText(String.valueOf(orderDAO.getCountByStatus("Cancelled")));
+        // Now integrated into loadOrders
     }
-
     @FXML
     private void onOrderClicked(MouseEvent event) {
         if (event.getClickCount() == 2) {

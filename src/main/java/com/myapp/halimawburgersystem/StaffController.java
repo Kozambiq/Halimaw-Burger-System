@@ -195,21 +195,37 @@ public class StaffController extends BaseController {
     }
 
     public void loadStaff() {
-        try {
-            int total = staffService.getTotalCount();
-            int active = staffService.getActiveCount();
-            int onBreak = staffService.getOnBreakCount();
-            allStaff = staffService.findAll();
+        javafx.concurrent.Task<StaffData> loadTask = new javafx.concurrent.Task<>() {
+            @Override
+            protected StaffData call() throws Exception {
+                StaffData data = new StaffData();
+                data.total = staffService.getTotalCount();
+                data.active = staffService.getActiveCount();
+                data.onBreak = staffService.getOnBreakCount();
+                data.staffList = staffService.findAll();
+                return data;
+            }
+        };
 
-            Platform.runLater(() -> {
-                lblTotal.setText(String.valueOf(total));
-                lblOnShift.setText(String.valueOf(active));
-                lblOnBreak.setText(String.valueOf(onBreak));
-                staffTable.setItems(FXCollections.observableArrayList(allStaff));
-            });
-        } catch (Exception e) {
-            System.err.println("Error loading staff: " + e.getMessage());
-        }
+        loadTask.setOnSucceeded(e -> {
+            StaffData data = loadTask.getValue();
+            allStaff = data.staffList;
+            lblTotal.setText(String.valueOf(data.total));
+            lblOnShift.setText(String.valueOf(data.active));
+            lblOnBreak.setText(String.valueOf(data.onBreak));
+            staffTable.setItems(FXCollections.observableArrayList(allStaff));
+        });
+
+        loadTask.setOnFailed(e -> {
+            System.err.println("Error loading staff: " + loadTask.getException().getMessage());
+        });
+
+        new Thread(loadTask).start();
+    }
+
+    private static class StaffData {
+        int total, active, onBreak;
+        List<Staff> staffList;
     }
 
     private void showEditStaffDialog(Staff staff) {
