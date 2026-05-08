@@ -13,7 +13,7 @@ import java.util.List;
 public class OrderDAO {
 
     public int insert(Order order, List<OrderItem> items) {
-        String orderSql = "INSERT INTO orders (order_number, staff_id, order_type, subtotal, discount, total, payment_type, reference_number, status, notes) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)";
+        String orderSql = "INSERT INTO orders (order_number, staff_id, order_type, subtotal, discount, total, payment_type, reference_number, status, notes, created_at) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)";
         String itemSql = "INSERT INTO order_items (order_id, item_type, item_id, item_name, quantity, unit_price, total_price) VALUES (?, ?, ?, ?, ?, ?, ?)";
 
         try (Connection conn = DatabaseConnection.getConnection()) {
@@ -31,6 +31,7 @@ public class OrderDAO {
                     orderStmt.setString(8, order.getReferenceNumber());
                     orderStmt.setString(9, order.getStatus());
                     orderStmt.setString(10, order.getNotes());
+                    orderStmt.setTimestamp(11, Timestamp.valueOf(LocalDateTime.now()));
                     orderStmt.executeUpdate();
 
                     try (ResultSet rs = orderStmt.getGeneratedKeys()) {

@@ -40,9 +40,12 @@ public class DatabaseConnection {
         }
 
         String sslMode = props.getProperty("db.sslMode", "disable");
-        String timezone = props.getProperty("db.timezone", "UTC");
+        // Use system default timezone instead of hardcoded UTC to fix the 8-hour offset
+        String systemTimezone = java.util.TimeZone.getDefault().getID();
+        String timezone = props.getProperty("db.timezone", systemTimezone);
+        
         String dbUrl = String.format(
-                "jdbc:mariadb://%s:%s/%s?sslMode=%s&serverTimezone=%s&useLegacyDatetimeCode=false",
+                "jdbc:mariadb://%s:%s/%s?sslMode=%s&serverTimezone=%s&useLegacyDatetimeCode=false&noAccessToProcedureBodies=true",
                 host, port, name, sslMode, timezone
         );
 
