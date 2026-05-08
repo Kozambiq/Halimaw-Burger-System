@@ -76,6 +76,8 @@ public class DashboardController extends BaseController {
     private ObservableList<Order> recentOrdersList = FXCollections.observableArrayList();
     private ScheduledExecutorService refreshService;
 
+    private java.util.concurrent.atomic.AtomicLong lastRefreshRequest = new java.util.concurrent.atomic.AtomicLong(0);
+
     @FXML
     public void initialize() {
         updateTopbarDate();
@@ -83,15 +85,25 @@ public class DashboardController extends BaseController {
         setupTableColumns();
         loadDashboardData();
 
-        // Subscribe to instant notifications for live dashboard data
-        OrderNotificationService.subscribe(this::loadDashboardData);
+        // Subscribe with debouncing to prevent spam during high-volume orders
+        OrderNotificationService.subscribe(() -> {
+            long now = System.currentTimeMillis();
+            lastRefreshRequest.set(now);
+            
+            // Wait 300ms before actually refreshing to catch multiple rapid updates
+            Executors.newSingleThreadScheduledExecutor().schedule(() -> {
+                if (lastRefreshRequest.get() == now) {
+                    Platform.runLater(this::loadDashboardData);
+                }
+            }, 300, TimeUnit.MILLISECONDS);
+        });
 
         refreshService = Executors.newSingleThreadScheduledExecutor(r -> {
             Thread t = new Thread(r);
             t.setDaemon(true);
             return t;
         });
-        refreshService.scheduleAtFixedRate(() -> Platform.runLater(this::loadRecentOrders), 60, 60, TimeUnit.SECONDS);
+        refreshService.scheduleAtFixedRate(() -> Platform.runLater(this::loadDashboardData), 60, 60, TimeUnit.SECONDS);
     }
 
     private void setupUserInfo() {
@@ -183,23 +195,55 @@ public class DashboardController extends BaseController {
     }
 
     private void loadDashboardData() {
-        loadRevenueStats();
-        loadRecentOrders();
-        loadTopItems();
-        loadLowStock();
-        loadActiveStaff();
+        javafx.concurrent.Task<DashboardData> loadTask = new javafx.concurrent.Task<>() {
+            @Override
+            protected DashboardData call() throws Exception {
+                DashboardData data = new DashboardData();
+                data.todayRevenue = orderDAO.getTodayRevenue();
+                data.yesterdayRevenue = orderDAO.getYesterdayRevenue();
+                data.todayOrders = orderDAO.getTodayOrderCount();
+                data.yesterdayOrders = orderDAO.getYesterdayOrderCount();
+                
+                LocalDateTime start = LocalDateTime.now().withHour(0).withMinute(0).withSecond(0);
+                LocalDateTime end = LocalDateTime.now();
+                List<Order> orders = orderDAO.findByFilters(null, start, end);
+                data.recentOrders = orders.size() > 10 ? orders.subList(0, 10) : orders;
+                
+                data.topSellingItems = menuItemDAO.getTopSellingItems(5);
+                data.criticalStock = ingredientDAO.findCriticalStock();
+                data.lowStock = ingredientDAO.findLowStock();
+                data.activeStaff = staffDAO.findActiveStaff();
+                
+                return data;
+            }
+        };
+
+        loadTask.setOnSucceeded(e -> {
+            DashboardData data = loadTask.getValue();
+            updateRevenueStats(data);
+            recentOrdersList.setAll(data.recentOrders);
+            updateTopItems(data.topSellingItems);
+            updateStockAlerts(data.criticalStock, data.lowStock);
+            updateActiveStaff(data.activeStaff);
+        });
+
+        new Thread(loadTask).start();
     }
 
-    private void loadRevenueStats() {
-        double todayRevenue = orderDAO.getTodayRevenue();
-        double yesterdayRevenue = orderDAO.getYesterdayRevenue();
-        int todayOrders = orderDAO.getTodayOrderCount();
-        int yesterdayOrders = orderDAO.getYesterdayOrderCount();
+    private static class DashboardData {
+        double todayRevenue, yesterdayRevenue;
+        int todayOrders, yesterdayOrders;
+        List<Order> recentOrders;
+        List<MenuItemDAO.TopSellingItem> topSellingItems;
+        List<Ingredient> criticalStock, lowStock;
+        List<Staff> activeStaff;
+    }
 
-        lblRevenue.setText("₱" + String.format("%,.0f", todayRevenue));
+    private void updateRevenueStats(DashboardData data) {
+        lblRevenue.setText("₱" + String.format("%,.0f", data.todayRevenue));
 
-        if (yesterdayRevenue > 0) {
-            double revenueChange = ((todayRevenue - yesterdayRevenue) / yesterdayRevenue) * 100;
+        if (data.yesterdayRevenue > 0) {
+            double revenueChange = ((data.todayRevenue - data.yesterdayRevenue) / data.yesterdayRevenue) * 100;
             if (revenueChange >= 0) {
                 lblRevenueDelta.setText("↑ +" + String.format("%.0f", revenueChange) + "% vs yesterday");
                 lblRevenueDelta.getStyleClass().removeAll("delta-down");
@@ -213,10 +257,10 @@ public class DashboardController extends BaseController {
             lblRevenueDelta.setText("");
         }
 
-        lblOrders.setText(String.valueOf(todayOrders));
+        lblOrders.setText(String.valueOf(data.todayOrders));
 
-        if (yesterdayOrders > 0) {
-            double ordersChange = ((double)(todayOrders - yesterdayOrders) / yesterdayOrders) * 100;
+        if (data.yesterdayOrders > 0) {
+            double ordersChange = ((double)(data.todayOrders - data.yesterdayOrders) / data.yesterdayOrders) * 100;
             if (ordersChange >= 0) {
                 lblOrdersDelta.setText("↑ +" + String.format("%.0f", ordersChange) + "% vs yesterday");
                 lblOrdersDelta.getStyleClass().removeAll("delta-down");
@@ -231,17 +275,8 @@ public class DashboardController extends BaseController {
         }
     }
 
-    private void loadRecentOrders() {
-        LocalDateTime start = LocalDateTime.now().withHour(0).withMinute(0).withSecond(0);
-        LocalDateTime end = LocalDateTime.now();
-        List<Order> orders = orderDAO.findByFilters(null, start, end);
-        recentOrdersList.setAll(orders.size() > 10 ? orders.subList(0, 10) : orders);
-    }
-
-    private void loadTopItems() {
+    private void updateTopItems(List<MenuItemDAO.TopSellingItem> items) {
         topItemsContainer.getChildren().clear();
-        List<MenuItemDAO.TopSellingItem> items = menuItemDAO.getTopSellingItems(5);
-        
         if (items.isEmpty()) {
             Label empty = new Label("No sales data yet");
             empty.setStyle("-fx-text-fill: #8a7055; -fx-font-size: 12px; -fx-font-style: italic;");
@@ -271,25 +306,20 @@ public class DashboardController extends BaseController {
         }
     }
 
-    private void loadLowStock() {
+    private void updateStockAlerts(List<Ingredient> critical, List<Ingredient> low) {
         lowStockContainer.getChildren().clear();
-        List<Ingredient> critical = ingredientDAO.findCriticalStock();
-        List<Ingredient> low = ingredientDAO.findLowStock();
-
         int maxDisplay = 5;
         int count = 0;
 
         for (Ingredient ing : critical) {
             if (count >= maxDisplay) break;
-            HBox row = createStockRow(ing.getName(), "OUT", "out");
-            lowStockContainer.getChildren().add(row);
+            lowStockContainer.getChildren().add(createStockRow(ing.getName(), "OUT", "out"));
             count++;
         }
 
         for (Ingredient ing : low) {
             if (count >= maxDisplay) break;
-            HBox row = createStockRow(ing.getName(), (int)ing.getQuantity() + " " + ing.getUnit(), "low");
-            lowStockContainer.getChildren().add(row);
+            lowStockContainer.getChildren().add(createStockRow(ing.getName(), (int)ing.getQuantity() + " " + ing.getUnit(), "low"));
             count++;
         }
 
@@ -324,17 +354,14 @@ public class DashboardController extends BaseController {
         return tile;
     }
 
-    private void loadActiveStaff() {
+    private void updateActiveStaff(List<Staff> activeStaff) {
         activeStaffContainer.getChildren().clear();
-        List<Staff> activeStaff = staffDAO.findActiveStaff();
-
         int maxDisplay = 5;
         int count = 0;
 
         for (Staff staff : activeStaff) {
             if (count >= maxDisplay) break;
-            HBox chip = createStaffChip(staff);
-            activeStaffContainer.getChildren().add(chip);
+            activeStaffContainer.getChildren().add(createStaffChip(staff));
             count++;
         }
 

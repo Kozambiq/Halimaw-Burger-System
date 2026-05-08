@@ -599,12 +599,6 @@ public class CashierController {
             return;
         }
 
-        List<String> outOfStockItems = checkOutOfStockIngredients();
-        if (!outOfStockItems.isEmpty()) {
-            showOutOfStockWarning(outOfStockItems);
-            return;
-        }
-
         String referenceNumber = null;
         if ("GCash".equals(paymentType)) {
             referenceNumber = showGCashDialog();
@@ -641,24 +635,19 @@ public class CashierController {
 
         int orderId = cashierService.insert(order, items);
         if (orderId > 0) {
-            String reserveError = cashierService.reserveIngredientsForOrder(orderId);
-            if (reserveError != null) {
-                showErrorAlert("Insufficient Stock", reserveError);
-                cashierService.releaseReservationsForOrder(orderId);
-                cashierService.updateStatus(orderId, "Cancelled");
-                return;
-            }
-orderNumber = cashierService.getNextOrderNumber();
-orderItems.clear();
-subtotal = 0.0;
-txtOrderNotes.clear();
-updateOrderNumber();
-updateOrderDisplay();
-updateTotals();
-
-// Notify other modules (like Cook Panel and Inventory) instantly
-OrderNotificationService.broadcastUpdate();
+            orderNumber = cashierService.getNextOrderNumber();
+            orderItems.clear();
+            subtotal = 0.0;
+            txtOrderNotes.clear();
             updateOrderNumber();
+            updateOrderDisplay();
+            updateTotals();
+
+            // Notify other modules (like Cook Panel and Inventory) instantly
+            OrderNotificationService.broadcastUpdate();
+            reloadMenu();
+        } else if (orderId == -2) {
+            showErrorAlert("Insufficient Stock", "Some ingredients ran out while processing your order. Please check the menu for availability.");
             reloadMenu();
         } else {
             showErrorAlert("Order Failed", "Failed to save the order. Please try again.");

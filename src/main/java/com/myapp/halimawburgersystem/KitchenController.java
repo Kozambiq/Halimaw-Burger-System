@@ -100,7 +100,7 @@ public class KitchenController extends BaseController {
     }
 
     public void loadQueue() {
-        List<Order> allOrders = orderDAO.findAll();
+        List<Order> activeOrders = orderDAO.findActiveOrders();
         
         colNew.getChildren().clear();
         colPreparing.getChildren().clear();
@@ -109,18 +109,11 @@ public class KitchenController extends BaseController {
         int n = 0, p = 0, r = 0;
         LocalDateTime now = LocalDateTime.now();
 
-        for (Order order : allOrders) {
+        for (Order order : activeOrders) {
             String status = order.getStatus();
             
             if ("Cancelled".equals(status)) {
-                LocalDateTime cancelledAt = order.getCancelledAt();
-                if (cancelledAt == null) {
-                    cancelledAt = now;
-                }
-                
-                long secsSinceCancel = Duration.between(cancelledAt, now).getSeconds();
-                if (secsSinceCancel > 30) continue;
-
+                // Already filtered to recent in DAO
                 VBox card = createOrderCard(order);
                 colNew.getChildren().add(0, card);
                 continue;
@@ -182,7 +175,12 @@ public class KitchenController extends BaseController {
         VBox itemsContainer = new VBox(8);
         itemsContainer.getStyleClass().add("card-items-container");
         
-        List<OrderItem> items = orderDAO.findItemsByOrderId(order.getId());
+        // Optimized: Use pre-fetched items
+        List<OrderItem> items = order.getItems();
+        if (items == null) {
+            items = orderDAO.findItemsByOrderId(order.getId());
+        }
+        
         for (OrderItem item : items) {
             HBox itemRow = new HBox(8);
             itemRow.setAlignment(Pos.CENTER_LEFT);

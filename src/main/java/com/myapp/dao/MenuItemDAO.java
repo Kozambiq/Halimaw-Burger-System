@@ -85,24 +85,25 @@ public class MenuItemDAO {
     }
 
     public void syncAvailabilityToDatabase() {
-        String selectSql = "SELECT mi.id FROM menu_items mi WHERE mi.availability != 'Unavailable'";
-        String updateSql = "UPDATE menu_items SET availability = ? WHERE id = ?";
+        String sql = "UPDATE menu_items mi " +
+                     "JOIN (" +
+                     "    SELECT mi.id, " +
+                     "           CASE " +
+                     "               WHEN SUM(CASE WHEN i.quantity <= 0 THEN 1 ELSE 0 END) > 0 THEN 'Out of Stock' " +
+                     "               WHEN SUM(CASE WHEN i.quantity <= i.min_threshold THEN 1 ELSE 0 END) > 0 THEN 'Low Stock' " +
+                     "               ELSE 'Available' " +
+                     "           END as calculated_status " +
+                     "    FROM menu_items mi " +
+                     "    LEFT JOIN menu_item_ingredients mmi ON mi.id = mmi.menu_item_id " +
+                     "    LEFT JOIN ingredients i ON mmi.ingredient_id = i.id " +
+                     "    WHERE mi.availability != 'Unavailable' " +
+                     "    GROUP BY mi.id" +
+                     ") AS status_map ON mi.id = status_map.id " +
+                     "SET mi.availability = status_map.calculated_status";
 
-        try (Connection conn = DatabaseConnection.getConnection()) {
-            try (PreparedStatement selectStmt = conn.prepareStatement(selectSql);
-                 PreparedStatement updateStmt = conn.prepareStatement(updateSql)) {
-
-                ResultSet rs = selectStmt.executeQuery();
-                while (rs.next()) {
-                    int menuItemId = rs.getInt("id");
-                    String availability = calculateAvailability(conn, menuItemId);
-                    updateStmt.setString(1, availability);
-                    updateStmt.setInt(2, menuItemId);
-                    updateStmt.addBatch();
-                }
-                updateStmt.executeBatch();
-                conn.commit();
-            }
+        try (Connection conn = DatabaseConnection.getConnection();
+             PreparedStatement stmt = conn.prepareStatement(sql)) {
+            stmt.executeUpdate();
         } catch (SQLException e) {
             System.err.println("Error syncing availability: " + e.getMessage());
         }

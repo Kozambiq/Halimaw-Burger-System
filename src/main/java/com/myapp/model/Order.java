@@ -17,8 +17,17 @@ public class Order {
     private String itemsSummary;
     private LocalDateTime cancelledAt;
     private LocalDateTime createdAt;
+    private java.util.List<OrderItem> items;
 
     public Order() {
+    }
+    
+    public java.util.List<OrderItem> getItems() {
+        return items;
+    }
+
+    public void setItems(java.util.List<OrderItem> items) {
+        this.items = items;
     }
 
     public Order(int orderNumber, int staffId, String orderType, double subtotal, double discount, double total, String paymentType, String referenceNumber, String status, String notes) {

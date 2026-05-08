@@ -7,6 +7,7 @@ module com.myapp.halimawburgersystem {
     requires java.net.http;
     requires java.desktop;
     requires com.github.librepdf.openpdf;
+    requires com.zaxxer.hikari;
 
 
     opens com.myapp.halimawburgersystem to javafx.fxml;
