@@ -49,3 +49,7 @@ secret/
 keys/
 *.sql
 markdownFiles/
+
+output/
+output2/
+app.exe

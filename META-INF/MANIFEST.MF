@@ -1,0 +1,7 @@
+Manifest-Version: 1.0
+Archiver-Version: Plexus Archiver
+Created-By: Apache Maven 3.8.5
+Built-By: cyrus
+Build-Jdk: 17.0.19
+Main-Class: com.myapp.halimawburgersystem.Main
+

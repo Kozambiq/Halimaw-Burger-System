@@ -7,6 +7,7 @@ import java.sql.*;
 import java.util.ArrayList;
 import java.util.List;
 
+// Handles the combo tag for orders
 public class ComboDAO {
 
     public List<Combo> findAll() {
