@@ -1,0 +1,41 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<component LANGUAGE_LEVEL="JDK_14" inheritJdk="true">
+	<output-test url="file://$MODULE_DIR$/target/test-classes"/>
+	<contentEntry url="file://$MODULE_DIR$">
+		<testFolder url="file://$MODULE_DIR$/src/test/java"/>
+		<testFolder url="file://$MODULE_DIR$/src/test/resources"/>
+		<excludeFolder url="file://$MODULE_DIR$/target"/>
+	</contentEntry>
+	<lib name="Maven: org.junit.jupiter:junit-jupiter-api:5.12.1" scope="TEST"/>
+	<lib name="Maven: org.opentest4j:opentest4j:1.3.0" scope="TEST"/>
+	<lib name="Maven: org.junit.platform:junit-platform-commons:1.12.1" scope="TEST"/>
+	<lib name="Maven: org.apiguardian:apiguardian-api:1.1.2" scope="TEST"/>
+	<lib name="Maven: org.junit.jupiter:junit-jupiter-engine:5.12.1" scope="TEST"/>
+	<lib name="Maven: org.junit.platform:junit-platform-engine:1.12.1" scope="TEST"/>
+	<levels>
+		<level name="Maven: org.openjfx:javafx-controls:21.0.6" value="project"/>
+		<level name="Maven: org.openjfx:javafx-controls:linux:21.0.6" value="project"/>
+		<level name="Maven: org.openjfx:javafx-graphics:21.0.6" value="project"/>
+		<level name="Maven: org.openjfx:javafx-graphics:linux:21.0.6" value="project"/>
+		<level name="Maven: org.openjfx:javafx-base:21.0.6" value="project"/>
+		<level name="Maven: org.openjfx:javafx-base:linux:21.0.6" value="project"/>
+		<level name="Maven: org.openjfx:javafx-fxml:21.0.6" value="project"/>
+		<level name="Maven: org.openjfx:javafx-fxml:linux:21.0.6" value="project"/>
+		<level name="Maven: org.mariadb.jdbc:mariadb-java-client:3.5.7" value="project"/>
+		<level name="Maven: com.zaxxer:HikariCP:5.1.0" value="project"/>
+		<level name="Maven: org.slf4j:slf4j-api:1.7.36" value="project"/>
+		<level name="Maven: org.mindrot:jbcrypt:0.4" value="project"/>
+		<level name="Maven: org.openjfx:javafx-web:21.0.6" value="project"/>
+		<level name="Maven: org.openjfx:javafx-web:linux:21.0.6" value="project"/>
+		<level name="Maven: org.openjfx:javafx-media:21.0.6" value="project"/>
+		<level name="Maven: org.openjfx:javafx-media:linux:21.0.6" value="project"/>
+		<level name="Maven: org.junit.jupiter:junit-jupiter-api:5.12.1" value="project"/>
+		<level name="Maven: org.opentest4j:opentest4j:1.3.0" value="project"/>
+		<level name="Maven: org.junit.platform:junit-platform-commons:1.12.1" value="project"/>
+		<level name="Maven: org.apiguardian:apiguardian-api:1.1.2" value="project"/>
+		<level name="Maven: org.junit.jupiter:junit-jupiter-engine:5.12.1" value="project"/>
+		<level name="Maven: org.junit.platform:junit-platform-engine:1.12.1" value="project"/>
+		<level name="Maven: com.github.librepdf:openpdf:1.3.30" value="project"/>
+		<level name="Maven: com.google.code.findbugs:jsr305:3.0.2" value="project"/>
+	</levels>
+</component>

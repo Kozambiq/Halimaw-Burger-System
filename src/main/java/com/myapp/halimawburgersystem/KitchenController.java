@@ -30,37 +30,32 @@ import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
 
+/**
+ * Controller for the Kitchen/Order fulfillment module.
+ * Implements a real-time Kanban-style queue for monitoring and managing
+ * active orders from 'New' to 'Ready' status.
+ */
 public class KitchenController extends BaseController {
 
     @FXML private Label pageTitle;
     @FXML private Label topbarDate;
-    @FXML private Label userDisplayName;
-    @FXML private Label userDisplayRole;
-    @FXML private Label sidebarAvatarText;
-    @FXML private Label sidebarUserName;
-    @FXML private Label sidebarUserRole;
+    @FXML private Label userDisplayName, userDisplayRole, sidebarAvatarText, sidebarUserName, sidebarUserRole;
 
-    @FXML private Button btnDashboard;
-    @FXML private Button btnOrders;
-    @FXML private Button btnKitchen;
-    @FXML private Button btnMenuItems;
-    @FXML private Button btnCombos;
-    @FXML private Button btnInventory;
-    @FXML private Button btnSales;
-    @FXML private Button btnStaff;
+    @FXML private Button btnDashboard, btnOrders, btnKitchen, btnMenuItems, btnCombos, btnInventory, btnSales, btnStaff;
 
-    @FXML private VBox colNew;
-    @FXML private VBox colPreparing;
-    @FXML private VBox colReady;
+    // KANBAN COLUMNS
+    @FXML private VBox colNew, colPreparing, colReady;
 
-    @FXML private Label countNew;
-    @FXML private Label countPreparing;
-    @FXML private Label countReady;
+    // METRICS
+    @FXML private Label countNew, countPreparing, countReady;
 
     private OrderDAO orderDAO = new OrderDAO();
     private StaffDAO staffDAO = new StaffDAO();
     private ScheduledExecutorService timerService;
 
+    /**
+     * Initializes the kitchen interface. Sets up instant sync and failsafe polling.
+     */
     @FXML
     public void initialize() {
         updateTopbarDate();
@@ -68,10 +63,10 @@ public class KitchenController extends BaseController {
         setActiveNav("Kitchen Queue");
         loadQueue();
         
-        // Subscribe to instant notifications from the Cashier and Cook Panel
+        // INSTANT SYNC: Refreshes the queue immediately when a new order is placed at the POS
         OrderNotificationService.subscribe(this::loadQueue);
         
-        // Refresh every 60 seconds as a backup (failsafe)
+        // FAILSAFE POLLING: Periodic refresh every 60 seconds
         timerService = Executors.newSingleThreadScheduledExecutor(r -> {
             Thread t = new Thread(r);
             t.setDaemon(true);
@@ -99,6 +94,9 @@ public class KitchenController extends BaseController {
         }
     }
 
+    /**
+     * Fetches active orders and sorts them into the appropriate Kanban column based on status.
+     */
     public void loadQueue() {
         List<Order> activeOrders = orderDAO.findActiveOrders();
         
@@ -107,13 +105,12 @@ public class KitchenController extends BaseController {
         colReady.getChildren().clear();
 
         int n = 0, p = 0, r = 0;
-        LocalDateTime now = LocalDateTime.now();
 
         for (Order order : activeOrders) {
             String status = order.getStatus();
             
             if ("Cancelled".equals(status)) {
-                // Already filtered to recent in DAO
+                // Recent cancellations are shown at the top of the NEW column
                 VBox card = createOrderCard(order);
                 colNew.getChildren().add(0, card);
                 continue;
@@ -136,6 +133,10 @@ public class KitchenController extends BaseController {
         countReady.setText(String.valueOf(r));
     }
 
+    /**
+     * Creates a visual card for a single order.
+     * Includes logic for URGENCY detection and timer display.
+     */
     private VBox createOrderCard(Order order) {
         VBox card = new VBox(12);
         card.getStyleClass().add("order-card");
@@ -146,20 +147,21 @@ public class KitchenController extends BaseController {
             card.getStyleClass().add("done-card");
         }
         
+        // URGENCY LOGIC: Highlights cards if they've been in a state for too long
         long mins = Duration.between(order.getCreatedAt(), LocalDateTime.now()).toMinutes();
         boolean isUrgent = false;
 
         if ("New".equals(order.getStatus()) && mins >= 5) {
-            isUrgent = true;
+            isUrgent = true; // Unassigned for 5+ mins
         } else if ("Preparing".equals(order.getStatus()) && mins >= 15) {
-            isUrgent = true;
+            isUrgent = true; // Cooking for 15+ mins
         }
         
         if (isUrgent) {
             card.getStyleClass().add("urgent");
         }
 
-        // Header: #OrderNumber | Type
+        // Card Header: Order # and Type
         HBox header = new HBox();
         header.setAlignment(Pos.CENTER_LEFT);
         Label orderNum = new Label("#" + String.format("%04d", order.getOrderNumber()));
@@ -172,10 +174,10 @@ public class KitchenController extends BaseController {
 
         card.getChildren().add(header);
 
+        // Item List: Shows quantities and product names
         VBox itemsContainer = new VBox(8);
         itemsContainer.getStyleClass().add("card-items-container");
         
-        // Optimized: Use pre-fetched items
         List<OrderItem> items = order.getItems();
         if (items == null) {
             items = orderDAO.findItemsByOrderId(order.getId());
@@ -208,7 +210,7 @@ public class KitchenController extends BaseController {
         
         card.getChildren().add(itemsContainer);
 
-        // Footer: Timer
+        // Footer: Elapsed time and Warning icon
         HBox footer = new HBox();
         footer.setAlignment(Pos.CENTER_LEFT);
         footer.setSpacing(10);
@@ -227,17 +229,23 @@ public class KitchenController extends BaseController {
         return card;
     }
 
+    /**
+     * Transitions an order to a new status.
+     * Handles specialized side-effects like ingredient deduction.
+     */
     private void updateStatus(Order order, String newStatus) {
+        // CANCELLATION: Releases any stock that was previously reserved
         if ("Cancelled".equals(newStatus) && "New".equals(order.getStatus())) {
             orderDAO.releaseReservationsForOrder(order.getId());
         }
 
+        // PREPARATION: Physically deducts ingredients from the main inventory table
         if ("Preparing".equals(newStatus) && "New".equals(order.getStatus())) {
             orderDAO.deductIngredientsForOrder(order.getId());
         }
 
         if (orderDAO.updateStatus(order.getId(), newStatus)) {
-            // Signal to others (Dashboard, Cook Panel) that an order status changed
+            // INSTANT BROADCAST: Notifies other modules (Cook Panel, Dashboard) of the change
             OrderNotificationService.broadcastUpdate();
             loadQueue();
         }

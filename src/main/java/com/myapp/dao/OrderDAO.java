@@ -10,8 +10,22 @@ import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 
+/**
+ * Data Access Object for Order management.
+ * Handles critical transactions including order placement,
+ * real-time ingredient reservations, and complex analytical aggregations.
+ */
 public class OrderDAO {
 
+    /**
+     * Atomically inserts an order and its constituent items.
+     * TRANSACTION STRATEGY:
+     * 1. Start Transaction (Disable Auto-Commit).
+     * 2. Insert Order Header.
+     * 3. Batch Insert Order Items.
+     * 4. Perform Ingredient Reservation (Fails if stock ran out during the process).
+     * 5. Commit if all steps succeed, otherwise Rollback.
+     */
     public int insert(Order order, List<OrderItem> items) {
         String orderSql = "INSERT INTO orders (order_number, staff_id, order_type, subtotal, discount, total, payment_type, reference_number, status, notes, created_at) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)";
         String itemSql = "INSERT INTO order_items (order_id, item_type, item_id, item_name, quantity, unit_price, total_price) VALUES (?, ?, ?, ?, ?, ?, ?)";
@@ -56,13 +70,11 @@ public class OrderDAO {
                         itemStmt.executeBatch();
                     }
 
-                    // Perform reservation within the same transaction
+                    // ATOMIC RESERVATION: Reserves ingredients within the same transaction
                     String reserveError = reserveIngredientsInTransaction(conn, orderId, items);
                     if (reserveError != null) {
                         conn.rollback();
-                        // We will return a negative value and let the service handle the error message
-                        // Actually, better to throw a custom exception or use a result object, 
-                        // but for now let's use a special return code.
+                        // Special code -2 indicates a concurrency/stock failure
                         return -2; 
                     }
 
@@ -79,11 +91,15 @@ public class OrderDAO {
         return -1;
     }
 
+    /**
+     * Logic for reserving ingredients to prevent overselling.
+     * Checks availability against (Physical Quantity - Existing Reservations).
+     */
     private String reserveIngredientsInTransaction(Connection conn, int orderId, List<OrderItem> items) throws SQLException {
-        // Optimized batch reservation
+        // AGGREGATION: Maps ingredient IDs to total quantity needed for this entire order
         java.util.Map<Integer, Double> needed = new java.util.HashMap<>();
         
-        // 1. Get MenuItem ingredients
+        // 1. Resolve MenuItem and Combo ingredients into raw needs
         String menuItemSql = "SELECT mmi.ingredient_id, mmi.quantity_used FROM menu_item_ingredients mmi WHERE mmi.menu_item_id = ?";
         try (PreparedStatement stmt = conn.prepareStatement(menuItemSql)) {
             for (OrderItem item : items) {
@@ -97,7 +113,7 @@ public class OrderDAO {
                         }
                     }
                 } else if ("Combo".equals(item.getItemType())) {
-                    // For combos, we need to find the includes and then their ingredients
+                    // For combos, parse inclusions and resolve their individual ingredient requirements
                     String comboSql = "SELECT includes FROM combos WHERE id = ?";
                     try (PreparedStatement comboStmt = conn.prepareStatement(comboSql)) {
                         comboStmt.setInt(1, item.getItemId());
@@ -123,7 +139,7 @@ public class OrderDAO {
             }
         }
 
-        // 2. Check and Reserve
+        // CHECK & UPDATE: Verify availability and increment the 'reserved' column
         String checkSql = "SELECT name, quantity, COALESCE(reserved, 0) as reserved FROM ingredients WHERE id = ?";
         String updateSql = "UPDATE ingredients SET reserved = COALESCE(reserved, 0) + ? WHERE id = ?";
         
@@ -150,7 +166,7 @@ public class OrderDAO {
             }
         }
 
-        // 3. Mark as reserved
+        // 3. FLAG SUCCESS: Mark order as having valid reservations
         String markSql = "UPDATE orders SET ingredients_reserved = 1 WHERE id = ?";
         try (PreparedStatement markStmt = conn.prepareStatement(markSql)) {
             markStmt.setInt(1, orderId);
@@ -160,6 +176,10 @@ public class OrderDAO {
         return null;
     }
 
+    /**
+     * Fetches orders within a date range. 
+     * Uses a subquery to generate a human-readable summary of items for display.
+     */
     public List<Order> findByDateRange(LocalDateTime start, LocalDateTime end) {
         List<Order> orders = new ArrayList<>();
         String sql = "SELECT o.*, COALESCE((SELECT GROUP_CONCAT(CONCAT(quantity, 'x ', item_name) SEPARATOR ', ') FROM order_items WHERE order_id = o.id), 'No items') as summary FROM orders o WHERE o.created_at BETWEEN ? AND ? ORDER BY o.created_at DESC";
@@ -231,9 +251,12 @@ public class OrderDAO {
         return 1;
     }
 
+    /**
+     * Fetches active orders for the Kitchen queue.
+     * Includes an optimization to pre-fetch items for each order to avoid the N+1 problem.
+     */
     public List<Order> findActiveOrders() {
         List<Order> orders = new java.util.ArrayList<>();
-        // Fetch only active statuses to avoid loading historical data
         String sql = "SELECT o.* FROM orders o WHERE status IN ('New', 'Preparing', 'Done') " +
                      "OR (status = 'Cancelled' AND created_at >= DATE_SUB(NOW(), INTERVAL 1 HOUR)) " +
                      "ORDER BY created_at ASC";
@@ -261,7 +284,7 @@ public class OrderDAO {
                     order.setCancelledAt(cancelledTs.toLocalDateTime());
                 }
                 
-                // Solve N+1: Pre-fetch items for this order while we have the connection
+                // SOLVE N+1: Pre-fetches items using the existing database connection
                 order.setItems(findItemsByOrderId(conn, order.getId()));
                 orders.add(order);
             }
@@ -395,6 +418,10 @@ public class OrderDAO {
         return false;
     }
 
+    /**
+     * Public wrapper for ingredient reservation. 
+     * Used when an order is created at the POS.
+     */
     public String reserveIngredientsForOrder(int orderId) {
         String checkSql = "SELECT ingredients_reserved FROM orders WHERE id = ?";
         try (Connection conn = DatabaseConnection.getConnection();
@@ -402,7 +429,7 @@ public class OrderDAO {
             checkStmt.setInt(1, orderId);
             try (ResultSet rs = checkStmt.executeQuery()) {
                 if (rs.next() && rs.getInt("ingredients_reserved") == 1) {
-                    return null;
+                    return null; // Already reserved
                 }
             }
         } catch (SQLException e) {
@@ -455,6 +482,10 @@ public class OrderDAO {
         return null;
     }
 
+    /**
+     * Frees previously reserved ingredients back into the available pool.
+     * Used during order cancellation.
+     */
     public void releaseReservationsForOrder(int orderId) {
         List<OrderItem> items = findItemsByOrderId(orderId);
         IngredientDAO ingredientDAO = new IngredientDAO();
@@ -491,6 +522,10 @@ public class OrderDAO {
         }
     }
 
+    /**
+     * Physically deducts ingredients from stock and clears reservations.
+     * TRANSACTIONAL: Ensures atomic update for all affected ingredients.
+     */
     public String deductIngredientsForOrder(int orderId) {
         String checkSql = "SELECT ingredients_deducted, ingredients_reserved FROM orders WHERE id = ?";
         boolean isReserved = false;
@@ -549,6 +584,7 @@ public class OrderDAO {
                     }
                 }
 
+                // DEDUCTION LOGIC: Reduces physical quantity and releases reservation simultaneously
                 String deductSql = "UPDATE ingredients SET quantity = quantity - ? WHERE id = ?";
                 String releaseSql = "UPDATE ingredients SET reserved = CASE WHEN COALESCE(reserved, 0) - ? < 0 THEN 0 ELSE COALESCE(reserved, 0) - ? END WHERE id = ?";
                 

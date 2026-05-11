@@ -35,6 +35,11 @@ import java.util.concurrent.TimeUnit;
 
 import com.myapp.util.OrderNotificationService;
 
+/**
+ * Controller for the Main Dashboard module.
+ * Acts as a centralized command center, aggregating data from all system modules
+ * to display real-time revenue stats, order trends, and critical stock alerts.
+ */
 public class DashboardController extends BaseController {
 
     @FXML private Label pageTitle;
@@ -44,14 +49,7 @@ public class DashboardController extends BaseController {
     @FXML private Label sidebarUserName;
     @FXML private Label sidebarUserRole;
 
-    @FXML private Button btnDashboard;
-    @FXML private Button btnOrders;
-    @FXML private Button btnKitchen;
-    @FXML private Button btnMenuItems;
-    @FXML private Button btnCombos;
-    @FXML private Button btnInventory;
-    @FXML private Button btnSales;
-    @FXML private Button btnStaff;
+    @FXML private Button btnDashboard, btnOrders, btnKitchen, btnMenuItems, btnCombos, btnInventory, btnSales, btnStaff;
 
     @FXML private Label lblRevenue;
     @FXML private Label lblRevenueDelta;
@@ -76,8 +74,13 @@ public class DashboardController extends BaseController {
     private ObservableList<Order> recentOrdersList = FXCollections.observableArrayList();
     private ScheduledExecutorService refreshService;
 
+    // DEBOUNCE STATE: Prevents rapid-fire refreshes during high-volume order bursts
     private java.util.concurrent.atomic.AtomicLong lastRefreshRequest = new java.util.concurrent.atomic.AtomicLong(0);
 
+    /**
+     * Initializes the dashboard. Sets up metrics, recent orders table,
+     * and establishes the real-time synchronization strategy with debouncing.
+     */
     @FXML
     public void initialize() {
         updateTopbarDate();
@@ -85,7 +88,7 @@ public class DashboardController extends BaseController {
         setupTableColumns();
         loadDashboardData();
 
-        // Subscribe with debouncing to prevent spam during high-volume orders
+        // SYNC STRATEGY: Instant updates with a 300ms debounce buffer
         OrderNotificationService.subscribe(() -> {
             long now = System.currentTimeMillis();
             lastRefreshRequest.set(now);
@@ -98,6 +101,7 @@ public class DashboardController extends BaseController {
             }, 300, TimeUnit.MILLISECONDS);
         });
 
+        // FAILSAFE POLLING: Periodic refresh every 60 seconds
         refreshService = Executors.newSingleThreadScheduledExecutor(r -> {
             Thread t = new Thread(r);
             t.setDaemon(true);
@@ -122,15 +126,17 @@ public class DashboardController extends BaseController {
         }
     }
 
+    /**
+     * Configures the Recent Orders table with status-specific badges.
+     */
     private void setupTableColumns() {
         colOrderNumber.setCellValueFactory(data -> new javafx.beans.property.SimpleObjectProperty<>(data.getValue().getOrderNumber()));
         colOrderNumber.setCellFactory(column -> new TableCell<Order, Integer>() {
             @Override
             protected void updateItem(Integer item, boolean empty) {
                 super.updateItem(item, empty);
-                if (empty || item == null) {
-                    setText(null);
-                } else {
+                if (empty || item == null) setText(null);
+                else {
                     setText("#" + String.format("%04d", item));
                     setStyle("-fx-font-family: 'DM Mono', monospace; -fx-text-fill: #d4591e; -fx-font-weight: bold;");
                 }
@@ -142,9 +148,8 @@ public class DashboardController extends BaseController {
             @Override
             protected void updateItem(String item, boolean empty) {
                 super.updateItem(item, empty);
-                if (empty || item == null) {
-                    setText(null);
-                } else {
+                if (empty || item == null) setText(null);
+                else {
                     setText(item);
                     setWrapText(true);
                     setStyle("-fx-text-fill: #c4a882;");
@@ -157,15 +162,15 @@ public class DashboardController extends BaseController {
             @Override
             protected void updateItem(String item, boolean empty) {
                 super.updateItem(item, empty);
-                if (empty || item == null) {
-                    setText(null);
-                } else {
+                if (empty || item == null) setText(null);
+                else {
                     setText(item);
                     setStyle("-fx-text-fill: #c4a882;");
                 }
             }
         });
 
+        // STATUS BADGE LOGIC: Dynamic color-coding based on current order state
         colStatus.setCellValueFactory(data -> new javafx.beans.property.SimpleStringProperty(data.getValue().getStatus() != null ? data.getValue().getStatus() : ""));
         colStatus.setCellFactory(column -> new TableCell<Order, String>() {
             @Override
@@ -194,21 +199,28 @@ public class DashboardController extends BaseController {
         recentOrdersTable.setColumnResizePolicy(TableView.CONSTRAINED_RESIZE_POLICY);
     }
 
+    /**
+     * Aggregates data from multiple DAOs in a single background Task.
+     * Prevents UI freezing by offloading heavy relational queries to a separate thread.
+     */
     public void loadDashboardData() {
         javafx.concurrent.Task<DashboardData> loadTask = new javafx.concurrent.Task<>() {
             @Override
             protected DashboardData call() throws Exception {
                 DashboardData data = new DashboardData();
+                // REVENUE AGGREGATION
                 data.todayRevenue = orderDAO.getTodayRevenue();
                 data.yesterdayRevenue = orderDAO.getYesterdayRevenue();
                 data.todayOrders = orderDAO.getTodayOrderCount();
                 data.yesterdayOrders = orderDAO.getYesterdayOrderCount();
                 
+                // ORDER HISTORY (Recent 10)
                 LocalDateTime start = LocalDateTime.now().withHour(0).withMinute(0).withSecond(0);
                 LocalDateTime end = LocalDateTime.now();
                 List<Order> orders = orderDAO.findByFilters(null, start, end);
                 data.recentOrders = orders.size() > 10 ? orders.subList(0, 10) : orders;
                 
+                // PRODUCT & STOCK ANALYTICS
                 data.topSellingItems = menuItemDAO.getTopSellingItems(5);
                 data.criticalStock = ingredientDAO.findCriticalStock();
                 data.lowStock = ingredientDAO.findLowStock();
@@ -239,6 +251,10 @@ public class DashboardController extends BaseController {
         List<Staff> activeStaff;
     }
 
+    /**
+     * Calculates and displays current revenue stats along with percentage change
+     * compared to the previous day. Includes visual indicators (arrows) for trend.
+     */
     private void updateRevenueStats(DashboardData data) {
         lblRevenue.setText("₱" + String.format("%,.0f", data.todayRevenue));
 
@@ -275,6 +291,10 @@ public class DashboardController extends BaseController {
         }
     }
 
+    /**
+     * Renders a list of top selling items using progress bars to represent
+     * sales volume relative to the most popular item.
+     */
     private void updateTopItems(List<MenuItemDAO.TopSellingItem> items) {
         topItemsContainer.getChildren().clear();
         if (items.isEmpty()) {
@@ -306,6 +326,9 @@ public class DashboardController extends BaseController {
         }
     }
 
+    /**
+     * Renders inventory alerts. Prioritizes 'Critical' (Out of stock) over 'Low Stock'.
+     */
     private void updateStockAlerts(List<Ingredient> critical, List<Ingredient> low) {
         lowStockContainer.getChildren().clear();
         int maxDisplay = 5;

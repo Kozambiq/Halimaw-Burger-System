@@ -10,10 +10,17 @@ import javafx.scene.Parent;
 import javafx.scene.Scene;
 import javafx.stage.Stage;
 
+/**
+ * Main entry point for the Halimaw Burger Staff Portal.
+ * Orchestrates global navigation, manages UI view caching, 
+ * and maintains the active staff session across modules.
+ */
 public class Main extends Application {
 
     private static Stage mainStage;
     private static Scene cachedScene;
+
+    // VIEW CACHE: Stores loaded FXML roots and controllers to optimize transition speed
     private static Parent loginRoot;
     private static Parent dashboardRoot;
     private static Parent inventoryRoot;
@@ -23,6 +30,9 @@ public class Main extends Application {
     private static Parent cashierRoot;
     private static Parent ordersRoot;
     private static Parent kitchenRoot;
+    private static Parent salesReportRoot;
+    private static Parent cookRoot;
+
     private static DashboardController dashboardController;
     private static InventoryController inventoryController;
     private static MenuItemsController menuItemsController;
@@ -31,14 +41,17 @@ public class Main extends Application {
     private static CashierController cashierController;
     private static OrdersController ordersController;
     private static KitchenController kitchenController;
-    private static Parent salesReportRoot;
     private static SalesReportController salesReportController;
-    private static Parent cookRoot;
     private static CookController cookController;
 
+    // GLOBAL SESSION STATE
     private static User currentUser;
     private static Staff currentStaff;
 
+    /**
+     * Application Lifecycle: Initialization.
+     * Loads environment variables and establishes the database connection pool.
+     */
     @Override
     public void start(Stage stage) throws Exception {
         mainStage = stage;
@@ -47,6 +60,9 @@ public class Main extends Application {
         showLogin();
     }
 
+    /**
+     * Navigation: Displays the authentication screen.
+     */
     public static void showLogin() throws Exception {
         if (loginRoot == null) {
             FXMLLoader fxmlLoader = new FXMLLoader(Main.class.getResource("/fxml/login.fxml"));
@@ -64,6 +80,10 @@ public class Main extends Application {
         mainStage.show();
     }
 
+    /**
+     * Navigation: Transitions to the main management dashboard.
+     * Triggers a data refresh in the controller upon entry.
+     */
     public static void showDashboard() throws Exception {
         if (dashboardRoot == null) {
             FXMLLoader fxmlLoader = new FXMLLoader(Main.class.getResource("/fxml/dashboard.fxml"));
@@ -77,7 +97,7 @@ public class Main extends Application {
         
         if (dashboardController != null) {
             dashboardController.setActiveNav("Dashboard");
-            // Refresh data when returning to tab
+            // REFRESH LOGIC: Ensures metrics are up-to-date when returning to the dashboard
             dashboardController.loadDashboardData();
         }
     }
@@ -217,6 +237,9 @@ public class Main extends Application {
         }
     }
 
+    /**
+     * Specialized view for kitchen staff to monitor active orders.
+     */
     public static void showCook() throws Exception {
         if (cookRoot == null) {
             FXMLLoader fxmlLoader = new FXMLLoader(Main.class.getResource("/fxml/cook.fxml"));
@@ -233,6 +256,10 @@ public class Main extends Application {
         }
     }
 
+    /**
+     * Force-clears all cached views. Used during logout or configuration changes
+     * to ensure a fresh UI state.
+     */
     public static void clearAllCaches() {
         dashboardRoot = null;
         inventoryRoot = null;
@@ -257,61 +284,31 @@ public class Main extends Application {
         cookController = null;
     }
 
-    public static void clearInventoryCache() {
-        inventoryRoot = null;
-    }
+    // CACHE CLEARING HELPERS: Allow surgical resets of specific modules
+    public static void clearInventoryCache() { inventoryRoot = null; }
+    public static void clearMenuItemsCache() { menuItemsRoot = null; }
+    public static void clearCombosCache() { combosRoot = null; }
+    public static void clearStaffCache() { staffRoot = null; }
+    public static void clearOrdersCache() { ordersRoot = null; }
+    public static void clearCashierCache() { cashierRoot = null; }
+    public static void clearCookCache() { cookRoot = null; cookController = null; }
+    public static void clearSalesReportCache() { salesReportRoot = null; salesReportController = null; }
 
-    public static void clearMenuItemsCache() {
-        menuItemsRoot = null;
-    }
-
-    public static void clearCombosCache() {
-        combosRoot = null;
-    }
-
-    public static void clearStaffCache() {
-        staffRoot = null;
-    }
-
-    public static void clearOrdersCache() {
-        ordersRoot = null;
-    }
-
-    public static void clearCashierCache() {
-        cashierRoot = null;
-    }
-
-    public static void clearCookCache() {
-        cookRoot = null;
-        cookController = null;
-    }
-
-    public static void clearSalesReportCache() {
-        salesReportRoot = null;
-        salesReportController = null;
-    }
-
-@Override
+    /**
+     * Application Lifecycle: Termination.
+     * Safely closes the database connection pool before the JVM exits.
+     */
+    @Override
     public void stop() throws Exception {
         DatabaseConnection.close();
         super.stop();
     }
 
-    public static User getCurrentUser() {
-        return currentUser;
-    }
-
-    public static void setCurrentUser(User user) {
-        currentUser = user;
-    }
-
-    public static Staff getCurrentStaff() {
-        return currentStaff;
-    }
-
-    public static void setCurrentStaff(Staff staff) {
-        currentStaff = staff;
-    }
+    // SESSION MANAGEMENT: Global accessors for the current authenticated staff
+    public static User getCurrentUser() { return currentUser; }
+    public static void setCurrentUser(User user) { currentUser = user; }
+    public static Staff getCurrentStaff() { return currentStaff; }
+    public static void setCurrentStaff(Staff staff) { currentStaff = staff; }
 
     public static void clearSession() {
         currentUser = null;

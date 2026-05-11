@@ -38,6 +38,11 @@ import java.util.Arrays;
 import java.util.stream.Collectors;
 import javafx.scene.paint.Color;
 
+/**
+ * Controller for the Combos & Promos module.
+ * Handles the creation and management of bundled menu offerings, 
+ * including inclusion definitions, promo pricing, and validity periods.
+ */
 public class CombosController extends BaseController {
 
     @FXML private Label lblTotal;
@@ -51,15 +56,8 @@ public class CombosController extends BaseController {
     @FXML private TableColumn<Combo, String> colStatus;
     @FXML private TableColumn<Combo, String> colActions;
 
-    @FXML private Button btnDashboard;
-    @FXML private Button btnOrders;
-    @FXML private Button btnKitchen;
-    @FXML private Button btnMenuItems;
-    @FXML private Button btnCombos;
-    @FXML private Button btnInventory;
-    @FXML private Button btnSales;
-    @FXML private Button btnStaff;
-
+    // NAVIGATION
+    @FXML private Button btnDashboard, btnOrders, btnKitchen, btnMenuItems, btnCombos, btnInventory, btnSales, btnStaff;
     @FXML private TextField searchField;
     @FXML private Button btnSearch;
     @FXML private Label topbarDate;
@@ -68,6 +66,9 @@ public class CombosController extends BaseController {
     private boolean alreadyLoaded = false;
     private List<Combo> allCombos;
 
+    /**
+     * Initializes the controller. Sets up TableView columns and autocomplete logic.
+     */
     @FXML
     public void initialize() {
         if (alreadyLoaded) return;
@@ -79,10 +80,13 @@ public class CombosController extends BaseController {
         setupSearchAutocomplete();
         loadCombos();
 
-        // Subscribe to instant updates
+        // INSTANT SYNC: Subscribes to updates from other modules
         OrderNotificationService.subscribe(this::loadCombos);
     }
 
+    /**
+     * Configures real-time autocomplete for the combo search bar.
+     */
     private void setupSearchAutocomplete() {
         javafx.scene.control.ListView<String> suggestionList = new javafx.scene.control.ListView<>();
         suggestionList.getStyleClass().add("suggestion-list");
@@ -157,6 +161,9 @@ public class CombosController extends BaseController {
         return new Button[] {btnDashboard, btnOrders, btnKitchen, btnMenuItems, btnCombos, btnInventory, btnSales, btnStaff};
     }
 
+    /**
+     * Configures TableView columns, including specialized cells for price, savings, and status.
+     */
     private void setupTableColumns() {
         colName.setCellValueFactory(new PropertyValueFactory<>("name"));
         colName.setCellFactory(col -> new TableCell<Combo, String>() {
@@ -202,6 +209,7 @@ public class CombosController extends BaseController {
 
         combosTable.setColumnResizePolicy(TableView.CONSTRAINED_RESIZE_POLICY);
 
+        // STATUS PILL LOGIC: Renders 'Active' or 'Expired' badges
         colStatus.setCellValueFactory(new PropertyValueFactory<>("status"));
         colStatus.setCellFactory(col -> new TableCell<Combo, String>() {
             @Override
@@ -254,6 +262,9 @@ public class CombosController extends BaseController {
         });
     }
 
+    /**
+     * Loads combo data from the database using a background Task.
+     */
     public void loadCombos() {
         javafx.concurrent.Task<CombosData> loadTask = new javafx.concurrent.Task<>() {
             @Override
@@ -293,6 +304,10 @@ public class CombosController extends BaseController {
         InclusionData(String n, int q, double p) { name = n; qty = q; unitPrice = p; }
     }
 
+    /**
+     * Creates a visual chip for a menu item included in a combo.
+     * Includes a listener to update the 'Total Original Price' when items are removed.
+     */
     private HBox createItemChipWithQty(InclusionData data, List<InclusionData> dataList, VBox container, TextField originalPriceInput) {
         HBox chip = new HBox(12);
         chip.setAlignment(Pos.CENTER_LEFT);
@@ -313,6 +328,7 @@ public class CombosController extends BaseController {
         Button removeBtn = new Button("✕");
         removeBtn.getStyleClass().add("btn-chip-remove");
         removeBtn.setOnAction(e -> {
+            // STATE SYNC: Remove from list and update the total calculation
             dataList.remove(data);
             container.getChildren().remove(chip);
             double newTotal = 0;
@@ -324,6 +340,10 @@ public class CombosController extends BaseController {
         return chip;
     }
 
+    /**
+     * Displays a dialog for editing an existing promo bundle.
+     * Parses the current inclusion string into InclusionData objects for the UI builder.
+     */
     private void onEditPromo(Combo existingCombo) {
         Dialog<Boolean> dialog = new Dialog<>();
         dialog.setTitle("EDIT PROMO");
@@ -416,6 +436,7 @@ public class CombosController extends BaseController {
         colRight.getChildren().addAll(searchArea, itemsScroll);
         mainLayout.getChildren().addAll(colLeft, colRight);
 
+        // PARSING LOGIC: Translates the inclusion string (e.g., "1 x Burger + 1 x Fries") into data objects
         List<InclusionData> inclusionList = new ArrayList<>();
         String[] parts = existingCombo.getIncludes().split(" \\+ ");
         for (String p : parts) {
@@ -474,6 +495,7 @@ public class CombosController extends BaseController {
             try {
                 double promoPrice = Double.parseDouble(pPrice);
                 double originalPrice = Double.parseDouble(originalPriceField.getText());
+                // RE-SERIALIZATION: Transforms inclusion objects back into a standardized string
                 String inclusionStr = inclusionList.stream().map(id -> id.qty + " x " + id.name).collect(Collectors.joining(" + "));
                 comboService.update(existingCombo.getId(), name, inclusionStr, promoPrice, originalPrice, java.sql.Date.valueOf(date));
                 loadCombos();
@@ -484,6 +506,10 @@ public class CombosController extends BaseController {
         dialog.showAndWait();
     }
 
+    /**
+     * Displays a dialog for defining a new combo bundle.
+     * Similar complex builder UI to the edit dialog.
+     */
     @FXML
     private void onAddPromo() {
         Dialog<Boolean> dialog = new Dialog<>();
@@ -635,6 +661,9 @@ public class CombosController extends BaseController {
         return box;
     }
 
+    /**
+     * Validates inclusion quantities. Ensures only positive whole numbers are accepted.
+     */
     private void validateInclusion(TextField qtyField, Label errorLabel, Button addBtn) {
         String qtxt = qtyField.getText().trim();
         if (qtxt.isEmpty()) {
@@ -681,6 +710,9 @@ public class CombosController extends BaseController {
         });
     }
 
+    /**
+     * Refreshes the visual chips and the 'Total Original Price' calculation.
+     */
     private void refreshInclusionsUI(List<InclusionData> list, VBox container, TextField originalPriceField) {
         container.getChildren().clear();
         double total = 0;

@@ -41,6 +41,11 @@ import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
 
+/**
+ * Controller for the Inventory Management module.
+ * Handles the display of ingredient stock levels, restocking transactions,
+ * threshold configurations, and real-time inventory monitoring.
+ */
 public class InventoryController extends BaseController {
 
     @FXML private Label lblTotal;
@@ -72,6 +77,10 @@ public class InventoryController extends BaseController {
     private List<Ingredient> allIngredients;
     private ScheduledExecutorService timerService;
 
+    /**
+     * Initializes the controller. Sets up table columns, navigation, search autocomplete,
+     * and establishes the synchronization strategy for inventory data.
+     */
     @FXML
     public void initialize() {
         if (alreadyLoaded) return;
@@ -83,18 +92,23 @@ public class InventoryController extends BaseController {
         setupSearchAutocomplete();
         loadInventory();
         
-        // Subscribe to instant updates from orders (stock reservations/deductions)
+        // RELEVANT SYNC STRATEGY:
+        // 1. Instant Updates: Subscribe to OrderNotificationService to refresh whenever an order is placed/deducted.
         OrderNotificationService.subscribe(this::loadInventory);
         
+        // 2. Periodic Polling: Failsafe mechanism to ensure UI stays in sync even if notifications fail.
         timerService = Executors.newSingleThreadScheduledExecutor(r -> {
             Thread t = new Thread(r);
             t.setDaemon(true);
             return t;
         });
-        // Polling as a backup (failsafe)
         timerService.scheduleAtFixedRate(() -> Platform.runLater(this::loadInventory), 60, 60, TimeUnit.SECONDS);
     }
 
+    /**
+     * Configures a real-time search autocomplete popup for the ingredient name field.
+     * Includes table-level filtering as the user types.
+     */
     private void setupSearchAutocomplete() {
         javafx.scene.control.ListView<String> suggestionList = new javafx.scene.control.ListView<>();
         suggestionList.getStyleClass().add("suggestion-list");
@@ -112,17 +126,18 @@ public class InventoryController extends BaseController {
             String query = searchField.getText().trim().toLowerCase();
             if (query.isEmpty()) {
                 suggestionPopup.hide();
-                // Reset table when empty
+                // Restore original list if search is cleared
                 inventoryTable.setItems(FXCollections.observableArrayList(allIngredients));
                 return;
             }
 
-            // Real-time table filtering
+            // FILTERING LOGIC: Perform client-side filtering on the cached allIngredients list
             List<Ingredient> filtered = allIngredients.stream()
                     .filter(ing -> ing.getName().toLowerCase().contains(query))
                     .collect(Collectors.toList());
             inventoryTable.setItems(FXCollections.observableArrayList(filtered));
 
+            // SUGGESTION LOGIC: Filter matching names for the dropdown
             List<String> matches = allIngredientNames.stream()
                     .filter(name -> name.toLowerCase().contains(query))
                     .collect(Collectors.toList());
@@ -153,6 +168,10 @@ public class InventoryController extends BaseController {
         });
     }
 
+    /**
+     * Triggered by the search button or enter key. Performs a server-side find
+     * for the specific ingredient name entered.
+     */
     @FXML
     private void onSearchIngredient() {
         String searchText = searchField.getText().trim();
@@ -177,6 +196,10 @@ public class InventoryController extends BaseController {
         return new Button[] {btnDashboard, btnOrders, btnKitchen, btnMenuItems, btnCombos, btnInventory, btnSales, btnStaff};
     }
 
+    /**
+     * Configures the TableView columns, including complex custom cell factories for
+     * stock bars, status pills, and action menus.
+     */
     private void setupTableColumns() {
         colName.setCellValueFactory(new PropertyValueFactory<>("name"));
         colName.setCellFactory(col -> new TableCell<Ingredient, String>() {
@@ -187,6 +210,7 @@ public class InventoryController extends BaseController {
             }
         });
 
+        // STOCK BAR LOGIC: Dynamically generates a progress bar with threshold markers
         colStockLevel.setCellValueFactory(cellData ->
             new javafx.beans.property.SimpleObjectProperty<>(
                 cellData.getValue().getStockPercentage()
@@ -211,17 +235,20 @@ public class InventoryController extends BaseController {
                 container.setPrefWidth(BAR_WIDTH);
                 container.setMaxWidth(BAR_WIDTH);
 
+                // Background track of the bar
                 Region barTrack = new Region();
                 barTrack.getStyleClass().add("stock-bar-track");
                 barTrack.setPrefHeight(8);
                 barTrack.setPrefWidth(BAR_WIDTH);
 
+                // Foreground fill of the bar based on stock percentage
                 Region barFill = new Region();
                 barFill.setPrefHeight(8);
                 double fillWidth = Math.min(percentage * (BAR_WIDTH / 100.0), BAR_WIDTH);
                 barFill.setPrefWidth(fillWidth);
                 barFill.setMaxWidth(fillWidth);
 
+                // Color coding based on stock status
                 if ("OK".equals(status)) {
                     barFill.getStyleClass().add("stock-bar-fill-ok");
                 } else if ("Low".equals(status)) {
@@ -230,16 +257,17 @@ public class InventoryController extends BaseController {
                     barFill.getStyleClass().add("stock-bar-fill-out");
                 }
 
+                // THRESHOLD MARKERS: Visual indicators for Low and Critical points
                 Pane markerLayer = new Pane();
                 markerLayer.setPrefSize(BAR_WIDTH, 8);
                 
                 if (maxStock > 0) {
-                    // Low Stock Marker (Yellow)
+                    // Yellow Marker: Where "Low Stock" alert begins
                     javafx.scene.shape.Rectangle lowMarker = new javafx.scene.shape.Rectangle(2.5, 8);
                     lowMarker.getStyleClass().add("stock-marker-low");
                     lowMarker.setLayoutX((minThreshold / maxStock) * BAR_WIDTH);
                     
-                    // Critical Stock Marker (Red - 50% of threshold)
+                    // Red Marker: Critical level (set at 50% of the low stock threshold)
                     javafx.scene.shape.Rectangle criticalMarker = new javafx.scene.shape.Rectangle(2.5, 8);
                     criticalMarker.getStyleClass().add("stock-marker-critical");
                     criticalMarker.setLayoutX((minThreshold * 0.5 / maxStock) * BAR_WIDTH);
@@ -279,6 +307,7 @@ public class InventoryController extends BaseController {
         
         inventoryTable.setColumnResizePolicy(TableView.CONSTRAINED_RESIZE_POLICY);
         
+        // STATUS PILL LOGIC: Renders color-coded status badges (OK, LOW, OUT, DISABLED)
         colStatus.setCellValueFactory(cellData -> {
             String availabilityStatus = cellData.getValue().getAvailabilityStatus();
             if ("Unavailable".equals(availabilityStatus)) {
@@ -313,6 +342,7 @@ public class InventoryController extends BaseController {
             }
         });
 
+        // ACTION MENU: Contextual actions for each ingredient
         colActions.setCellFactory(col -> new TableCell<Ingredient, String>() {
             @Override
             protected void updateItem(String item, boolean empty) {
@@ -409,6 +439,10 @@ public class InventoryController extends BaseController {
         }
     }
 
+    /**
+     * Loads inventory data from the database using a background Task to prevent
+     * UI freezing during database access. Updates metrics and table items on completion.
+     */
     public void loadInventory() {
         javafx.concurrent.Task<InventoryData> loadTask = new javafx.concurrent.Task<>() {
             @Override
@@ -452,6 +486,10 @@ public class InventoryController extends BaseController {
         }
     }
 
+    /**
+     * Displays a custom dialog for restocking an ingredient.
+     * Includes strict validation for unit types (whole numbers for 'pcs') and max capacity.
+     */
     private void showAddStockDialog(Ingredient ingredient) {
         Dialog<StockUpdateResult> dialog = new Dialog<>();
         dialog.setTitle("RESTOCK INGREDIENT");
@@ -539,6 +577,7 @@ public class InventoryController extends BaseController {
             }
         });
 
+        // VALIDATION LOGIC: Ensures the user doesn't enter invalid quantities or exceed max capacity
         quantityField.textProperty().addListener(obs -> {
             String qtyText = quantityField.getText().trim();
             String errorMsg = null;
@@ -589,6 +628,10 @@ public class InventoryController extends BaseController {
         });
     }
 
+    /**
+     * Displays a custom dialog for reducing stock level (e.g., due to spoilage or error).
+     * Includes validation to ensure the reduction doesn't exceed current stock.
+     */
     private void showReduceStockDialog(Ingredient ingredient) {
         Dialog<StockUpdateResult> dialog = new Dialog<>();
         dialog.setTitle("REDUCE STOCK");
@@ -676,6 +719,7 @@ public class InventoryController extends BaseController {
             }
         });
 
+        // VALIDATION LOGIC: Ensures reduction doesn't exceed current inventory levels
         quantityField.textProperty().addListener(obs -> {
             String qtyText = quantityField.getText().trim();
             String errorMsg = null;
@@ -726,6 +770,10 @@ public class InventoryController extends BaseController {
         });
     }
 
+    /**
+     * Displays a dialog for configuring inventory thresholds (Min/Max).
+     * This affects when "Low Stock" alerts are triggered and the scaling of stock bars.
+     */
     private void showEditThresholdDialog(Ingredient ingredient) {
         Dialog<Boolean> dialog = new Dialog<>();
         dialog.setTitle("THRESHOLD CONFIG");
@@ -810,6 +858,7 @@ public class InventoryController extends BaseController {
         Button cancelButton = (Button) dialog.getDialogPane().lookupButton(javafx.scene.control.ButtonType.CANCEL);
         cancelButton.getStyleClass().add("dialog-button-cancel");
 
+        // CROSS-FIELD VALIDATION: Ensures min isn't negative and max isn't below current stock
         javafx.beans.InvalidationListener validator = obs -> {
             boolean valid = true;
             try {
@@ -987,6 +1036,11 @@ public class InventoryController extends BaseController {
         alert.showAndWait();
     }
 
+/**
+ * Displays a dialog for adding a completely new ingredient to the system.
+ * Handles complex validation including existence checks and relational constraints
+ * between initial quantity, min alerts, and max capacity.
+ */
 @FXML
 private void onAddIngredient() {
     Dialog<Boolean> dialog = new Dialog<>();
@@ -1088,6 +1142,7 @@ private void onAddIngredient() {
     Button cancelButton = (Button) dialog.getDialogPane().lookupButton(javafx.scene.control.ButtonType.CANCEL);
     cancelButton.getStyleClass().add("dialog-button-cancel");
 
+    // COMPLEX VALIDATOR: Checks multiple constraints simultaneously as the user types
     javafx.beans.InvalidationListener validator = obs -> {
         boolean valid = true;
         String name = nameField.getText().trim();
@@ -1161,6 +1216,10 @@ private void onAddIngredient() {
         showRestockLogsDialog();
     }
 
+    /**
+     * Displays a full-screen dialog containing a TableView of all inventory transactions.
+     * Shows before/after stock levels and the specific change amount for every restock or deduction.
+     */
     private void showRestockLogsDialog() {
         Dialog<Void> dialog = new Dialog<>();
         dialog.setTitle("RESTOCK & TRANSACTION LOGS");
@@ -1207,6 +1266,7 @@ private void onAddIngredient() {
         ));
         colBefore.getStyleClass().add("cell-mono");
 
+        // CHANGE COLUMN: Color-coded to show positive (green) or negative (red) stock movements
         TableColumn<RestockLog, String> colChange = new TableColumn<>("CHANGE");
         colChange.setCellValueFactory(cellData -> {
             double qty = cellData.getValue().getQuantityAdded();

@@ -49,6 +49,11 @@ import java.util.Map;
 
 import com.myapp.util.OrderNotificationService;
 
+/**
+ * Controller for the Cashier/POS (Point of Sale) module.
+ * Manages the dynamic rendering of the menu, category filtering,
+ * real-time order state management, and the checkout process.
+ */
 public class CashierController {
 
     @FXML private GridPane menuGrid;
@@ -71,6 +76,13 @@ public class CashierController {
     @FXML private Button btnCatOthers;
 
     private CashierService cashierService = new CashierService();
+
+    /**
+     * Maps item identifiers to their current order quantity.
+     * IDENTIFIER STRATEGY:
+     * - Positive IDs (>0) represent Combo items.
+     * - Negative IDs (<0) represent individual MenuItems (itemID * -1).
+     */
     private Map<Integer, Integer> orderItems = new HashMap<>();
     private Map<Integer, Double> itemPrices = new HashMap<>();
     private Map<Integer, Double> comboPrices = new HashMap<>();
@@ -80,11 +92,17 @@ public class CashierController {
     private String currentCategory = "All";
     private int orderNumber = 1;
     private double subtotal = 0.0;
+    
+    // UI LAYOUT CONSTANTS
     private static final int CARD_WIDTH = 160;
     private static final int CARD_HGAP = 10;
     private static final int RIGHT_PANEL_WIDTH = 360;
     private static final int GRID_PADDING = 32;
 
+    /**
+     * Initializes the POS interface. Sets up the initial state, staff info,
+     * and responsive listeners for the menu grid to adapt to window resizing.
+     */
     @FXML
     public void initialize() {
         orderNumber = cashierService.getNextOrderNumber();
@@ -94,6 +112,7 @@ public class CashierController {
         setActiveCategory(btnCatAll);
         updateStaffInfo();
 
+        // RESPONSIVE LAYOUT LOGIC: Listen for size changes to re-calculate columns
         menuGrid.parentProperty().addListener((obs, oldParent, newParent) -> {
             if (newParent != null) {
                 newParent.layoutBoundsProperty().addListener((o, oldBounds, newBounds) -> {
@@ -120,6 +139,11 @@ public class CashierController {
         }
     }
 
+    /**
+     * Calculates the number of columns that can fit in the menu grid based on
+     * the current width of the parent container.
+     * @return Number of columns (minimum 1).
+     */
     private int calculateColumns() {
         double availableWidth = 0;
         if (menuGrid.getParent() != null) {
@@ -135,15 +159,20 @@ public class CashierController {
         reloadMenu();
     }
 
+    /**
+     * Completely re-renders the menu grid. 
+     * Categorizes items and applies search filters in real-time.
+     */
     private void reloadMenu() {
         try {
             String searchText = txtSearch.getText().toLowerCase().trim();
             menuGrid.getChildren().clear();
             
-            // 1. Load Promos & Combos First
+            // RENDERING ORDER:
+            // 1. Promos & Combos (Always shown at the top if search/category matches)
             int currentRow = loadFilteredCombos(0, searchText);
             
-            // 2. Load Menu Items Categories in requested order: Burgers, Drinks, Sides, Others
+            // 2. Menu Items by category (Burgers -> Drinks -> Sides -> Others)
             loadFilteredMenuItems(currentRow, searchText);
         } catch (Exception e) {
             System.err.println("Error reloading menu: " + e.getMessage());
@@ -359,6 +388,10 @@ public class CashierController {
         return card;
     }
 
+    /**
+     * Adds an individual menu item to the current order.
+     * Transforms the ID to negative to distinguish it from combo items.
+     */
     private void addMenuItemToOrder(MenuItemModel item) {
         int itemId = -item.getId();
         int quantity = orderItems.getOrDefault(itemId, 0) + 1;
@@ -369,6 +402,10 @@ public class CashierController {
         updateTotals();
     }
 
+    /**
+     * Adds a combo/promo deal to the current order.
+     * Uses positive IDs to distinguish it from individual items.
+     */
     private void addComboToOrder(Combo combo) {
         int comboId = combo.getId();
         int quantity = orderItems.getOrDefault(comboId, 0) + 1;
@@ -456,6 +493,10 @@ public class CashierController {
         orderItemsList.getChildren().add(row);
     }
 
+    /**
+     * Decreases the quantity of an item in the order state and updates totals.
+     * Removes the item entirely if the quantity reaches zero.
+     */
     private void decrementItem(String name, double price) {
         for (Map.Entry<Integer, Integer> entry : orderItems.entrySet()) {
             int id = entry.getKey();
@@ -491,6 +532,9 @@ public class CashierController {
         updateTotals();
     }
 
+    /**
+     * Increases the quantity of an item in the order state and updates totals.
+     */
     private void incrementItem(String name, double price) {
         for (Map.Entry<Integer, Integer> entry : orderItems.entrySet()) {
             int id = entry.getKey();
@@ -575,11 +619,18 @@ public class CashierController {
         reloadMenu();
     }
 
+    /**
+     * Initiates the payment process for a Cash transaction.
+     */
     @FXML
     private void onPayCash() {
         processOrder("Cash");
     }
 
+    /**
+     * Initiates the payment process for a digital (GCash) transaction.
+     * Triggers a secondary dialog for the reference number.
+     */
     @FXML
     private void onPayCard() {
         processOrder("GCash");
@@ -593,17 +644,23 @@ public class CashierController {
         updateTotals();
     }
 
+    /**
+     * Core business logic for finalizing an order. 
+     * Validates stock, captures payment info, saves to DB, and broadcasts updates.
+     * @param paymentType "Cash" or "GCash"
+     */
     private void processOrder(String paymentType) {
         if (orderItems.isEmpty()) {
             showErrorAlert("No items ordered", "Please add items to the order before proceeding with payment.");
             return;
         }
 
+        // DIGITAL PAYMENT FLOW: Captures the 13-digit reference number for GCash
         String referenceNumber = null;
         if ("GCash".equals(paymentType)) {
             referenceNumber = showGCashDialog();
             if (referenceNumber == null) {
-                return;
+                return; // User cancelled the GCash dialog
             }
         }
 
@@ -613,19 +670,23 @@ public class CashierController {
         double discount = 0.0;
         String notes = txtOrderNotes.getText();
 
+        // 1. Create Master Order Record
         Order order = new Order(orderNumber, staffId, currentOrderType, subtotal, discount, subtotal, paymentType, referenceNumber, "New", notes);
 
+        // 2. Prepare Order Items (mapping logic applies here)
         List<OrderItem> items = new ArrayList<>();
         for (Map.Entry<Integer, Integer> entry : orderItems.entrySet()) {
             int id = entry.getKey();
             int qty = entry.getValue();
 
             if (id > 0) {
+                // COMBO ITEM
                 Combo combo = findComboById(id);
                 if (combo != null) {
                     items.add(new OrderItem("Combo", id, combo.getName(), qty, combo.getPromoPrice()));
                 }
             } else {
+                // MENU ITEM
                 MenuItemModel item = findMenuItemById(-id);
                 if (item != null) {
                     items.add(new OrderItem("MenuItem", -id, item.getName(), qty, item.getPrice()));
@@ -633,8 +694,10 @@ public class CashierController {
             }
         }
 
+        // 3. Database Transaction: Atomic insert and stock deduction
         int orderId = cashierService.insert(order, items);
         if (orderId > 0) {
+            // SUCCESS FLOW: Reset POS state
             orderNumber = cashierService.getNextOrderNumber();
             orderItems.clear();
             subtotal = 0.0;
@@ -643,10 +706,11 @@ public class CashierController {
             updateOrderDisplay();
             updateTotals();
 
-            // Notify other modules (like Cook Panel and Inventory) instantly
+            // INSTANT SYNC: Notify Cook Panel and Inventory modules via the Notification Service
             OrderNotificationService.broadcastUpdate();
             reloadMenu();
         } else if (orderId == -2) {
+            // CONCURRENCY HANDLING: Stock ran out while the order was being built
             showErrorAlert("Insufficient Stock", "Some ingredients ran out while processing your order. Please check the menu for availability.");
             reloadMenu();
         } else {
@@ -688,6 +752,11 @@ public class CashierController {
         alert.showAndWait();
     }
 
+    /**
+     * Performs a comprehensive check of all items in the current cart
+     * against the actual physical stock in the database.
+     * @return List of strings describing which ingredients are insufficient.
+     */
     private List<String> checkOutOfStockIngredients() {
         List<String> outOfStockItems = new ArrayList<>();
 
@@ -696,6 +765,7 @@ public class CashierController {
             int orderQty = entry.getValue();
 
             if (id > 0) {
+                // COMBO STOCK CHECK: Deep check of all items included in the promo
                 Combo combo = findComboById(id);
                 if (combo != null) {
                     List<String> comboOutItems = checkComboIngredients(combo.getIncludes(), orderQty);
@@ -706,6 +776,7 @@ public class CashierController {
                     }
                 }
             } else {
+                // MENU ITEM STOCK CHECK: Checks raw ingredients required for this item
                 MenuItemModel item = findMenuItemById(-id);
                 if (item != null) {
                     List<MenuItemIngredient> ingredients = cashierService.getIngredientsForMenuItem(item.getId());
@@ -730,6 +801,10 @@ public class CashierController {
         return outOfStockItems;
     }
 
+    /**
+     * Helper for combo validation. Splits the 'includes' string and checks
+     * ingredients for each component item.
+     */
     private List<String> checkComboIngredients(String includes, int orderQty) {
         List<String> outOfStockItems = new ArrayList<>();
         if (includes == null || includes.isEmpty()) return outOfStockItems;

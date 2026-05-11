@@ -23,7 +23,13 @@ import java.util.List;
 import java.util.Locale;
 import java.util.Map;
 
+/**
+ * Utility for building professional PDF reports using the OpenPDF library.
+ * Provides a standardized layout for all system exports, including 
+ * brand-consistent styling, automated headers/footers, and KPI summaries.
+ */
 public class ReportPdfBuilder {
+    // BRANDING CONSTANTS: Used to maintain visual identity across all reports
     private final Color brandColor = new Color(180, 50, 30);
     private final Color altRowColor = new Color(245, 245, 245);
     private final Font fontTitle = FontFactory.getFont(FontFactory.HELVETICA_BOLD, 18, brandColor);
@@ -32,6 +38,10 @@ public class ReportPdfBuilder {
     private final Font fontMetric = FontFactory.getFont(FontFactory.HELVETICA_BOLD, 14, brandColor);
     private final Font fontTableHeader = FontFactory.getFont(FontFactory.HELVETICA_BOLD, 11, Color.WHITE);
 
+    /**
+     * Orchestrates the construction of a complete report.
+     * FLOW: Initialize Document -> Add Metadata -> Add Summary KPIs -> Add Main Data Table -> Close.
+     */
     public void generateReport(
             String reportTitle,
             String dateFrom,
@@ -45,29 +55,33 @@ public class ReportPdfBuilder {
         Document document = new Document(PageSize.A4);
         PdfWriter writer = PdfWriter.getInstance(document, new FileOutputStream(outputPath));
         
-        // Attach Header/Footer event
+        // EVENT HOOK: Automatically adds the brand header and page numbers on every page
         writer.setPageEvent(new HeaderFooterEvent(reportTitle));
         
         document.open();
         document.add(new Paragraph("\n")); // Spacer for header
 
-        // 1. META SECTION (First Page Only)
+        // 1. META SECTION: Report identification details
         addMetaSection(document, reportTitle, dateFrom, dateTo, generatedBy);
         document.add(new Paragraph("\n"));
 
-        // 2. SUMMARY BOXES
+        // 2. SUMMARY BOXES: Highlights key KPIs (e.g., Total Revenue, Order Count)
         if (summaryMetrics != null && !summaryMetrics.isEmpty()) {
             addSummaryBoxes(document, summaryMetrics);
             document.add(new Paragraph("\n"));
         }
 
-        // 3. BREAKDOWN TABLES
+        // 3. BREAKDOWN TABLES: Detailed itemized list of records
         if (rows != null && !rows.isEmpty()) {
             addSectionHeader(document, "DETAILED BREAKDOWN");
             addBreakdownTable(document, columns, rows);
         }
     }
 
+    /**
+     * Specialized generator for the comprehensive Sales Report.
+     * Includes time-series data, top items, and category breakdowns in a single document.
+     */
     public void generateFullSalesReport(
             String dateFrom,
             String dateTo,
@@ -89,11 +103,13 @@ public class ReportPdfBuilder {
         addMetaSection(document, "Comprehensive Sales Report", dateFrom, dateTo, generatedBy);
         document.add(new Paragraph("\n"));
 
+        // KPI SECTION
         if (metrics != null) {
             addSectionHeader(document, "KEY PERFORMANCE INDICATORS");
             addSummaryBoxes(document, metrics);
         }
 
+        // TREND ANALYSIS: Hourly or Daily revenue flow
         if (timeData != null && !timeData.isEmpty()) {
             document.add(new Paragraph("\n"));
             if (isHourly) {
@@ -105,12 +121,14 @@ public class ReportPdfBuilder {
             }
         }
 
+        // PRODUCT PERFORMANCE: Most popular items
         if (topItems != null && !topItems.isEmpty()) {
             document.add(new Paragraph("\n"));
             addSectionHeader(document, "TOP SELLING PRODUCTS");
             addDataTable(document, new String[]{"Item Name", "Qty Sold", "Total Sales"}, topItems);
         }
 
+        // CATEGORY PERFORMANCE: Revenue split by product type
         if (categories != null && !categories.isEmpty()) {
             document.add(new Paragraph("\n"));
             addSectionHeader(document, "CATEGORY PERFORMANCE");
@@ -120,6 +138,9 @@ public class ReportPdfBuilder {
         document.close();
     }
 
+    /**
+     * Adds a bold subtitle header to divide different report sections.
+     */
     private void addSectionHeader(Document document, String text) throws DocumentException {
         Paragraph p = new Paragraph(text, FontFactory.getFont(FontFactory.HELVETICA_BOLD, 12, Color.DARK_GRAY));
         p.setSpacingBefore(10);
@@ -127,6 +148,10 @@ public class ReportPdfBuilder {
         document.add(p);
     }
 
+    /**
+     * Localized currency formatter for the Philippines (₱).
+     * Handles cleaning of raw strings before parsing to numeric values.
+     */
     private String formatCurrency(String value) {
         if (value == null || value.isEmpty() || "No sales yet".equalsIgnoreCase(value) || "N/A".equalsIgnoreCase(value)) {
             return value;
@@ -142,12 +167,17 @@ public class ReportPdfBuilder {
         }
     }
 
+    /**
+     * Generic table builder for data represented as String arrays.
+     * Implements brand styling for headers and Zebra-striping for rows.
+     */
     private void addDataTable(Document document, String[] headers, List<String[]> data) throws DocumentException {
         PdfPTable table = new PdfPTable(headers.length);
         table.setWidthPercentage(100);
         table.setHeaderRows(1);
         table.setKeepTogether(true);
 
+        // STYLED HEADER
         for (String h : headers) {
             PdfPCell c = new PdfPCell(new Phrase(h.toUpperCase(), fontTableHeader));
             c.setBackgroundColor(brandColor);
@@ -157,6 +187,7 @@ public class ReportPdfBuilder {
             table.addCell(c);
         }
 
+        // ZEBRA-STRIPED ROWS
         int rowCount = 0;
         for (String[] row : data) {
             Color bgColor = (rowCount % 2 == 0) ? Color.WHITE : altRowColor;
@@ -164,7 +195,7 @@ public class ReportPdfBuilder {
                 String val = row[i];
                 String displayVal = val;
                 
-                // Auto-peso for currency-like strings (usually column 1 for Daily/Hourly or 2 for Top Items/Categories)
+                // AUTO-CURRENCY DETECTION: Formats values if header implies financial data
                 String header = headers[i].toLowerCase();
                 if (header.contains("revenue") || header.contains("sales") || header.contains("price") || val.matches("\\d+\\.\\d{2}")) {
                     displayVal = formatCurrency(val);
@@ -181,6 +212,9 @@ public class ReportPdfBuilder {
         document.add(table);
     }
 
+    /**
+     * Adds the report metadata (date range, user, timestamp) in a grid layout.
+     */
     private void addMetaSection(Document document, String title, String from, String to, String user) throws DocumentException {
         Paragraph pTitle = new Paragraph(title.toUpperCase(), fontTitle);
         pTitle.setSpacingAfter(10);
@@ -210,6 +244,9 @@ public class ReportPdfBuilder {
         return cell;
     }
 
+    /**
+     * Adds standardized summary KPI boxes (highlights).
+     */
     private void addSummaryBoxes(Document document, List<Map<String, String>> metrics) throws DocumentException {
         PdfPTable table = new PdfPTable(metrics.size());
         table.setWidthPercentage(100);
@@ -246,13 +283,16 @@ public class ReportPdfBuilder {
         document.add(table);
     }
 
+    /**
+     * Specialized Breakdown Table for Map-based data rows.
+     */
     private void addBreakdownTable(Document document, List<String> columns, List<Map<String, String>> rows) throws DocumentException {
         PdfPTable table = new PdfPTable(columns.size());
         table.setWidthPercentage(100);
         table.setHeaderRows(1);
         table.setKeepTogether(true);
 
-        // Header
+        // HEADER
         for (String col : columns) {
             PdfPCell headerCell = new PdfPCell(new Phrase(col.toUpperCase(), fontTableHeader));
             headerCell.setBackgroundColor(brandColor);
@@ -262,14 +302,14 @@ public class ReportPdfBuilder {
             table.addCell(headerCell);
         }
 
-        // Data Rows
+        // DATA ROWS
         int rowCount = 0;
         for (Map<String, String> rowData : rows) {
             Color bgColor = (rowCount % 2 == 0) ? Color.WHITE : altRowColor;
             for (String col : columns) {
                 String value = rowData.getOrDefault(col, "");
                 
-                // Format currency in table if detected
+                // CURRENCY DETECTION
                 if (col.toLowerCase().contains("total") || col.toLowerCase().contains("price") || col.toLowerCase().contains("revenue")) {
                     value = formatCurrency(value);
                 }

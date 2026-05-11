@@ -35,6 +35,11 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
 
+/**
+ * Controller for the Menu Items Management module.
+ * Handles the creation, editing, and organization of menu products,
+ * including their complex associations with raw ingredients (recipes).
+ */
 public class MenuItemsController extends BaseController {
 
     @FXML private Label lblTotal;
@@ -48,25 +53,14 @@ public class MenuItemsController extends BaseController {
     @FXML private TableColumn<MenuItemModel, String> colAvailability;
     @FXML private TableColumn<MenuItemModel, String> colActions;
 
-    @FXML private Button btnDashboard;
-    @FXML private Button btnOrders;
-    @FXML private Button btnKitchen;
-    @FXML private Button btnMenuItems;
-    @FXML private Button btnCombos;
-    @FXML private Button btnInventory;
-    @FXML private Button btnSales;
-    @FXML private Button btnStaff;
-
+    // NAVIGATION & UI
+    @FXML private Button btnDashboard, btnOrders, btnKitchen, btnMenuItems, btnCombos, btnInventory, btnSales, btnStaff;
     @FXML private TextField searchField;
     @FXML private Button btnSearch;
     @FXML private Button btnAddItem;
 
     // Category Sidebar Buttons
-    @FXML private Button catAll;
-    @FXML private Button catBurgers;
-    @FXML private Button catSides;
-    @FXML private Button catDrinks;
-    @FXML private Button catOthers;
+    @FXML private Button catAll, catBurgers, catSides, catDrinks, catOthers;
     @FXML private Label topbarDate;
 
     private MenuItemService menuItemService = new MenuItemService();
@@ -74,6 +68,10 @@ public class MenuItemsController extends BaseController {
     private List<MenuItemModel> allMenuItems;
     private String selectedCategory = "All Items";
 
+    /**
+     * Initializes the controller. Sets up table columns, navigation, search autocomplete,
+     * and subscribes to stock updates for real-time status changes.
+     */
     @FXML
     public void initialize() {
         if (alreadyLoaded) return;
@@ -85,10 +83,13 @@ public class MenuItemsController extends BaseController {
         setupSearchAutocomplete();
         loadMenuItems();
 
-        // Subscribe to instant updates (e.g., when stock levels change)
+        // INSTANT SYNC: Subscribes to stock changes to update availability status in real-time
         OrderNotificationService.subscribe(this::loadMenuItems);
     }
 
+    /**
+     * Filters the TableView based on the current search query and selected category.
+     */
     private void applyFilters() {
         String query = searchField.getText().trim().toLowerCase();
         
@@ -108,6 +109,10 @@ public class MenuItemsController extends BaseController {
     @FXML
     private HBox searchBarContainer;
 
+    /**
+     * Handles category filtering from the sidebar. 
+     * Updates visual selection state and applies data filters.
+     */
     @FXML
     private void onCategorySelect(javafx.event.ActionEvent event) {
         Button source = (Button) event.getSource();
@@ -125,6 +130,9 @@ public class MenuItemsController extends BaseController {
         applyFilters();
     }
 
+    /**
+     * Configures real-time autocomplete for the menu item search bar.
+     */
     private void setupSearchAutocomplete() {
         javafx.scene.control.ListView<String> suggestionList = new javafx.scene.control.ListView<>();
         suggestionList.getStyleClass().add("suggestion-list");
@@ -189,6 +197,11 @@ public class MenuItemsController extends BaseController {
         applyFilters();
     }
 
+    /**
+     * Triggered when the "Add New Item" button is clicked.
+     * Displays a complex dialog for defining product details and its ingredient recipe.
+     * Includes real-time validation and a dynamic ingredient chip UI.
+     */
     @FXML
     private void onAddItem() {
         Dialog<Boolean> dialog = new Dialog<>();
@@ -205,17 +218,17 @@ public class MenuItemsController extends BaseController {
         dialog.getDialogPane().setHeader(headerLabel);
 
         // --- Main Layout (Two Columns) ---
-        HBox mainLayout = new HBox(32); // Use fixed spacing between cards
-        mainLayout.setPadding(new Insets(30, 40, 30, 40)); // Increased overall padding
+        HBox mainLayout = new HBox(32);
+        mainLayout.setPadding(new Insets(30, 40, 30, 40));
         mainLayout.setAlignment(javafx.geometry.Pos.TOP_CENTER);
 
-        // LEFT COLUMN: Identity
-        VBox colLeft = new VBox(28); // Increased internal spacing
+        // LEFT COLUMN: Basic Identity (Name, Category, Price)
+        VBox colLeft = new VBox(28);
         colLeft.getStyleClass().addAll("dialog-col-left", "dialog-section-card");
         colLeft.setPrefWidth(340);
-        colLeft.setFillWidth(true); // Ensure children fill width
+        colLeft.setFillWidth(true);
 
-        // Name Field
+        // Item Name
         VBox nameBox = new VBox(8);
         Label nameEyebrow = new Label("ITEM NAME");
         nameEyebrow.getStyleClass().add("dialog-eyebrow");
@@ -225,18 +238,18 @@ public class MenuItemsController extends BaseController {
         nameField.setMaxWidth(Double.MAX_VALUE);
         nameBox.getChildren().addAll(nameEyebrow, nameField);
 
-        // Category Field
+        // Category Selection
         VBox catBox = new VBox(8);
         Label catEyebrow = new Label("CATEGORY");
         catEyebrow.getStyleClass().add("dialog-eyebrow");
         ComboBox<String> categoryCombo = new ComboBox<>();
         categoryCombo.getStyleClass().add("premium-combo");
-        categoryCombo.setMaxWidth(Double.MAX_VALUE); // Fill width
+        categoryCombo.setMaxWidth(Double.MAX_VALUE);
         categoryCombo.setPromptText("Select Category");
         categoryCombo.getItems().addAll(menuItemService.getAllCategories());
         catBox.getChildren().addAll(catEyebrow, categoryCombo);
 
-        // Price Field
+        // Pricing
         VBox priceBox = new VBox(8);
         Label priceEyebrow = new Label("BASE PRICE (PHP)");
         priceEyebrow.getStyleClass().add("dialog-eyebrow");
@@ -248,7 +261,7 @@ public class MenuItemsController extends BaseController {
 
         colLeft.getChildren().addAll(nameBox, catBox, priceBox);
 
-        // RIGHT COLUMN: Recipe Builder
+        // RIGHT COLUMN: Recipe Builder (Ingredient Associations)
         VBox colRight = new VBox(24);
         colRight.getStyleClass().addAll("dialog-col-right", "dialog-section-card");
         colRight.setPrefWidth(400);
@@ -257,13 +270,11 @@ public class MenuItemsController extends BaseController {
         Label recipeEyebrow = new Label("RECIPE CONSTRUCTION");
         recipeEyebrow.getStyleClass().add("dialog-eyebrow");
 
-        // Ingredient Search & Add
         VBox searchArea = new VBox(12);
-        
-        // Wrapped Search Bar
         HBox searchInputs = new HBox(10);
         searchInputs.setAlignment(javafx.geometry.Pos.CENTER_LEFT);
 
+        // INGREDIENT SEARCH & AUTOCOMPLETE
         HBox ingSearchWrapper = new HBox(10);
         ingSearchWrapper.getStyleClass().add("search-bar-group");
         ingSearchWrapper.setAlignment(javafx.geometry.Pos.CENTER_LEFT);
@@ -293,6 +304,7 @@ public class MenuItemsController extends BaseController {
 
         searchInputs.getChildren().addAll(ingSearchWrapper, qtyField, addBtn);
 
+        // Error Feedback Label for units (e.g., pcs decimal check)
         Label unitErrorLabel = new Label("Decimals not allowed for 'pcs' unit");
         unitErrorLabel.setStyle("-fx-text-fill: #e07070; -fx-font-size: 11px; -fx-font-weight: bold;");
         unitErrorLabel.setVisible(false);
@@ -300,7 +312,7 @@ public class MenuItemsController extends BaseController {
 
         searchArea.getChildren().addAll(recipeEyebrow, searchInputs, unitErrorLabel);
 
-        // Current Recipe List (Chips)
+        // RECIPE CHIP CONTAINER: Visually lists added ingredients
         javafx.scene.control.ScrollPane recipeScroll = new javafx.scene.control.ScrollPane();
         recipeScroll.setFitToWidth(true);
         recipeScroll.setPrefHeight(220);
@@ -314,11 +326,11 @@ public class MenuItemsController extends BaseController {
 
         mainLayout.getChildren().addAll(colLeft, colRight);
 
-        // --- Logic & Events ---
+        // --- Recipe Logic & Events ---
         List<MenuItemIngredient> ingredientDataList = new ArrayList<>();
         List<String> allIngredientNames = menuItemService.searchIngredients("").stream().map(Ingredient::getName).collect(Collectors.toList());
 
-        // Validation Logic
+        // VALIDATION LOGIC: Ensures quantities are valid for the specific ingredient unit type
         Runnable validateIngredient = () -> {
             String name = ingSearch.getText().trim();
             String qtyStr = qtyField.getText().trim();
@@ -370,7 +382,7 @@ public class MenuItemsController extends BaseController {
         ingSearch.textProperty().addListener((obs, old, newVal) -> validateIngredient.run());
         qtyField.textProperty().addListener((obs, old, newVal) -> validateIngredient.run());
 
-        // Ingredient Autocomplete (Reusing logic but with new UI)
+        // INGREDIENT AUTOCOMPLETE: Helper popup for recipe construction
         javafx.scene.control.ListView<String> ingSuggestionList = new javafx.scene.control.ListView<>();
         ingSuggestionList.getStyleClass().add("suggestion-list");
         ingSuggestionList.getStylesheets().add(getClass().getResource("/css/common.css").toExternalForm());
@@ -399,6 +411,10 @@ public class MenuItemsController extends BaseController {
             }
         });
 
+        /**
+         * Adds an ingredient to the current recipe definition.
+         * Resolves exact matches and adds a visual chip for user feedback.
+         */
         addBtn.setOnAction(e -> {
             String txt = ingSearch.getText().trim();
             String qtxt = qtyField.getText().trim();
@@ -408,7 +424,7 @@ public class MenuItemsController extends BaseController {
                 double q = Double.parseDouble(qtxt);
                 List<Ingredient> res = menuItemService.searchIngredients(txt);
                 
-                // Find exact match (case-insensitive) to avoid fuzzy match bugs (e.g. egg matching veggies)
+                // EXACT MATCH RESOLUTION: Avoids fuzzy match bugs (e.g., egg matching veggies)
                 Ingredient i = res.stream()
                     .filter(ing -> ing.getName().equalsIgnoreCase(txt))
                     .findFirst()
@@ -418,7 +434,7 @@ public class MenuItemsController extends BaseController {
                     MenuItemIngredient mi = new MenuItemIngredient(i.getId(), i.getName(), i.getUnit(), q);
                     ingredientDataList.add(mi);
                     
-                    // Add Chip UI
+                    // Render Chip UI
                     HBox chip = createIngredientChip(mi, ingredientDataList, ingredientChipContainer);
                     ingredientChipContainer.getChildren().add(chip);
                     
@@ -430,7 +446,6 @@ public class MenuItemsController extends BaseController {
         dialog.getDialogPane().setContent(mainLayout);
         dialog.getDialogPane().getButtonTypes().addAll(javafx.scene.control.ButtonType.CANCEL, javafx.scene.control.ButtonType.OK);
 
-        // Styling Dialog Buttons
         Button okButton = (Button) dialog.getDialogPane().lookupButton(javafx.scene.control.ButtonType.OK);
         okButton.setText("SAVE ITEM");
         okButton.getStyleClass().add("dialog-button-save");
@@ -440,18 +455,24 @@ public class MenuItemsController extends BaseController {
         
         dialog.setResultConverter(btn -> btn == javafx.scene.control.ButtonType.OK);
 
+        /**
+         * Finalizes the product creation. 
+         * Saves the Master Item record first, then establishes the Many-to-Many
+         * ingredient links using the generated ID.
+         */
         okButton.setOnAction(e -> {
             String name = nameField.getText().trim();
             String cat = categoryCombo.getValue();
             String ptxt = priceField.getText().trim();
             if (name.isEmpty() || cat == null || ptxt.isEmpty() || ingredientDataList.isEmpty()) {
-                e.consume();
+                e.consume(); // Prevent dialog close if invalid
                 return;
             }
             try {
                 double p = Double.parseDouble(ptxt);
                 int nid = menuItemService.insertAndGetId(name, cat, p);
                 if (nid > 0) {
+                    // LINK ESTABLISHMENT: Atomic update for recipe ingredients
                     menuItemService.updateMenuItemIngredients(nid, ingredientDataList);
                     loadMenuItems();
                     dialog.close();
@@ -462,6 +483,10 @@ public class MenuItemsController extends BaseController {
         dialog.showAndWait();
     }
 
+    /**
+     * Creates a visual "chip" for a selected ingredient in the recipe builder.
+     * Includes a removal action that syncs with the internal data list.
+     */
     private HBox createIngredientChip(MenuItemIngredient mi, List<MenuItemIngredient> dataList, VBox container) {
         HBox chip = new HBox(12);
         chip.setAlignment(javafx.geometry.Pos.CENTER_LEFT);
@@ -482,6 +507,7 @@ public class MenuItemsController extends BaseController {
         Button removeBtn = new Button("✕");
         removeBtn.getStyleClass().add("btn-chip-remove");
         removeBtn.setOnAction(e -> {
+            // STATE SYNC: Remove from both the visual container and the underlying data list
             dataList.remove(mi);
             container.getChildren().remove(chip);
         });
@@ -495,6 +521,10 @@ public class MenuItemsController extends BaseController {
         return new Button[] {btnDashboard, btnOrders, btnKitchen, btnMenuItems, btnCombos, btnInventory, btnSales, btnStaff};
     }
 
+    /**
+     * Configures the TableView columns for menu items.
+     * Includes custom cell factories for status badges (Availability) and action menus.
+     */
     private void setupTableColumns() {
         colName.setCellValueFactory(new PropertyValueFactory<>("name"));
         colName.setCellFactory(col -> new TableCell<MenuItemModel, String>() {
@@ -525,6 +555,10 @@ public class MenuItemsController extends BaseController {
 
         menuItemsTable.setColumnResizePolicy(TableView.CONSTRAINED_RESIZE_POLICY);
 
+        /**
+         * STATUS PILL LOGIC: Renders color-coded availability badges.
+         * 'Available' (Green), 'Low Stock' (Orange), 'Out of Stock' (Red).
+         */
         colAvailability.setCellValueFactory(new PropertyValueFactory<>("availability"));
         colAvailability.setCellFactory(col -> new TableCell<MenuItemModel, String>() {
             @Override
@@ -578,6 +612,10 @@ public class MenuItemsController extends BaseController {
         });
     }
 
+    /**
+     * Displays a dialog for editing an existing menu item and its recipe.
+     * Reuses the chip-based UI and validation logic from the creation dialog.
+     */
     private void showEditPopup(MenuItemModel menuItem) {
         Dialog<Boolean> dialog = new Dialog<>();
         dialog.setTitle("EDIT MENU ITEM");
@@ -965,10 +1003,15 @@ public class MenuItemsController extends BaseController {
         alert.showAndWait();
     }
 
+    /**
+     * Refreshes the menu items list from the database.
+     * Uses a background Task to ensure UI responsiveness.
+     */
     public void loadMenuItems() {
         javafx.concurrent.Task<MenuItemsData> loadTask = new javafx.concurrent.Task<>() {
             @Override
             protected MenuItemsData call() throws Exception {
+                // SYNC STEP: Ensures availability status is correct based on current raw ingredients
                 menuItemService.syncAvailabilityToDatabase();
                 MenuItemsData data = new MenuItemsData();
                 data.total = menuItemService.getTotalCount();
